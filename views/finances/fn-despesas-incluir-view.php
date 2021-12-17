@@ -97,12 +97,10 @@ $hora = date('h:i a');
           <hr>
 
           <div class="form-row">
-            <div class="hidden form-group col-2">
+            <div class="form-group col-2">
               <small class="mt-4"><strong>Parcela:</strong></small>
               <input type="text" class="form-control mask-money" id="NDIncluirNumeroParcela" name="NDIncluirNumeroParcela" value="" readonly>
             </div>
-          </div>
-          <div class="form-row">
             <div class="form-group col-5">
               <small class="mt-4"><strong>Vencimento:</strong></small>
               <input type="date" class="form-control" id="NDIncluirVencimento" name="NDIncluirVencimento" value="" required>
@@ -116,9 +114,16 @@ $hora = date('h:i a');
                 <input type="text" class="form-control mask-money" id="NDIncluirValor" name="NDIncluirValor" value="" required>
               </div>
             </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-10 mt-0">
+              <small class="mt-0"><strong>Observações:</strong></small>
+              <input type="text" class="form-control" id="NDIncluirObservacoes" name="NDIncluirObservacoes" value="">
+            </div>
             <!-- Botão de Incluir Parcelas-->
-            <div class="form-group col-2 mt-4 text-right">
-              <small class="mt-4"><strong></strong></small>
+            <div class="form-group col-2 mt-0 text-right">
+              <small class="mt-0"><strong></strong></small>
               <nobr>
                 <button type="button" id="btnCancelarInclusaoParcela" class="btn btn-danger btn"><i class="fas fa-times"></i></button>
                 <button type="button" id="btnIncluirParcela" class="btn btn-info btn"><i class="fas fa-check"></i></button>

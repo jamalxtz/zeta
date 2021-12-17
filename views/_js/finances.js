@@ -80,10 +80,11 @@ $('#btnIncluirParcela').click(function() {
   //Captura os valores dos campos
   let tabelaDeParcelas = document.getElementById("tabelaParcelas");
   let numeroDaParcela = document.getElementById("NDIncluirNumeroParcela").value;
-  let vencimento = document.getElementById("NDIncluirVencimento").value;
-  let valor = document.getElementById("NDIncluirValor").value;
+  let vencimento = $("#NDIncluirVencimento").val().replace(/-/g, ",");
+  let valor = parseFloat($("#NDIncluirValor").val().replace('.',''));
   let novaLinha = tabelaDeParcelas.insertRow(-1);
   let novaCelula;
+  let vencimentoFormatado;
   // if (geral % 2 == 0)
   //     cortabela = "#FFFF00";
   // else
@@ -92,12 +93,13 @@ $('#btnIncluirParcela').click(function() {
   // alert(vencimento);
   // alert(valor);
 
-  //Formata os valores para o padrão brasileiro
-  //vencimento = vencimento.toLocaleDateString()
+  //Formata as datas e valores para o padrão brasileiro
+  vencimentoFormatado = new Date(vencimento);
+  vencimentoFormatado = vencimentoFormatado.toLocaleDateString();
   valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' })
-alert(valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' }));
 
   if (numeroDaParcela == ""){
+    numeroDaParcela = $('#tabelaParcelas tr').length - 1;
     //Insere os valores na tabela
     novaCelula = novaLinha.insertCell(0);
     // novaCelula.style.backgroundColor = cortabela;
@@ -105,7 +107,7 @@ alert(valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currenc
 
     novaCelula = novaLinha.insertCell(1);
     // novaCelula.style.backgroundColor = cortabela;
-    novaCelula.innerHTML = vencimento;
+    novaCelula.innerHTML = vencimentoFormatado;
 
     novaCelula = novaLinha.insertCell(2);
     // novaCelula.style.backgroundColor = cortabela;
