@@ -41,7 +41,7 @@ if($tipo_conexao == "localhost"){
 }else{
 	// URL da home
 	//define( 'HOME_URI', "http://br972.teste.website/~icomet77/siteadmin/" );
-	define( 'HOME_URI', "http://icometais.com.br/siteadmin/" );
+	define( 'HOME_URI', "http://alemtecnologia.com.br/zeta/" );
 
 	// URL do site
 	define( 'SITE_URI', "http://icometais.com.br/" );
