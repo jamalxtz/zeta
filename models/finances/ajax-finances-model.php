@@ -1,5 +1,11 @@
 <?php 
-
+    /* Prepara o documento para comunicação com o JSON, as duas linhas a seguir são obrigatórias 
+	  para que o PHP saiba que irá se comunicar com o JSON, elas sempre devem estar no ínicio da página */
+	header("Cache-Control: no-cache, no-store, must-revalidate"); // Limpa o cache
+	header("Access-Control-Allow-Origin: *");
+	header("Content-Type: application/json; charset=utf-8"); 
+	// Limpa o cache
+	clearstatcache(); 
     // Conexão com o banco de dados
     require '../conexao.php';
 
@@ -12,6 +18,12 @@
         $varFuncao = "";
     }
 
+    //Projeto API, esse projeto vai demorar um pouco para ser implementado, porém vai ser de grande utilidade.
+    class FinancesAPI {
+        private function incluirDespesa(){
+
+        }
+    }
     //Pega a data atual
     date_default_timezone_set('America/Sao_Paulo');
     $dataAtual = date('Y/m/d H:i:s');
@@ -161,6 +173,44 @@
         }
          
     }
+
+//******************* LISTAR DESPESAS *********************************************************************************
+    /* 
+    Retorna um JSON para alimentar os dados da despesa
+    */
+
+    // $usuario = $_SESSION["userdata"]["id"];
+
+    // $mes = null;
+    // $ano = null;
+
+    // // Pega o mês e o ano dos parâmetros da URL
+    // $mes = chk_array( $parametros, 0 );
+    // $ano = chk_array( $parametros, 1 );
+
+    // $data = $ano."/".$mes."/01";
+
+    // $SQL = "SELECT fn_despesas_parcelas.id,
+    //                     fn_despesas.descricao,
+    //                     fn_despesas_parcelas.valorpendente,
+    //                     fn_despesas_parcelas.valorquitado,
+    //                     fn_despesas_parcelas.quitado
+    //                 FROM 	fn_despesas_parcelas
+    //                     INNER JOIN fn_despesas ON fn_despesas_parcelas.fn_despesas_id = fn_despesas.id
+    //                 WHERE	usuarios_id = ".$usuario."
+    //                     AND DATE_FORMAT(vencimento,'%Y-%m') = DATE_FORMAT('".$data."','%Y-%m')";
+
+    // // Simplesmente seleciona os dados na base de dados 
+    // $query = $this->db->query($SQL);
+    
+    // // Verifica se a consulta está OK
+    // if ( ! $query ) {
+    //     return array();
+    // }
+    // // Preenche a tabela com os dados do clientes
+    // return $query->fetchAll();
+
+    
 
 //******************* INCLUIR NOVA DESPESA ****************************************************************************
     /* 

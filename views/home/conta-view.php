@@ -66,7 +66,7 @@
               <span class="icon-phone mr-1" aria-hidden="true"></span><?php echo $fetch_userdata['telefone'] ?> / <?php echo $fetch_userdata['celular'] ?>
               <br />
               <div class="mb-4 mt-4">
-                <a href="<?php echo HOME_URI?>usuario/vizualizar/edit/<?php echo $fetch_userdata['id'] ?>" type="button" class="btn btn-primary btn-sm"><span class="icon-user mr-1" aria-hidden="true"></span> Ver Detalhes</a>
+                <a href="<?php echo HOME_URI?>usuario/visualizar/edit/<?php echo $fetch_userdata['id'] ?>" type="button" class="btn btn-primary btn-sm"><span class="icon-user mr-1" aria-hidden="true"></span> Ver Detalhes</a>
                 <button type="button" class="btn btn-secondary btn-sm" role="button" data-toggle="modal" data-target="#modal-cadastrar"><span class="icon-lock mr-1" aria-hidden="true"></span> Alterar Senha</button>
               </div>
                 

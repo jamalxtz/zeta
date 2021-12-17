@@ -200,3 +200,44 @@ $('#incluirDespesaBTN').click(function() {
   //Fim da requisição Ajax para enviar os dados para o banco de dados
   
 })
+
+//-------------------------------------------------------------------------------------------------------------------------------
+//Listar Despesas
+
+function ListarDespesas(){
+  //Pega os dados dos campos
+  let url = $('#idURL').val();
+  let varFuncao = "listarDespesas";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let dataReferencia = $('#dataReferencia').val(); // 2121-02
+
+  //Valida os dados
+  if(dataReferencia == null || dataReferencia == ""){
+    alert("A data de referência não pode ser vazia!");
+    $('#dataReferencia').focus();
+    return;
+  }
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+      url : url,
+      type : 'post',
+      data : {
+      varFuncao : varFuncao,
+      userID : userID,
+      dataReferencia : dataReferencia,      
+    },
+      dataType: 'json',
+      beforeSend : function(){
+        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+      }
+  })
+  .done(function(msg){
+    alert(msg.mensagem);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro no retorno de dados: "+textStatus+"\n"+msg);
+    console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+  });
+  //Fim da requisição Ajax para enviar os dados para o banco de dados
+}

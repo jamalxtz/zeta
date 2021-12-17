@@ -80,7 +80,7 @@
                     <div class="col-6 fz-30 text-white text-right"><i class="fas fa-credit-card"></i></div>
                   </div>
                   <!--stretched-link funciona apenas no body do painel por causa do style transform-->
-                  <a class="small text-white stretched-link" href="<?php echo HOME_URI?>finances/despesas/<?php echo $link_mes_atual?>"></a>
+                  <a class="small text-white stretched-link" href="<?php echo HOME_URI?>despesas/"></a>
                 </div>
                 
                 <div class="card-footer d-flex align-items-center justify-content-between">
