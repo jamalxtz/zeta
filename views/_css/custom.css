@@ -1,0 +1,123 @@
+/*remove a Barra de Rolagem do menu*/
+.sb-sidenav-menu::-webkit-scrollbar { 
+    display: none; 
+}
+
+.text-right{
+    text-align: right;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.fz-25{
+    font-size: 25px;
+}
+
+.fz-30{
+    font-size: 30px;
+}
+
+/*PERSONALIZA O FIELDSET */
+legend {
+    width:inherit; /* Or auto */
+    padding:0 10px; /* To give a bit of padding on the left and right */
+    border-bottom:none;
+    background: #1F497D;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 0 5px #fff;
+}
+
+fieldset {
+    border: 1px solid #1F497D !important;
+    border-radius: 5px;
+    background: #C7DAF0;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    -webkit-box-shadow:  0px 0px 0px 0px #000;
+            box-shadow:  0px 0px 0px 0px #000;
+}
+
+
+/*fieldset {
+    font-family: sans-serif;
+    border: 5px solid #1F497D;
+    background: #ddd;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+fieldset legend {
+    background: #1F497D;
+    color: #fff;
+    padding: 5px 10px ;
+    font-size: 32px;
+    border-radius: 5px;
+    box-shadow: 0 0 0 5px #ddd;
+    margin-left: 20px;
+}*/
+
+/*AJUSTA A IMAGEM DO MODAL DE DELETE*/
+.modalDeleteAlinhar{
+    margin: auto;
+}
+.modalDelete{
+   height: 100%;
+   width: 300px;
+}
+
+.hidden{
+    display: none;
+}
+
+.grupoBotoes{
+    display: inline;
+    margin-right: 10px;
+    border-radius: 10px;
+}
+
+/*Usado na tela de login*/
+.bg-imagem {
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: top !important;
+  background-position: center !important;
+  background-attachment: fixed;
+}
+
+.align-itens-center{
+    align-items: center;
+}
+
+.alinhar-div{
+    margin : auto;
+}
+
+/*Alinha Verticalmente todo o conteudo das tabelas*/
+.table tbody > tr > td {
+    vertical-align: middle;
+}
+
+/*Ajusta o tamanho da imagem de destaque utilizada na vizualização do cadastro de produtos*/
+.imagem-destaque img{
+  max-height: 400px;
+  height: auto;
+  width: auto; /*width: 100%;*/
+  object-fit: cover;
+}
+@media (max-width: 767.98px) {
+  .imagem-destaque img{
+    width: 100%; /*preenche a largura da imagem para ocupar toda a tela em dispositivos moveis*/
+  }
+}
+
+/*Pinta de vermelho a borda dos campos requeridos*/
+fieldset input:required {
+    border: 1px dashed red !important;
+}
+  
+fieldset select:required {
+border: 1px dashed red !important;
+}
