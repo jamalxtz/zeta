@@ -125,15 +125,67 @@ $('#btnIncluirParcela').click(function() {
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
+
+$('#incluirDespesaBTN').click(function() {
+  let chkDespesaFixa = document.getElementById('chkDespesaFixa');
+
+  if(chkDespesaFixa.checked) {
+    //IncluirDespesaFixa()
+  } else {
+    //IncluirDespesa()
+  }
+  
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------
+//Listar Despesas
+
+function ListarDespesas(){
+  //Pega os dados dos campos
+  let url = $('#idURL').val();
+  let varFuncao = "listarDespesas";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let dataReferencia = $('#dataReferencia').val(); // 2121-02
+
+  //Valida os dados
+  if(dataReferencia == null || dataReferencia == ""){
+    alert("A data de referência não pode ser vazia!");
+    $('#dataReferencia').focus();
+    return;
+  }
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+      url : url,
+      type : 'post',
+      data : {
+      varFuncao : varFuncao,
+      userID : userID,
+      dataReferencia : dataReferencia,      
+    },
+      dataType: 'json',
+      beforeSend : function(){
+        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+      }
+  })
+  .done(function(msg){
+    alert(msg.mensagem);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro no retorno de dados: "+textStatus+"\n"+msg);
+    console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+  
+}//ListarDespesas
+
 //Salvar nova despesa (Validado)
 /*
 * Para salvar uma nova despesa irei utilizar 2 arrays, o primeiro irá armazenar os dados da despesa como nome, vencimento, etc.. 
 * O segundo array irá armazenar os dados das parcelas, que serão geradas dinamicamente na tabela 'tabelaParcelas'
 */
-$('#incluirDespesaBTN').click(function() {
-
+function IncluirDespesa(){
   let url = $('#idURL').val();
-  let varFuncao = "incluirDespesa";
+  let requisicao = "incluirDespesa";
   let userID = $('#userID').val(); // ID do usuário logado
   let descricao = $('#NDdescricao').val();
   //Cria um array com os dados principais da Despesa
@@ -178,66 +230,100 @@ $('#incluirDespesaBTN').click(function() {
   console.log(arrayDespesa);
 
   //Requisição Ajax para enviar os dados para o banco de dados
-    $.ajax({
-         url : url,
-         type : 'post',
-         data : {
-          varFuncao : varFuncao,
-          arrayDespesa,      
-        },
-         dataType: 'json',
-         beforeSend : function(){
-            //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
-         }
-    })
-    .done(function(msg){
-        alert(msg.mensagem);
-    })
-    .fail(function(jqXHR, textStatus, msg){
-        alert("Erro no retorno de dados: "+textStatus+"\n"+msg);
-        console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
-    });
-  //Fim da requisição Ajax para enviar os dados para o banco de dados
-  
-})
+  $.ajax({
+        url : url,
+        type : 'post',
+        data : {
+        requisicao : requisicao,
+        arrayDespesa,      
+      },
+        dataType: 'json',
+        beforeSend : function(){
+          //alert(requisicao+" \n "+ url );
+        }
+  })
+  .done(function(msg){
+      alert(msg.mensagem);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+      alert("Erro ao cadastrar despesa: "+"\n"+jqXHR.responseText);
+      console.log("Erro ao cadastrar despesa: "+"\n"+jqXHR);
+      //console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//IncluirDespesa
 
-//-------------------------------------------------------------------------------------------------------------------------------
-//Listar Despesas
-
-function ListarDespesas(){
-  //Pega os dados dos campos
+//Incluir Despesa Fixa
+/*
+* Despesas fixas não geram parcelas no momento da criação, as parcelas são criadas no momento em que o usuário abre a lista de despesas
+* e o sistema identifica que existem despesas fixas não informadas na tabela de despesas.
+*/
+function IncluirDespesaFixa(){
   let url = $('#idURL').val();
-  let varFuncao = "listarDespesas";
+  let requisicao = "incluirDespesaFixa";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataReferencia = $('#dataReferencia').val(); // 2121-02
+  let descricao = $('#NDdescricao').val();
+  let categoria = $('#NDCategoria').val();
+  let valor = $('#NDvalor').val();
+  //Cria um array com os dados principais da Despesa
+  var arrayCabecalhoDespesa = {url:url,
+    userID:userID,
+    descricao:descricao};
+  //console.log(arrayCabecalhoDespesa);
 
-  //Valida os dados
-  if(dataReferencia == null || dataReferencia == ""){
-    alert("A data de referência não pode ser vazia!");
-    $('#dataReferencia').focus();
-    return;
-  }
+  //Cria o Array de parcelas, obtido através da tabela 'tabelaParcelas' que é montada dinâmicamente ao clicar no botão 'Gerar Parcelas'
+  var indices = [];
+  //Pega os indices da tabela
+  $('#tabelaParcelas thead tr th').each(function() {
+    indices.push($(this).text());
+  });
+  var arrayParcelas = [];
+  //Pecorre todas as parcelas e armazena no array
+  $('#tabelaParcelas tbody tr').each(function( index ) {
+    var obj = {};
+    let valorFormatado;
+    //Controle o objeto
+    $(this).find('td').each(function( index ) {
+      //Alerta de gambiarra: Tive que utilizar o replace, pois quando estava pegando o valor das parcelas, não estava conseguindo remover o espaço
+      //do valor formatado, então eu faço uma verificação para identificar se é uma parcela, se for, eu já faço a formatação antes de enviar para o PHP
+      if($(this).text().substring(0, 2) == "R$"){
+         valorFormatado = $(this).text().replace(/[^0-9,]*/g, '').replace(',', '.');
+      }else{
+        valorFormatado = $(this).text(); 
+      }
+      obj[indices[index]] = valorFormatado;
+      //alert(valorFormatado);
+    });
+    //Adiciona no arrray de objetos
+    arrayParcelas.push(obj);
+  });
+  //Mostra dados pegos no console
+  //console.log(arrayParcelas);
+  
+  //Cria o array final que será um array multidimensional, ele irá conter o array com os dados principais da despesa e tambem o array com as parcelas
+  var arrayDespesa = [];
+  arrayDespesa.push(arrayCabecalhoDespesa);
+  arrayDespesa.push(arrayParcelas);
+  console.log(arrayDespesa);
 
   //Requisição Ajax para enviar os dados para o banco de dados
   $.ajax({
-      url : url,
-      type : 'post',
-      data : {
-      varFuncao : varFuncao,
-      userID : userID,
-      dataReferencia : dataReferencia,      
-    },
-      dataType: 'json',
-      beforeSend : function(){
-        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
-      }
+        url : url,
+        type : 'post',
+        data : {
+        requisicao : requisicao,
+        arrayDespesa,      
+      },
+        dataType: 'json',
+        beforeSend : function(){
+          //alert(requisicao+" \n "+ url );
+        }
   })
   .done(function(msg){
-    alert(msg.mensagem);
+      alert(msg.mensagem);
   })
   .fail(function(jqXHR, textStatus, msg){
-    alert("Erro no retorno de dados: "+textStatus+"\n"+msg);
-    console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
-  });
-  //Fim da requisição Ajax para enviar os dados para o banco de dados
-}
+      alert("Erro ao cadastrar despesa: "+"\n"+jqXHR.responseText);
+      console.log("Erro ao cadastrar despesa: "+"\n"+jqXHR);
+      //console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//IncluirDespesaFixa

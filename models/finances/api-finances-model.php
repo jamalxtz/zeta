@@ -1,11 +1,12 @@
 <?php 
     /* Prepara o documento para comunicação com o JSON, as duas linhas a seguir são obrigatórias 
 	  para que o PHP saiba que irá se comunicar com o JSON, elas sempre devem estar no ínicio da página */
-	// header("Cache-Control: no-cache, no-store, must-revalidate"); // Limpa o cache
-	// header("Access-Control-Allow-Origin: *");
-	// header("Content-Type: application/json; charset=utf-8"); 
-	// // Limpa o cache
-	// clearstatcache(); 
+	header("Cache-Control: no-cache, no-store, must-revalidate"); // Limpa o cache
+	header("Access-Control-Allow-Origin: *");
+	header("Content-Type: application/json; charset=utf-8"); 
+
+	// Limpa o cache
+	clearstatcache(); 
     
 
 //******************* DECLARAÇÃO DE VARIÁVEIS *************************************************************************
@@ -13,8 +14,8 @@
     *Para testar basta procar o _POST por _GET e utilizar o seguinte padrão de URL:
     *http://localhost:8090/zeta/zeta/models/finances/api-finances-model.php?requisicao=consultaSimples&outroParametro=22
     */
-    if (isset($_GET['requisicao'])){
-        $requisicao = $_GET['requisicao'];
+    if (isset($_POST['requisicao'])){
+        $requisicao = $_POST['requisicao'];
     }else{
         $requisicao = "";
     }
@@ -29,7 +30,7 @@
 
     class FinancesAPI {
         //Pega a data atual
-        public $dataAtual = date('Y/m/d H:i:s');
+        //public $dataAtual = date('Y/m/d H:i:s');
         
         /**
          * Recebe a requisição via post e chama o método reponsável por tratar aquela determinada requisição.
@@ -40,6 +41,15 @@
             }
             elseif($requisicao == "consultaSimples"){
                 $this->ConsultaSimples();
+            }
+            elseif($requisicao == "criarBancoDeDados"){
+                $this->CriarBancoDeDados();
+            }
+            elseif($requisicao == "incluirDespesa"){
+                $this->IncluirDespesa();
+            }
+            elseif($requisicao == "incluirDespesaFixa"){
+                $this->IncluirDespesaFixa();
             }
         }//DistribuirRequisicao
 
@@ -77,6 +87,212 @@
             }
         }//ConsultaSimples
 
+        /**
+         * Roda o script de exportaçaõ do MySQL e cria a estrutura do banco de daos
+         */
+        public function CriarBancoDeDados(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+
+            //Faz uma consulta para retornar o id que será utilizado para cadastrar a Despesa
+            try{
+                $sql = "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
+                SET AUTOCOMMIT = 0;
+                START TRANSACTION;
+                SET time_zone = '+00:00';
+                
+                
+                /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+                /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+                /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+                /*!40101 SET NAMES utf8mb4 */;
+                
+                --
+                -- Banco de dados: `zeta_finances`
+                --
+                CREATE DATABASE IF NOT EXISTS `zeta_finances` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+                USE `zeta_finances`;
+                
+                -- --------------------------------------------------------
+                
+                --
+                -- Estrutura da tabela `fn_categorias`
+                --
+                
+                DROP TABLE IF EXISTS `fn_categorias`;
+                CREATE TABLE IF NOT EXISTS `fn_categorias` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `descricao` varchar(255) DEFAULT NULL,
+                  `tipo` varchar(255) DEFAULT NULL,
+                  `imagem` varchar(255) DEFAULT NULL,
+                  `usuarios_id` int(11) NOT NULL,
+                  PRIMARY KEY (`id`),
+                  KEY `fk_fn_categorias_usuarios` (`usuarios_id`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+                
+                -- --------------------------------------------------------
+                
+                --
+                -- Estrutura da tabela `fn_despesas`
+                --
+                
+                DROP TABLE IF EXISTS `fn_despesas`;
+                CREATE TABLE IF NOT EXISTS `fn_despesas` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `descricao` varchar(255) DEFAULT NULL,
+                  `fixo` varchar(5) DEFAULT NULL,
+                  `valor` varchar(255) DEFAULT NULL,
+                  `usuarios_id` int(11) NOT NULL,
+                  PRIMARY KEY (`id`,`usuarios_id`),
+                  KEY `fk_fn_despesas_usuarios_idx` (`usuarios_id`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=latin1;
+                
+                -- --------------------------------------------------------
+                
+                --
+                -- Estrutura da tabela `fn_despesas_parcelas`
+                --
+                
+                DROP TABLE IF EXISTS `fn_despesas_parcelas`;
+                CREATE TABLE IF NOT EXISTS `fn_despesas_parcelas` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `descricao` varchar(255) DEFAULT NULL,
+                  `valorpendente` float DEFAULT NULL,
+                  `vencimento` datetime DEFAULT NULL,
+                  `valorquitado` float DEFAULT NULL,
+                  `quitado` varchar(3) DEFAULT NULL,
+                  `quitacao` datetime DEFAULT NULL,
+                  `fn_categorias_id` int(11) NOT NULL,
+                  `fn_despesas_id` int(11) NOT NULL,
+                  PRIMARY KEY (`id`,`fn_categorias_id`,`fn_despesas_id`),
+                  KEY `fk_fn_despesas_parcelas_fn_categorias1_idx` (`fn_categorias_id`),
+                  KEY `fk_fn_despesas_parcelas_fn_despesas1_idx` (`fn_despesas_id`)
+                ) ENGINE=MyISAM AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
+                
+                -- --------------------------------------------------------
+                
+                --
+                -- Estrutura da tabela `fn_receitas`
+                --
+                
+                DROP TABLE IF EXISTS `fn_receitas`;
+                CREATE TABLE IF NOT EXISTS `fn_receitas` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `descricao` varchar(255) DEFAULT NULL,
+                  `usuarios_id` int(11) NOT NULL,
+                  PRIMARY KEY (`id`,`usuarios_id`),
+                  KEY `fk_fn_receitas_usuarios1_idx` (`usuarios_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+                
+                -- --------------------------------------------------------
+                
+                --
+                -- Estrutura da tabela `fn_receitas_parcelas`
+                --
+                
+                DROP TABLE IF EXISTS `fn_receitas_parcelas`;
+                CREATE TABLE IF NOT EXISTS `fn_receitas_parcelas` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `descricao` varchar(255) DEFAULT NULL,
+                  `valorpendente` float DEFAULT NULL,
+                  `vencimento` datetime DEFAULT NULL,
+                  `valorquitado` float DEFAULT NULL,
+                  `quitado` varchar(3) DEFAULT NULL,
+                  `quitacao` datetime DEFAULT NULL,
+                  `fn_categorias_id` int(11) NOT NULL,
+                  `fn_receitas_id` int(11) NOT NULL,
+                  `fixo` varchar(3) DEFAULT NULL,
+                  PRIMARY KEY (`id`,`fn_categorias_id`,`fn_receitas_id`),
+                  KEY `fk_fn_receitas_parcelas_fn_categorias1_idx` (`fn_categorias_id`),
+                  KEY `fk_fn_receitas_parcelas_fn_receitas1_idx` (`fn_receitas_id`)
+                ) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
+                
+                -- --------------------------------------------------------
+                
+                --
+                -- Estrutura da tabela `usuarios`
+                --
+                
+                DROP TABLE IF EXISTS `usuarios`;
+                CREATE TABLE IF NOT EXISTS `usuarios` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `cpf` varchar(45) NOT NULL,
+                  `rg` varchar(45) DEFAULT NULL,
+                  `nome` varchar(45) NOT NULL,
+                  `sobrenome` varchar(45) DEFAULT NULL,
+                  `email` varchar(45) NOT NULL,
+                  `telefone` varchar(45) DEFAULT NULL,
+                  `celular` varchar(45) DEFAULT NULL,
+                  `cep` varchar(45) DEFAULT NULL,
+                  `logradouro` varchar(45) DEFAULT NULL,
+                  `complemento` varchar(45) DEFAULT NULL,
+                  `bairro` varchar(45) DEFAULT NULL,
+                  `cidade` varchar(45) DEFAULT NULL,
+                  `estado` varchar(45) DEFAULT NULL,
+                  `imagem` varchar(45) DEFAULT NULL,
+                  `cadastro` date DEFAULT NULL,
+                  `senha` varchar(999) DEFAULT NULL,
+                  `dica` varchar(999) DEFAULT NULL,
+                  `user_session_id` varchar(999) DEFAULT NULL,
+                  `user_permissions` varchar(999) DEFAULT NULL,
+                  `user` varchar(999) DEFAULT NULL,
+                  `situacao` varchar(40) DEFAULT NULL,
+                  PRIMARY KEY (`id`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8;
+                
+                --
+                -- Extraindo dados da tabela `usuarios`
+                --
+                
+                INSERT INTO `usuarios` (`id`, `cpf`, `rg`, `nome`, `sobrenome`, `email`, `telefone`, `celular`, `cep`, `logradouro`, `complemento`, `bairro`, `cidade`, `estado`, `imagem`, `cadastro`, `senha`, `dica`, `user_session_id`, `user_permissions`, `user`, `situacao`) VALUES
+                (62, '754.634.581-20', '58364152', 'Bruno Mateus', 'Silva Souza', 'bruno_mss@outlook.com', '(35) 8620-47', '(62) 9 9462-6462', '74583-050', 'Rua Trajano de Sá Guimaraes', 'Qd 09 Lt 05', 'Vila Maria Dilce', 'Goiânia', 'GO', '20180728125651png_1648433868.png', NULL, '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'hid07vkouoir68rh4fkhl64pt5', 'ofgvuv4qmldu3o46cko4itb8ot', 'a:2:{i:0;s:19:\"AcessarAreaRestrita\";i:1;s:16:\"AcessarSiteAdmin\";}', 'bruno_mss@outlook.com', 'Ativo'),
+                (63, '00442953260', '4399743', 'Renan', 'Além Silva', 'renanalem@alemtecnologia.com.br', '35868027', '62985134662', '8798465', '5646546546', '654654654', '465465465', '4564654', '54654654', '5jpg_963156278.jpg', '2020-07-19', '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'Senha 123', '111eda0e3dc780ff0ef3c31f51574d73', 'a:2:{i:0;s:13:\"user-register\";i:1;s:18:\"gerenciar-noticias\";}', 'renanalem@alemtecnologia.com.br', ''),
+                (64, '75463458121', '1254635', 'Carlos daniel', 'souza pires', 'carlos@gmail.com', '62 3586-2047', '62 9 9462-6462', '74583050', 'Rua Trajano de Sá Guimarães', 'Qd 09 Lt 05', 'Jardim Clarissa', 'Goiânia', 'GO', 'foto3x4png_1156961214.png', '2021-03-16', '$2a$08$sthdPYQtn63aaqBii7nX2u5J08NSslg2yX5eFIyo.Vs7oStd6Cb7q', 'teste', NULL, 'AcessarAreaRestrita', 'carlos@gmail.com', 'Ativo');
+                
+                --
+                -- Restrições para despejos de tabelas
+                --
+                
+                --
+                -- Limitadores para a tabela `fn_categorias`
+                --
+                ALTER TABLE `fn_categorias`
+                  ADD CONSTRAINT `fk_fn_categorias_usuarios` FOREIGN KEY (`usuarios_id`) REFERENCES `zeta`.`usuarios` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+                
+                --
+                -- Limitadores para a tabela `fn_despesas`
+                --
+                ALTER TABLE `fn_despesas`
+                  ADD CONSTRAINT `fk_fn_despesas_usuarios` FOREIGN KEY (`usuarios_id`) REFERENCES `usuarios` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+                
+                --
+                -- Limitadores para a tabela `fn_receitas`
+                --
+                ALTER TABLE `fn_receitas`
+                  ADD CONSTRAINT `fk_fn_receitas_usuarios1` FOREIGN KEY (`usuarios_id`) REFERENCES `usuarios` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+                COMMIT;
+                
+                /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+                /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+                /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;";
+
+                $conexao =  $db_con->query($sql);
+
+                $this->RetornoPadrao(true,"Estrutura do banco de dados criado com sucesso!");
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao criar banco de dados! - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//CriarBancoDeDados
+
+        /**
+         * Faz a inclusão de novas despesas no banco de dados
+         * Esse método recebe via POST um array multidimensional, dentro do array principal tem o userID - que é o código do usuario logado
+         * E também a descrição da despesa, dentro desse array principal, tem um array com a lista das despesas. 
+         * Primeiramente é feito uma consulta na tabela fn_despesas para pegar o código da última despesa cadastrada
+         * Em seguida executo um loop para inserir as parcelas do array de parcelas no banco de dados.
+         */
         public function IncluirDespesa(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -86,7 +302,7 @@
 
             //Faz uma consulta para retornar o id que será utilizado para cadastrar a Despesa
             try{
-                $sql =  $this->$db_con->query("SELECT MAX(id) as id FROM fn_despesas");
+                $sql =  $db_con->query("SELECT MAX(id) as id FROM fn_despesas");
                 $ultimoIDfndespesas = 0;
                 foreach ($sql as $value) {
                     $ultimoIDfndespesas = intval($value['id']);
@@ -94,23 +310,16 @@
                 $IDfndespesas = $ultimoIDfndespesas + 1;
             }
             catch (Exception $e){
-                $retorno['success'] = false;
-                $retorno['mensagem'] = "Erro ao cadastrar despesa! - ".$e;
-                echo json_encode($retorno, JSON_UNESCAPED_UNICODE);
+                $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
                 exit;
             }
         
             //Salva os dados da Despesa no banco de dados
             try{
-                $sql =  $this->$db_con->query("INSERT INTO `fn_despesas` (`id`,`descricao`,`usuarios_id`) VALUES ('{$IDfndespesas}','{$descricao}','{$userID}')");
-                $retorno['success'] = true;
-                //$retorno['mensagem'] = "Despesa cadastrada com sucesso!";
-                //echo json_encode($retorno, JSON_UNESCAPED_UNICODE);              
+                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`id`,`descricao`,`usuarios_id`) VALUES ('{$IDfndespesas}','{$descricao}','{$userID}')");      
             }
             catch (Exception $e){
-                $retorno['success'] = false;
-                $retorno['mensagem'] = "Erro ao cadastrar despesa! - ".$e;
-                echo json_encode($retorno, JSON_UNESCAPED_UNICODE);
+                $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
                 exit;
             }
 
@@ -119,38 +328,58 @@
             $arrayParcelasDespesa = $_POST['arrayDespesa'][1];
             
             $parcela = "";
-            $data = "";
+            $vencimento = "";
             $valor = "";
             $qteParcelas = sizeof($arrayParcelasDespesa);
+ 
             foreach ($arrayParcelasDespesa as $value) {
                 $parcela = $value['Parcela'];
-                $data = $value['Data'];
-                $data = implode("-",array_reverse(explode("/",$data)));;
+                $vencimento = $value['Vencimento'];
+                $vencimento = implode("-",array_reverse(explode("/",$vencimento)));;
                 $valor = strval($value['Valor']);
                 $descricaoParcela = $parcela."/".$qteParcelas;
 
                 try{
                     $sql =  $db_con->query("INSERT INTO `fn_despesas_parcelas`
-                    (`descricao`,`valorpendente`,`vencimento`, `quitado`, `fn_categorias_id`, `fn_despesas_id`, `fixo`) 
+                    (`descricao`,`valorpendente`,`vencimento`, `quitado`, `fn_categorias_id`, `fn_despesas_id`) 
                     VALUES 
-                    ('{$descricaoParcela}','{$valor}','{$data}','NÃO', '1', '{$IDfndespesas}','NÃO')");
-
-                    $retorno['success'] = true;             
+                    ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO', '1', '{$IDfndespesas}')");           
                 }
                 catch (Exception $e){
-                    $retorno['success'] = false;
-                    $retorno['mensagem'] = "Erro ao cadastrar despesa! - ".$e;
-                    echo json_encode($retorno, JSON_UNESCAPED_UNICODE);
+                    $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
                     exit;
                 }
             }
             
-            //Verifica se até aqui todos as operações foram executadas com sucesso e então retorna a mensagem indicando que a despesa foi cadastrada com sucesso.
-            if($retorno['success'] == true){
-                $retorno['mensagem'] = "Despesa cadastrada com sucesso!";
-                echo json_encode($retorno, JSON_UNESCAPED_UNICODE); 
-            }
+            $this->RetornoPadrao(true,"Despesa cadastrada com sucesso!");
+            exit;
+
         }//IncluirDespesa
+
+        /**
+         * Faz a inclusão de despesas fixas
+         */
+        public function IncluirDespesaFixa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados do arrayCabecalhoDespesa
+            $userID = $_POST['userID'];
+            $descricao = $_POST['descricao'];
+            $valor = $_POST['valor'];
+        
+            //Salva a despesa no banco de dados
+            try{
+                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`descricao`,`fixo`,`valor`,`usuarios_id`) VALUES ('{$descricao}','SIM','{$valor}','{$userID}')");      
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
+                exit;
+            }
+            
+            $this->RetornoPadrao(true,"Despesa cadastrada com sucesso!");
+            exit;
+
+        }//IncluirDespesaFixa
 
         public function tempo_corrido($time) {
 

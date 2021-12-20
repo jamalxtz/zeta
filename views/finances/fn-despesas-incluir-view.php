@@ -14,7 +14,7 @@ $hora = date('h:i a');
       <li class="breadcrumb-item active">Incluir</li>
     </ol>
 
-    <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/ajax-finances-model.php">
+    <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
     <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="horta">
@@ -81,8 +81,8 @@ $hora = date('h:i a');
           <div class="row">
             <div class="form-group col-6">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="NDfixo" id="NDfixo">
-                <label class="form-check-label" for="NDfixo">
+                <input class="form-check-input" type="checkbox" name="chkDespesaFixa" id="chkDespesaFixa">
+                <label class="form-check-label" for="chkDespesaFixa">
                   <small class="mt-4"><strong>Despesa Fixa</strong></small>
                 </label>
               </div>
