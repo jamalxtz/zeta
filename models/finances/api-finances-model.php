@@ -299,6 +299,7 @@
             //Recebe os dados do arrayCabecalhoDespesa
             $userID = $_POST['arrayDespesa'][0]['userID'];
             $descricao = $_POST['arrayDespesa'][0]['descricao'];
+            $categoria = $_POST['arrayDespesa'][0]['categoria'];
 
             //Faz uma consulta para retornar o id que será utilizado para cadastrar a Despesa
             try{
@@ -316,7 +317,7 @@
         
             //Salva os dados da Despesa no banco de dados
             try{
-                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`id`,`descricao`,`usuarios_id`) VALUES ('{$IDfndespesas}','{$descricao}','{$userID}')");      
+                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`id`,`descricao`,`categorias_id`,`usuarios_id`) VALUES ('{$IDfndespesas}','{$descricao}','{$categoria}','{$userID}')");      
             }
             catch (Exception $e){
                 $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
@@ -331,19 +332,23 @@
             $vencimento = "";
             $valor = "";
             $qteParcelas = sizeof($arrayParcelasDespesa);
+            $categoriaParcela = 0;
  
             foreach ($arrayParcelasDespesa as $value) {
-                $parcela = $value['Parcela'];
+                $parcela = $value['Parcela'];//Número da parcela informado na descrição da parcela
                 $vencimento = $value['Vencimento'];
-                $vencimento = implode("-",array_reverse(explode("/",$vencimento)));;
+                $vencimento = implode("-",array_reverse(explode("/",$vencimento)));//Entender e documentar essa função aqui
                 $valor = strval($value['Valor']);
-                $descricaoParcela = $parcela."/".$qteParcelas;
-
+                $descricaoParcela = $parcela;
+                $categoriaParcela = $value['Categoria'];
+                $codigoDeBarras = $value['CodigoDeBarras'];
+                $observacoes = $value['Observacoes'];
+                
                 try{
                     $sql =  $db_con->query("INSERT INTO `fn_despesas_parcelas`
-                    (`descricao`,`valorpendente`,`vencimento`, `quitado`, `fn_categorias_id`, `fn_despesas_id`) 
+                    (`descricao`,`valorpendente`,`vencimento`,`quitado`,`codigo_de_barras`,`observacoes`,`fn_categorias_id`,`fn_despesas_id`) 
                     VALUES 
-                    ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO', '1', '{$IDfndespesas}')");           
+                    ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO','{$codigoDeBarras}','{$observacoes}','{$categoriaParcela}','{$IDfndespesas}')");           
                 }
                 catch (Exception $e){
                     $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
@@ -366,17 +371,18 @@
             $userID = $_POST['userID'];
             $descricao = $_POST['descricao'];
             $valor = $_POST['valor'];
+            $categoria = $_POST['categoria'];
         
             //Salva a despesa no banco de dados
             try{
-                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`descricao`,`fixo`,`valor`,`usuarios_id`) VALUES ('{$descricao}','SIM','{$valor}','{$userID}')");      
+                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`descricao`,`fixo`,`valor_despesa_fixa`,`categorias_id`,`usuarios_id`) VALUES ('{$descricao}','SIM','{$valor}','{$categoria}','{$userID}')");      
             }
             catch (Exception $e){
                 $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
                 exit;
             }
             
-            $this->RetornoPadrao(true,"Despesa cadastrada com sucesso!");
+            $this->RetornoPadrao(true,"Despesa fixa cadastrada com sucesso!");
             exit;
 
         }//IncluirDespesaFixa

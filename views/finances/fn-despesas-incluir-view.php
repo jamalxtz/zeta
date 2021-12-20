@@ -1,7 +1,7 @@
 <?php if (!defined('ABSPATH')) exit;
-date_default_timezone_set('America/Sao_Paulo');
-$data = date('Y/m/d');
-$hora = date('h:i a');
+  date_default_timezone_set('America/Sao_Paulo');
+  $data = date('Y/m/d');
+  $hora = date('h:i a');
 ?>
 
 <main class='bg-color'>
@@ -14,155 +14,211 @@ $hora = date('h:i a');
       <li class="breadcrumb-item active">Incluir</li>
     </ol>
 
-    <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
-    <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
-    <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
-    <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="horta">
+    <input type="text" class="hidden" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
+    <input type="text" class="hidden" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
+    <input type="text" class="hidden" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
+    <!-- <input type="text" class="form-control py-4 hidden" name="pagina" id="pagina" value="incluirDespesa"> -->
 
     <!-- Painel do Painel Principal -->
     <div class="card shadow mb-4">
 
       <?php
-      // Lista os dados
-      $listar_categorias = $modelo->listar_categorias("Despesa");
+        // Lista as categorias de despesas
+        $listar_categorias = $modelo->listar_categorias("Despesa");
       ?>
 
       <div class="card-body">
-        <!-- Corpo do Painel Principal -->
-
+      <!-- Corpo do Painel Principal -->
         <form enctype="multipart/form-data" method="post" action="">
 
-          <div class="form-row">
-            <div class="form-group col-md-8">
-              <small class="mt-4"><strong>Descrição:</strong></small>
-              <input type="text" class="form-control text-capitalize" id="NDdescricao" name="NDdescricao" required>
-            </div>
-            <div class="form-group col-md-4">
-              <small class="mt-4"><strong>Categoria:</strong></small>
-              <select id="NDCategoria" name="NDCategoria" class="form-control">
-                <option selected></option>
-                <?php foreach ($listar_categorias as $fetch_userdata) : ?>
-                  <option value="<?php echo $fetch_userdata['id'] ?>">
-                    <?php echo $fetch_userdata['descricao'] ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
+        <div class="form-row">
+          <div class="form-group col-12 text-right">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="chkDespesaFixaND" name="chkDespesaFixaND">
+              <label class="custom-control-label" for="chkDespesaFixaND"><small><strong>Despesa Fixa</strong></small></label>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group col-5">
-              <small class="mt-4"><strong>Vencimento:</strong></small>
-              <input type="date" class="form-control" id="NDvencimento" name="NDvencimento" value="" required>
+          <div class="form-group col-md-8">
+            <small class="mt-2"><strong>Descrição:</strong></small>
+            <input type="text" class="form-control form-control-sm text-capitalize" id="txtDescricaoND" name="txtDescricaoND" required>
+          </div>
+          <div class="form-group col-md-4">
+            <small class="mt-2"><strong>Categoria:</strong></small>
+            <select id="selCategoriaND" name="selCategoriaND" class="form-control form-control-sm">
+              <option selected></option>
+              <?php foreach ($listar_categorias as $fetch_userdata) : ?>
+                <option value="<?php echo $fetch_userdata['id'] ?>">
+                  <?php echo $fetch_userdata['descricao'] ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-lg-5 col-6">
+            <small class="mt1"><strong>Vencimento:</strong></small>
+            <input type="date" class="form-control form-control-sm" id="txtVencimentoND" name="txtVencimentoND" value="" required>
+          </div>
+          <div class="form-group col-lg-5 col-6">
+            <small class="mt-1"><strong>Valor:</strong></small>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text"><small>R$</small></div>
+              </div>
+              <input type="text" class="form-control form-control-sm mask-money" id="txtValorND" name="txtValorND" value="" required>
             </div>
-            <div class="form-group col-5">
-              <small class="mt-4"><strong>Valor:</strong></small>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">R$</div>
-                </div>
-                <input type="text" class="form-control mask-money" id="NDvalor" name="NDvalor" value="" required>
+          </div>
+          <div class="form-group col-lg-2 col-4">
+            <small class="mt-1"><strong>Parcelas:</strong></small>
+            <input type="number" class="form-control form-control-sm"  id="txtParcelasND" name="txtParcelasND" value="1" required>
+          </div>
+        </div>
+
+        <!-- Não utilizado-->
+        <div class="col-md-2 hidden">
+          <div class="form-group">
+            <small class="mt-4"><strong>Entrada:</strong></small>
+            <input type="text" class="form-control form-control-sm moeda" id="txtEntradaND" name="txtEntradaND" value="0" required />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 text-right">
+            <small class="mt-4"><strong></strong></small>
+            <button type="button" class="btn btn-info" id="btnGerarParcelasND">Gerar Parcelas</button>
+          </div>
+        </div>
+
+        <hr>
+
+        <!--Incluir/Alterar Parcelas Individualmente-->
+        <button type="button" class="btn btn-light" data-toggle="collapse" data-target="#collapseCriarAlterarParcelaND" id="btnCollapseCriarAlterarParcelaND" aria-expanded="false" aria-controls="collapseExample">Criar/Alterar Parcela</button>
+        <div class="collapse" id="collapseCriarAlterarParcelaND">
+          <div class="card card-body bg-light">
+          <!--Corpo do painel de Criar/Alterar Parcela-->
+            <div class="form-row">
+              <div class="form-group col-md-8">
+                <small class="mt-4"><strong>Descrição da parcela:</strong></small>
+                <input type="text" class="form-control form-control-sm mask-money" id="txtDescricaoParcelaND" name="txtDescricaoParcelaND" value="">
+              </div>
+              <div class="form-group col-md-4">
+                <small class="mt-4"><strong>Categoria:</strong></small>
+                <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" >
+                  <option selected></option>
+                  <?php foreach ($listar_categorias as $fetch_userdata) : ?>
+                    <option value="<?php echo $fetch_userdata['id'] ?>">
+                      <?php echo $fetch_userdata['descricao'] ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
               </div>
             </div>
-            <div class="form-group col-2">
-              <small class="mt-4"><strong>Parcelas:</strong></small>
-              <input id="NDparcelas" name="NDparcelas" type="number" class="form-control" value="1" required />
-            </div>
-          </div>
-
-          <!-- Não utilizado-->
-          <div class="col-md-2 hidden">
-            <div class="form-group">
-              <small class="mt-4"><strong>Entrada:</strong></small>
-              <input id="valorPago" name="valorPago" type="text" class="form-control moeda" value="0" required />
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="form-group col-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="chkDespesaFixa" id="chkDespesaFixa">
-                <label class="form-check-label" for="chkDespesaFixa">
-                  <small class="mt-4"><strong>Despesa Fixa</strong></small>
-                </label>
+            
+            <div class="form-row">
+              <div class="form-group col-2">
+                <small class="mt-4"><strong>Parcela:</strong></small>
+                <input type="text" class="form-control form-control-sm mask-money" id="txtNumeroParcelaND" name="txtNumeroParcelaND" value="" readonly>
               </div>
-            </div>
-            <!-- Botão de Calcular-->
-            <div class="col-6 text-right">
-              <small class="mt-4"><strong></strong></small>
-              <button type="button" id="btnGerarParcelas" class="btn btn-info">Gerar Parcelas</button>
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="form-row">
-            <div class="form-group col-2">
-              <small class="mt-4"><strong>Parcela:</strong></small>
-              <input type="text" class="form-control mask-money" id="NDIncluirNumeroParcela" name="NDIncluirNumeroParcela" value="" readonly>
-            </div>
-            <div class="form-group col-5">
-              <small class="mt-4"><strong>Vencimento:</strong></small>
-              <input type="date" class="form-control" id="NDIncluirVencimento" name="NDIncluirVencimento" value="" required>
-            </div>
-            <div class="form-group col-5">
-              <small class="mt-4"><strong>Valor:</strong></small>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">R$</div>
-                </div>
-                <input type="text" class="form-control mask-money" id="NDIncluirValor" name="NDIncluirValor" value="" required>
+              <div class="form-group col-5">
+                <small class="mt-4"><strong>Vencimento:</strong></small>
+                <input type="date" class="form-control form-control-sm" id="txtVencimentoParcelaND" name="txtVencimentoParcelaND" value="" required>
               </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-10 mt-0">
-              <small class="mt-0"><strong>Observações:</strong></small>
-              <input type="text" class="form-control" id="NDIncluirObservacoes" name="NDIncluirObservacoes" value="">
-            </div>
-            <!-- Botão de Incluir Parcelas-->
-            <div class="form-group col-2 mt-0 text-right">
-              <small class="mt-0"><strong></strong></small>
-              <nobr>
-                <button type="button" id="btnCancelarInclusaoParcela" class="btn btn-danger btn"><i class="fas fa-times"></i></button>
-                <button type="button" id="btnIncluirParcela" class="btn btn-info btn"><i class="fas fa-check"></i></button>
-              </nobr>
-            </div>
-          </div>
-
-          <!--Tabela que mostra as parcelas geradas-->
-          <div class="row mt-0">
-            <div class="col-12">
-              <div class="clearfix form-actions">
-                <div class="table-responsive">
-                  <table class="table table-sm display compact table-hover table-bordered" id="tabelaParcelas" width="100%" cellspacing="0">
-                    <thead class="thead-light">
-                      <tr>
-                        <th>Parcela</th>
-                        <th>Vencimento</th>
-                        <th>Valor</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                  </table>
+              <div class="form-group col-5">
+                <small class="mt-4"><strong>Valor:</strong></small>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text"><small>R$</small></div>
+                  </div>
+                  <input type="text" class="form-control form-control-sm mask-money" id="txtValorParcelaND" name="txtValorParcelaND" value="" required>
                 </div>
               </div>
+
+              <div class="form-group col-12">
+                <small class="mt-4"><strong>Código de barras:</strong></small>
+                <input type="text" class="form-control form-control-sm" id="txtCodigoDeBarrasParcelaND" name="txtCodigoDeBarrasParcelaND" value="">
+              </div>
+
+              <div class="form-group col-12 mt-0">
+                <small class="mt-0"><strong>Observações:</strong></small>
+                <input type="text" class="form-control form-control-sm" id="txtObservacoesParcelaND" name="txtObservacoesParcelaND" value="">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-12 mt-0 text-right">
+                <small class="mt-0"><strong></strong></small>
+                <nobr>
+                  <button type="button" class="btn btn-danger btn" id="btnCancelarInclusaoParcelaND"><i class="fas fa-times"></i></button>
+                  <button type="button" class="btn btn-info btn" id="btnIncluirParcelaND"><i class="fas fa-check"></i></button>
+                </nobr>
+              </div>
+            </div>
+
+          <!--FIM do corpo do painel de Criar/Alterar Parcela-->
+          </div>
+        </div>
+        <!--FIM Incluir/Alterar Parcelas Individualmente-->
+
+        <!--Tabela que mostra as parcelas geradas-->
+        <div class="row mt-0">
+          <div class="col-12">
+            <div class="clearfix form-actions">
+              <div class="table-responsive">
+                <table class="table table-sm display compact table-hover table-bordered" id="tabelaParcelasND" width="100%" cellspacing="0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Parcela</th>
+                      <th class = "">Descricao</th>
+                      <th>Vencimento</th>
+                      <th>Valor</th>
+                      <th class = "">Categoria</th>
+                      <th class = "">CodigoDeBarras</th>
+                      <th class = "">Observacoes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabelaParcelasBodyND">
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- FIM Corpo do Painel Principal -->
+      <!-- FIM Corpo do Painel Principal -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary">Limpar</button>
-        <button type="button" class="btn btn-success" id="incluirDespesaBTN" value="incluirDespesa">Salvar</button>
+        <button type="button" class="btn btn-success" id="btnSalvarDespesaND">Salvar</button>
       </div>
       </form>
     </div>
     <!-- Fim do Painel Principal -->
   </div>
 </main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!--Modal Quitar-->
 <div class="modal fade" id='modal-quitar' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
