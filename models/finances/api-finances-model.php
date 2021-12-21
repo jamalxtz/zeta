@@ -96,8 +96,16 @@
 
             //Faz uma consulta para retornar o id que será utilizado para cadastrar a Despesa
             try{
-                $sql = "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
-                SET AUTOCOMMIT = 0;
+                $sql = "-- phpMyAdmin SQL Dump
+                -- version 5.0.2
+                -- https://www.phpmyadmin.net/
+                --
+                -- Host: 127.0.0.1:3306
+                -- Tempo de geração: 21-Dez-2021 às 20:28
+                -- Versão do servidor: 5.7.31
+                -- versão do PHP: 7.3.21
+                
+                SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
                 START TRANSACTION;
                 SET time_zone = '+00:00';
                 
@@ -110,8 +118,6 @@
                 --
                 -- Banco de dados: `zeta_finances`
                 --
-                CREATE DATABASE IF NOT EXISTS `zeta_finances` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-                USE `zeta_finances`;
                 
                 -- --------------------------------------------------------
                 
@@ -128,7 +134,14 @@
                   `usuarios_id` int(11) NOT NULL,
                   PRIMARY KEY (`id`),
                   KEY `fk_fn_categorias_usuarios` (`usuarios_id`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+                ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+                
+                --
+                -- Extraindo dados da tabela `fn_categorias`
+                --
+                
+                INSERT INTO `fn_categorias` (`id`, `descricao`, `tipo`, `imagem`, `usuarios_id`) VALUES
+                (2, 'Outras', 'Despesa', '', 62);
                 
                 -- --------------------------------------------------------
                 
@@ -141,11 +154,13 @@
                   `id` int(11) NOT NULL AUTO_INCREMENT,
                   `descricao` varchar(255) DEFAULT NULL,
                   `fixo` varchar(5) DEFAULT NULL,
-                  `valor` varchar(255) DEFAULT NULL,
+                  `valor_despesa_fixa` varchar(255) DEFAULT NULL,
+                  `categorias_id` int(11) NOT NULL,
                   `usuarios_id` int(11) NOT NULL,
-                  PRIMARY KEY (`id`,`usuarios_id`),
-                  KEY `fk_fn_despesas_usuarios_idx` (`usuarios_id`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=latin1;
+                  PRIMARY KEY (`id`,`usuarios_id`,`categorias_id`) USING BTREE,
+                  KEY `fk_fn_despesas_usuarios_idx` (`usuarios_id`),
+                  KEY `fk_fn_despesas_fn_categorias` (`categorias_id`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
                 
                 -- --------------------------------------------------------
                 
@@ -162,12 +177,14 @@
                   `valorquitado` float DEFAULT NULL,
                   `quitado` varchar(3) DEFAULT NULL,
                   `quitacao` datetime DEFAULT NULL,
+                  `codigo_de_barras` varchar(255) DEFAULT NULL,
+                  `observacoes` varchar(999) DEFAULT NULL,
                   `fn_categorias_id` int(11) NOT NULL,
                   `fn_despesas_id` int(11) NOT NULL,
                   PRIMARY KEY (`id`,`fn_categorias_id`,`fn_despesas_id`),
                   KEY `fk_fn_despesas_parcelas_fn_categorias1_idx` (`fn_categorias_id`),
                   KEY `fk_fn_despesas_parcelas_fn_despesas1_idx` (`fn_despesas_id`)
-                ) ENGINE=MyISAM AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
+                ) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
                 
                 -- --------------------------------------------------------
                 
@@ -238,14 +255,14 @@
                   `user` varchar(999) DEFAULT NULL,
                   `situacao` varchar(40) DEFAULT NULL,
                   PRIMARY KEY (`id`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8;
+                ) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8;
                 
                 --
                 -- Extraindo dados da tabela `usuarios`
                 --
                 
                 INSERT INTO `usuarios` (`id`, `cpf`, `rg`, `nome`, `sobrenome`, `email`, `telefone`, `celular`, `cep`, `logradouro`, `complemento`, `bairro`, `cidade`, `estado`, `imagem`, `cadastro`, `senha`, `dica`, `user_session_id`, `user_permissions`, `user`, `situacao`) VALUES
-                (62, '754.634.581-20', '58364152', 'Bruno Mateus', 'Silva Souza', 'bruno_mss@outlook.com', '(35) 8620-47', '(62) 9 9462-6462', '74583-050', 'Rua Trajano de Sá Guimaraes', 'Qd 09 Lt 05', 'Vila Maria Dilce', 'Goiânia', 'GO', '20180728125651png_1648433868.png', NULL, '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'hid07vkouoir68rh4fkhl64pt5', 'ofgvuv4qmldu3o46cko4itb8ot', 'a:2:{i:0;s:19:\"AcessarAreaRestrita\";i:1;s:16:\"AcessarSiteAdmin\";}', 'bruno_mss@outlook.com', 'Ativo'),
+                (62, '75463458120', '58364152', 'Bruno Mateus', 'Silva Souza', 'bruno_mss@outlook.com', '35862047', '62994626462', '74583050', 'Rua Trajano de Sá Guimaraes', 'Qd 09 Lt 05', 'Vila Maria Dilce', 'Goiânia', 'GO', 'foto3x4png_426531666.png', NULL, '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'hid07vkouoir68rh4fkhl64pt5', '9e10nsc88tm4juljfqb57qmiof', 'a:2:{i:0;s:19:\"AcessarAreaRestrita\";i:1;s:16:\"AcessarSiteAdmin\";}', 'bruno_mss@outlook.com', 'Ativo'),
                 (63, '00442953260', '4399743', 'Renan', 'Além Silva', 'renanalem@alemtecnologia.com.br', '35868027', '62985134662', '8798465', '5646546546', '654654654', '465465465', '4564654', '54654654', '5jpg_963156278.jpg', '2020-07-19', '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'Senha 123', '111eda0e3dc780ff0ef3c31f51574d73', 'a:2:{i:0;s:13:\"user-register\";i:1;s:18:\"gerenciar-noticias\";}', 'renanalem@alemtecnologia.com.br', ''),
                 (64, '75463458121', '1254635', 'Carlos daniel', 'souza pires', 'carlos@gmail.com', '62 3586-2047', '62 9 9462-6462', '74583050', 'Rua Trajano de Sá Guimarães', 'Qd 09 Lt 05', 'Jardim Clarissa', 'Goiânia', 'GO', 'foto3x4png_1156961214.png', '2021-03-16', '$2a$08$sthdPYQtn63aaqBii7nX2u5J08NSslg2yX5eFIyo.Vs7oStd6Cb7q', 'teste', NULL, 'AcessarAreaRestrita', 'carlos@gmail.com', 'Ativo');
                 
@@ -254,22 +271,10 @@
                 --
                 
                 --
-                -- Limitadores para a tabela `fn_categorias`
-                --
-                ALTER TABLE `fn_categorias`
-                  ADD CONSTRAINT `fk_fn_categorias_usuarios` FOREIGN KEY (`usuarios_id`) REFERENCES `zeta`.`usuarios` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-                
-                --
                 -- Limitadores para a tabela `fn_despesas`
                 --
                 ALTER TABLE `fn_despesas`
-                  ADD CONSTRAINT `fk_fn_despesas_usuarios` FOREIGN KEY (`usuarios_id`) REFERENCES `usuarios` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-                
-                --
-                -- Limitadores para a tabela `fn_receitas`
-                --
-                ALTER TABLE `fn_receitas`
-                  ADD CONSTRAINT `fk_fn_receitas_usuarios1` FOREIGN KEY (`usuarios_id`) REFERENCES `usuarios` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+                  ADD CONSTRAINT `fk_fn_despesas_fn_categorias` FOREIGN KEY (`categorias_id`) REFERENCES `fn_categorias` (`id`);
                 COMMIT;
                 
                 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

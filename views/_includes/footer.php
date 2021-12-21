@@ -135,13 +135,15 @@
     <script src="<?php echo HOME_URI;?>views/_js/dataTables.min.js"></script>
     <script src="<?php echo HOME_URI;?>views/_js/dataTables-custom.js"></script>
 
-    <script src="<?php echo HOME_URI;?>views/_js/atendimentos.js"></script>
     <script src="<?php echo HOME_URI;?>views/_js/imgpreview.js"></script>
-    <!--Mascara que limita o numero de caracteres e insere pontos traços,etc-->
+    <!-- Mascara que limita o numero de caracteres e insere pontos traços,etc -->
     <script src="<?php echo HOME_URI;?>views/_js/jquery.mask.js"></script>
-
-    <script src="<?php echo HOME_URI;?>views/_js/inicio/menu.js"></script>
-    <script src="<?php echo HOME_URI;?>views/_js/inicio/apresentacao.js"></script>
+    <!-- Exibe notificações flutuantes -->
+    <script src="<?php echo HOME_URI;?>views/_js/notify.js"></script>
+    
+    <!-- <script src="<?php echo HOME_URI;?>views/_js/atendimentos.js"></script> -->
+    <!-- <script src="<?php echo HOME_URI;?>views/_js/inicio/menu.js"></script> -->
+    <!-- <script src="<?php echo HOME_URI;?>views/_js/inicio/apresentacao.js"></script> -->
     <?php echo $this->elementosFooter[0] ?>
     
   </body>

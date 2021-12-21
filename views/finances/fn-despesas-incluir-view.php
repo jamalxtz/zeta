@@ -3,6 +3,7 @@
   $data = date('Y/m/d');
   $hora = date('h:i a');
 ?>
+<!--Utilizo o sufixo ND nos ids dos campos para indicar que eles pertencem Nova Despesa-->
 
 <main class='bg-color'>
   <div class="container-fluid">
@@ -117,15 +118,15 @@
             </div>
             
             <div class="form-row">
-              <div class="form-group col-2">
+              <div class="form-group hidden col-12">
                 <small class="mt-4"><strong>Parcela:</strong></small>
                 <input type="text" class="form-control form-control-sm mask-money" id="txtNumeroParcelaND" name="txtNumeroParcelaND" value="" readonly>
               </div>
-              <div class="form-group col-5">
+              <div class="form-group col-6">
                 <small class="mt-4"><strong>Vencimento:</strong></small>
                 <input type="date" class="form-control form-control-sm" id="txtVencimentoParcelaND" name="txtVencimentoParcelaND" value="" required>
               </div>
-              <div class="form-group col-5">
+              <div class="form-group col-6">
                 <small class="mt-4"><strong>Valor:</strong></small>
                 <div class="input-group">
                   <div class="input-group-prepend">
@@ -151,7 +152,7 @@
                 <small class="mt-0"><strong></strong></small>
                 <nobr>
                   <button type="button" class="btn btn-danger btn" id="btnCancelarInclusaoParcelaND"><i class="fas fa-times"></i></button>
-                  <button type="button" class="btn btn-info btn" id="btnIncluirParcelaND"><i class="fas fa-check"></i></button>
+                  <button type="button" class="btn btn-info btn" id="btnIncluirAlterarParcelaND"><i class="fas fa-check"></i></button>
                 </nobr>
               </div>
             </div>
@@ -189,7 +190,7 @@
       <!-- FIM Corpo do Painel Principal -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary">Limpar</button>
+        <button type="button" class="btn btn-secondary" onclick="LimparCamposIncluirDespesa()">Limpar</button>
         <button type="button" class="btn btn-success" id="btnSalvarDespesaND">Salvar</button>
       </div>
       </form>
