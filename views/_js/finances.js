@@ -1,23 +1,17 @@
 //Função utilizada para gerar as parcelas ao criar uma despesa (Validado - Falta revisar os comentários)
-$('#btnGerarParcelasND').click(function() {
-
+  // $('#btnGerarParcelasND').click(function() { //Não utilizo mais essa forma, pois a submissão do formulário já faz a validação dos campos
+$("#formCabecalhoDespesaND").on("submit", function (event) { 
+  event.preventDefault();
 
   //Apagar esse bloco após os testes
-  if($("#txtDescricaoND").val() == ""){
-    $('#txtDescricaoND').val("Teste Gerar Parcelas");
-    // $('#selCategoriaND').val() = "";
-    $('#txtVencimentoND').val("2021-12-12");
-    $('#txtValorND').val("150,00");
-    $('#txtParcelasND').val("10");
-  }
-
-
-
-
-
-
-
-    
+  // if($("#txtDescricaoND").val() == "teste"){
+  //   $('#txtDescricaoND').val("Teste Gerar Parcelas");
+  //   // $('#selCategoriaND').val() = "";
+  //   $('#txtVencimentoND').val("2021-12-12");
+  //   $('#txtValorND').val("150,00");
+  //   $('#txtParcelasND').val("10");
+  // }
+  
   let valorTotal = parseFloat($("#txtValorND").val().replace('.',''));
   let valorEntrada = parseFloat($("#txtEntradaND").val()).toFixed(2);//Atualmente esse valor de entrada não é utilizado, deixei aqui só para usos futuro
   let parcelas = parseInt($("#txtParcelasND").val());
@@ -57,102 +51,12 @@ $('#btnGerarParcelasND').click(function() {
     }
     $('#tabelaParcelasND tbody').html(table);
   }
+
+  $('#tabelaParcelasND').focus(); //Não está funcionando, procurar uma alternativa para esse evento
+
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
 }); //FIM da função utilizada para gerar as parcelas ao criar uma despesa
-
-//-------------------------------------------------------------------------------------------------------------------------------
-
-//Função utilizada para incluir ou editar parcelas individualmente (validado)
-$('#btnIncluirAlterarParcelaND').click(function() {
-  //Verifica se o usuário está incluindo ou alterando uma parcela
-  let numeroParcela = $('#txtNumeroParcelaND').val();
-
-  if(numeroParcela == ""){ // Modo de Inclusão
-    IncluirParcela();
-  }else{ // Modo de Alteração
-    AlterarParcela(numeroParcela);
-  }
-}); //FIM da função utilizada para incluir ou editar parcelas individualmente
-
-//Faz a inclusão de novas parcelas
-function IncluirParcela(){
-    //Captura os valores dos campos
-  //let tabelaDeParcelas = document.getElementById("tabelaParcelasND");
-  let tabelaDeParcelas = document.getElementById("tabelaParcelasBodyND");
-  let numeroDaParcela = document.getElementById("txtNumeroParcelaND").value;
-  let vencimento = $("#txtVencimentoParcelaND").val().replace(/-/g, ",");
-  let valor = parseFloat($("#txtValorParcelaND").val().replace('.',''));
-  let descricao = document.getElementById("txtDescricaoParcelaND").value;
-  let codigoCategoria = parseInt($("#selCategoriaParcelaND").val());
-  let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaND").value;
-  let observacoes = document.getElementById("txtObservacoesParcelaND").value;
-  let novaLinha = tabelaDeParcelas.insertRow(-1);
-  let novaCelula;
-  let vencimentoFormatado;
-
-  //Formata as datas e valores para o padrão brasileiro
-  vencimentoFormatado = new Date(vencimento);
-  vencimentoFormatado = vencimentoFormatado.toLocaleDateString();
-  valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' })
-
-  if (numeroDaParcela == ""){
-    numeroDaParcela = $('#tabelaParcelasND tr').length - 1;
-    //Insere os valores na tabela
-    novaCelula = novaLinha.insertCell(0);
-    novaCelula.innerHTML = numeroDaParcela;
-
-    novaCelula = novaLinha.insertCell(1);
-    novaCelula.innerHTML = descricao;
-
-    novaCelula = novaLinha.insertCell(2);
-    novaCelula.innerHTML = vencimentoFormatado;
-
-    novaCelula = novaLinha.insertCell(3);
-    novaCelula.innerHTML = valor;
-
-    novaCelula = novaLinha.insertCell(4);
-    novaCelula.innerHTML = codigoCategoria;
-
-    novaCelula = novaLinha.insertCell(5);
-    novaCelula.innerHTML = codigoDeBarras;
-
-    novaCelula = novaLinha.insertCell(6);
-    novaCelula.innerHTML = observacoes;
-    
-    //Bruno Verificar se compensa inserir um botão para excluir as parcelas ou então subir e realizar a exclusão
-    // novaCelula = novaLinha.insertCell(3);
-    // novaCelula.style.backgroundColor = cortabela;
-    // novaCelula.innerHTML = '<input type="button" value="X" onclick="deleteRow(this)"/>';
-  }
-}//IncluirParcela
-
-//Faz a alteração de parcelas
-function AlterarParcela(numeroParcela){
-  //Obtém pos valores dos campos que serão incluídos nos campos
-  let descricao = $('#txtDescricaoParcelaND').val();
-  let categoria = $('#selCategoriaParcelaND').val();
-  let parcela = $('#txtNumeroParcelaND').val();
-  let vencimento = $('#txtVencimentoParcelaND').val();
-  let valor = $('#txtValorParcelaND').val();
-  let codigoDeBarras = $('#txtCodigoDeBarrasParcelaND').val();
-  let observacoes = $('#txtObservacoesParcelaND').val();
-
-  /*PONTO CRÍTICO:
-  *Apesar de ter colocado para funcionar, não entendi muito bem como funciona essa alteração de células da tabela
-  *Para executar essa função, utilizei o JQuery, ele seleciona os elementos da tabela utilizando o comando eq(), conforme abaixo:
-  *   td:eq(2)  => Esse comando corresponde a coluna onde a célula está localizada
-  *   $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")  => Esse comando corresponde a linha, para encontrar essa linha eu pego o número da parcela que fica em um campo oculto
-  *Não gostei nem um pouco dessa solução, porém fiz varias pesquisas e não consegui encontrar nenhuma outra melhor */
-  $('td:eq(1)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(descricao);
-  $('td:eq(2)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(vencimento);
-  $('td:eq(3)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(valor);
-  $('td:eq(4)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(categoria);
-  $('td:eq(5)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(codigoDeBarras);
-  $('td:eq(6)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(observacoes);
-
-  
-}//AlterarParcela
-
-//-------------------------------------------------------------------------------------------------------------------------------
 
 //Função que executa os eventos do botão chkDespesaFixaND 
 $('#chkDespesaFixaND').click(function() {
@@ -177,6 +81,114 @@ $('#chkDespesaFixaND').click(function() {
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
+//Função utilizada para incluir ou editar parcelas individualmente (validado)
+//$('#btnIncluirAlterarParcelaND').click(function() { //Não utilizo mais essa forma, pois a submissão do formulário já faz a validação dos campos
+$("#formParcelaDespesaND").on("submit", function (event) { 
+  event.preventDefault();
+  //Verifica se o usuário está incluindo ou alterando uma parcela
+  let numeroParcela = $('#txtNumeroParcelaND').val();
+
+  if(numeroParcela == ""){ // Modo de Inclusão
+    IncluirParcela();
+  }else{ // Modo de Alteração
+    AlterarParcela(numeroParcela);
+    LimparCamposIncluirDespesa(true);
+    $('#collapseCriarAlterarParcelaND').collapse("hide");
+  }
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função utilizada para incluir ou editar parcelas individualmente
+
+//Faz a inclusão de novas parcelas
+function IncluirParcela(){
+    //Captura os valores dos campos
+  //let tabelaDeParcelas = document.getElementById("tabelaParcelasND");
+  let tabelaDeParcelas = document.getElementById("tabelaParcelasBodyND");
+  let numeroDaParcela = $('#tabelaParcelasND tr').length - 1;
+  let vencimento = $("#txtVencimentoParcelaND").val();
+  let valor = parseFloat($("#txtValorParcelaND").val().replace('.',''));
+  let descricao = document.getElementById("txtDescricaoParcelaND").value;
+  let codigoCategoria = parseInt($("#selCategoriaParcelaND").val());
+  let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaND").value;
+  let observacoes = document.getElementById("txtObservacoesParcelaND").value;
+  let novaLinha = tabelaDeParcelas.insertRow(-1);
+  let novaCelula;
+
+  //Formata as datas e valores para o padrão brasileiro
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
+  valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' })
+
+  //Insere os valores na tabela
+  novaCelula = novaLinha.insertCell(0);
+  novaCelula.innerHTML = numeroDaParcela;
+
+  novaCelula = novaLinha.insertCell(1);
+  novaCelula.innerHTML = descricao;
+
+  novaCelula = novaLinha.insertCell(2);
+  novaCelula.innerHTML = vencimento;
+
+  novaCelula = novaLinha.insertCell(3);
+  novaCelula.innerHTML = valor;
+
+  novaCelula = novaLinha.insertCell(4);
+  novaCelula.innerHTML = codigoCategoria;
+
+  novaCelula = novaLinha.insertCell(5);
+  novaCelula.innerHTML = codigoDeBarras;
+
+  novaCelula = novaLinha.insertCell(6);
+  novaCelula.innerHTML = observacoes;
+  
+  //Bruno Verificar se compensa inserir um botão para excluir as parcelas ou então subir e realizar a exclusão
+  // novaCelula = novaLinha.insertCell(3);
+  // novaCelula.style.backgroundColor = cortabela;
+  // novaCelula.innerHTML = '<input type="button" value="X" onclick="deleteRow(this)"/>';
+  
+  //Limpa o campo de descrição
+  $('#tabelaParcelasND tr').val("");
+  $.notify("Parcela incluída.", 'info');
+
+}//IncluirParcela
+
+//Faz a alteração de parcelas
+function AlterarParcela(numeroParcela){
+  //Obtém pos valores dos campos que serão incluídos nos campos
+  let descricao = $('#txtDescricaoParcelaND').val();
+  let categoria = $('#selCategoriaParcelaND').val();
+  let parcela = $('#txtNumeroParcelaND').val();
+  let vencimento = $('#txtVencimentoParcelaND').val();
+  let valor = $("#txtValorParcelaND").val();
+  let codigoDeBarras = $('#txtCodigoDeBarrasParcelaND').val();
+  let observacoes = $('#txtObservacoesParcelaND').val();
+
+  //Formata as datas e valores para o padrão brasileiro
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
+  valor = ConverterRealParaFloat(valor);
+  valor = ConverterValorParaRealBrasileiro(valor)
+
+  /*PONTO CRÍTICO:
+  *Apesar de ter colocado para funcionar, não entendi muito bem como funciona essa alteração de células da tabela
+  *Para executar essa função, utilizei o JQuery, ele seleciona os elementos da tabela utilizando o comando eq(), conforme abaixo:
+  *   td:eq(2)  => Esse comando corresponde a coluna onde a célula está localizada
+  *   $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")  => Esse comando corresponde a linha, para encontrar essa linha eu pego o número da parcela que fica em um campo oculto
+  *Não gostei nem um pouco dessa solução, porém fiz varias pesquisas e não consegui encontrar nenhuma outra melhor */
+  $('td:eq(1)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(descricao);
+  $('td:eq(2)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(vencimento);
+  $('td:eq(3)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(valor);
+  $('td:eq(4)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(categoria);
+  $('td:eq(5)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(codigoDeBarras);
+  $('td:eq(6)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(observacoes);
+
+  $.notify("Parcela alterada.", 'info');
+  
+}//AlterarParcela
+
+$('#btnCancelarInclusaoParcelaND').click(function() { 
+  LimparCamposIncluirDespesa(true);
+  $('#collapseCriarAlterarParcelaND').collapse("hide");
+});
+
 //Ao clicar nas linhas da tabela de despesa os dados da parcela sobem para serem editados
 $("#tabelaParcelasND tbody").on('click', 'tr', function () {
   $('#collapseCriarAlterarParcelaND').collapse("show");
@@ -190,6 +202,10 @@ $("#tabelaParcelasND tbody").on('click', 'tr', function () {
   let observacoes = $('td:eq(6)', this).text().trim();
   //Converte a data de vencimento para o padrão americano, o input do tipo date só recebe datas no formato YYYY-MM-DD
   vencimento = FormataDataPadraoAmericano(vencimento);
+  //Remove o R$ se tiver
+  valor = valor.replace("R$","");
+  valor = valor.trim();
+  valor = ConverterValorParaRealBrasileiro(valor, false);
 
   $('#txtDescricaoParcelaND').val(descricao);
   $('#selCategoriaParcelaND').val(categoria);
@@ -199,23 +215,46 @@ $("#tabelaParcelasND tbody").on('click', 'tr', function () {
   $('#txtCodigoDeBarrasParcelaND').val(codigoDeBarras);
   $('#txtObservacoesParcelaND').val(observacoes);
 
+  $( "#txtDescricaoParcelaND" ).focus();
 })// Evento de click tabelaParcelasND
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
 //Evento do botão que salva a despesa no banco de dados
 $('#btnSalvarDespesaND').click(function() {
+  //Faz a validação dos campos obrigatórios
+  let descricao = $('#txtDescricaoND').val().trim();
+  let valor = $('#txtValorND').val();
+  if(descricao.length < 3){
+    $.notify("Informe uma descrição válida para a despesa.", 'error');
+    $('#txtDescricaoND').focus();
+    return;
+  }
+
+  //Verifica se irá fazer a inclusão de uma despesa com parcelas ou uma despesa fixa
   let chkDespesaFixa = document.getElementById('chkDespesaFixaND');
 
-  if(chkDespesaFixa.checked) {
+  if(chkDespesaFixa.checked) { //Inclusão de Despesa Fixa
+    //Faz a validação do campo Valor
+    if(valor == ""){
+      $.notify("Informe um valor válido.", 'error');
+      $('#txtValorND').focus();
+      return;
+    }
     IncluirDespesaFixa()
-  } else {
+
+  } else { //Inclusão de Despesa com Parcela
+    //Faz a validação da tabela de parcelas
+    if($('#tabelaParcelasND tr').length - 1 <= 0){
+      $.notify("É necessário incluir pelo menos uma parcela para continuar.", 'error');
+      $('#collapseCriarAlterarParcelaND').collapse("show");
+      $( "#txtDescricaoParcelaND" ).focus();
+      return;
+    }
     IncluirDespesa()
     LimparCamposIncluirDespesa(true);
   }
 })//Evento Click btnSalvarDespesaND
-
-//-------------------------------------------------------------------------------------------------------------------------------
 
 //Salvar nova despesa (Validado)
 /*
@@ -392,6 +431,39 @@ function FormataDataPadraoAmericano(data) {
   // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
 }//FormataDataPadraoAmericano
 
+//Recebe a data no formato YYYY-MM-DD e retorna no padrão DD/MM/AAAA 
+function FormatarDataPadraoBrasileiro(data){
+  //Troca os traços por vírgulas
+  data = data.replace(/-/g, ",");
+  //Formata as datas e valores para o padrão brasileiro
+  let dataFormatada = new Date(data);
+  dataFormatada = dataFormatada.toLocaleDateString();
+  return dataFormatada;
+}//FormatarDataPadraoBrasileiro
+
+//Recebe o valor no formato 1.222.222,56 e retorna no padrão 1222222.56
+function ConverterRealParaFloat(valor){
+  if(valor === ""){
+      valor =  0;
+  }else{
+      valor = valor.replace(".","");
+      valor = valor.replace(",",".");
+      valor = parseFloat(valor);
+  }
+  return valor;
+}//ConverterRealParaFloat
+
+//Recebe o valor no formato 1222222.56 e retorna no padrão (R$ 1.222.222,56) ou (1.222.222,56)
+function ConverterValorParaRealBrasileiro(valor, utilizarRS = true){
+  if(utilizarRS === true){
+    //Com R$
+    valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' })
+  }else{
+    //Cem R$
+    valor = valor.toLocaleString('pt-br', {minimumFractionDigits: 2});
+  }
+  return valor;
+}//ConverterValorParaRealBrasileiro
 
 
 

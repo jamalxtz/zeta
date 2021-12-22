@@ -1,37 +1,52 @@
 /*!
-    * Start Bootstrap - SB Admin v6.0.0 (https://startbootstrap.com/templates/sb-admin)
-    * Copyright 2013-2020 Start Bootstrap
-    * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-sb-admin/blob/master/LICENSE)
-    */
-    (function($) {
-    "use strict";
-
-    // Add active state to sidbar nav links
-    var path = window.location.href; // because the 'href' property of the DOM element is the absolute path
-        $("#layoutSidenav_nav .sb-sidenav a.nav-link").each(function() {
-            if (this.href === path) {
-                $(this).addClass("active");
-            }
-        });
-
-    // Toggle the side navigation
-    $("#sidebarToggle").on("click", function(e) {
-        e.preventDefault();
-        $("body").toggleClass("sb-sidenav-toggled");
+* Start Bootstrap - SB Admin v6.0.0 (https://startbootstrap.com/templates/sb-admin)
+* Copyright 2013-2020 Start Bootstrap
+* Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-sb-admin/blob/master/LICENSE)
+*/
+(function($) {
+"use strict";
+  // Add active state to sidbar nav links
+  var path = window.location.href; // because the 'href' property of the DOM element is the absolute path
+    $("#layoutSidenav_nav .sb-sidenav a.nav-link").each(function() {
+        if (this.href === path) {
+            $(this).addClass("active");
+        }
     });
+
+// Toggle the side navigation
+$("#sidebarToggle").on("click", function(e) {
+    e.preventDefault();
+    $("body").toggleClass("sb-sidenav-toggled");
+});
 })(jQuery);
 
 //***********************************************************************************************************************
 
-// ativa o menu de tab que aparece no cadastro de novos usuarios EX: Dados pessoais, endereço, etc
+//Ativa o menu de tab que aparece no cadastro de novos usuarios EX: Dados pessoais, endereço, etc
   $(function () {
     $('#myTab a:first').tab('show');
   })
 
-// ativa os tooltips que aparecem em cima dos botoes para indicar a ação
+//Ativa os tooltips que aparecem em cima dos botoes para indicar a ação
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+
+//***********************************************************************************************************************
+$(document).ready(function(){
+  //Alterna a mascara entre cpf e cnpj 
+  //OBS:  .cpfcnpj ele pega os dados por essa classe
+  var options = {
+      onKeyPress: function (cpf, ev, el, op) {
+          var masks = ['000.000.000-000', '00.000.000/0000-00'];
+          $('.cpfcnpj').mask((cpf.length > 14) ? masks[1] : masks[0], op);
+      }
+  }
+  $('.cpfcnpj').length > 11 ? $('.cpfcnpj').mask('00.000.000/0000-00', options) : $('.cpfcnpj').mask('000.000.000-00#', options);
+
+  //Mascara de dinheiro, utilizado no Finances
+  $('.mask-money').mask('#.##0,00', {reverse: true});
+});
 
 //***********************************************************************************************************************
 
@@ -70,26 +85,19 @@ function buscarCep(){
         $("#bairro").val(msg.bairro);
         $("#estado").val(msg.uf);
         $("#cidade").val(msg.localidade);
-
-
     })
-
     .fail(function(jqXHR, textStatus, msg){
         alert("Erro JSON ao buscar o cep: "+textStatus+"\n"+msg);
         console.log("Erro JSON ao buscar o cep: "+textStatus+"\n"+msg+"\n"+jqXHR);
     });
-
 }
 
-
 //************************************************************************************************************************
-//Função que troca a cor de fundo do site
+//Função que troca a cor de fundo do site (OBSOLETE - SE NÃO FOR UTILIZAR, APAGAR ESSA FUNÇÃO)
 $('#colorPicker').on('change', function() {
   //alert(this.value);
   //$('.bg-color').css('background-color', this.value);
-  
   $('.bg-color').css('background-image', 'linear-gradient(to bottom left, '+this.value+', rgba(0,0,0,0)');
-
 });
 
 //************************************************************************************************************************
@@ -103,7 +111,6 @@ function ReportarErro(){ //Pega o ofrmulario pelo ID
     $('#erroDetalhes').focus();
     return;
   }
-
 
   //desabilita o botão de Envio
   document.getElementById("btnEnviarErro").disabled = true;
@@ -135,7 +142,6 @@ let pagina = "";
 if(document.getElementById('pagina')){
   pagina = document.getElementById('pagina').value;
 }
-
 
 if(pagina =='login'){
   alterarWallpaper();
@@ -183,7 +189,6 @@ function alterarWallpaper(){
     var element = document.getElementsByTagName("body")[0];
     element.classList.add("bg-imagem");
   }
-
 
 };
 

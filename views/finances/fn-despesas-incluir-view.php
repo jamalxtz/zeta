@@ -30,8 +30,9 @@
 
       <div class="card-body">
       <!-- Corpo do Painel Principal -->
-        <form enctype="multipart/form-data" method="post" action="">
-
+      <!-- <form id="formIncluirNovaDespesa"> -->
+        <form id="formCabecalhoDespesaND">
+        <!-- ------------------------------------------------------------------------------------------------------------------- -->
         <div class="form-row">
           <div class="form-group col-12 text-right">
             <div class="custom-control custom-switch">
@@ -46,7 +47,7 @@
           </div>
           <div class="form-group col-md-4">
             <small class="mt-2"><strong>Categoria:</strong></small>
-            <select id="selCategoriaND" name="selCategoriaND" class="form-control form-control-sm">
+            <select id="selCategoriaND" name="selCategoriaND" class="form-control form-control-sm" required>
               <option selected></option>
               <?php foreach ($listar_categorias as $fetch_userdata) : ?>
                 <option value="<?php echo $fetch_userdata['id'] ?>">
@@ -88,25 +89,26 @@
         <div class="row">
           <div class="col-12 text-right">
             <small class="mt-4"><strong></strong></small>
-            <button type="button" class="btn btn-info" id="btnGerarParcelasND">Gerar Parcelas</button>
+            <button type="submit" class="btn btn-info" id="btnGerarParcelasND">Gerar Parcelas</button>
           </div>
         </div>
-
-        <hr>
+        </form>
+        <hr> <!-- ------------------------------------------------------------------------------------------------------------ -->
 
         <!--Incluir/Alterar Parcelas Individualmente-->
-        <button type="button" class="btn btn-light" data-toggle="collapse" data-target="#collapseCriarAlterarParcelaND" id="btnCollapseCriarAlterarParcelaND" aria-expanded="false" aria-controls="collapseExample">Criar/Alterar Parcela</button>
+        <button type="button" class="btn btn-info btn-block" data-toggle="collapse" data-target="#collapseCriarAlterarParcelaND" id="btnCollapseCriarAlterarParcelaND" aria-expanded="false" aria-controls="collapseExample">Criar/Alterar Parcela</button>
         <div class="collapse" id="collapseCriarAlterarParcelaND">
           <div class="card card-body bg-light">
           <!--Corpo do painel de Criar/Alterar Parcela-->
+          <form id="formParcelaDespesaND">
             <div class="form-row">
               <div class="form-group col-md-8">
                 <small class="mt-4"><strong>Descrição da parcela:</strong></small>
-                <input type="text" class="form-control form-control-sm mask-money" id="txtDescricaoParcelaND" name="txtDescricaoParcelaND" value="">
+                <input type="text" class="form-control form-control-sm" id="txtDescricaoParcelaND" name="txtDescricaoParcelaND" value="" required>
               </div>
               <div class="form-group col-md-4">
                 <small class="mt-4"><strong>Categoria:</strong></small>
-                <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" >
+                <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" required>
                   <option selected></option>
                   <?php foreach ($listar_categorias as $fetch_userdata) : ?>
                     <option value="<?php echo $fetch_userdata['id'] ?>">
@@ -120,7 +122,7 @@
             <div class="form-row">
               <div class="form-group hidden col-12">
                 <small class="mt-4"><strong>Parcela:</strong></small>
-                <input type="text" class="form-control form-control-sm mask-money" id="txtNumeroParcelaND" name="txtNumeroParcelaND" value="" readonly>
+                <input type="text" class="form-control form-control-sm" id="txtNumeroParcelaND" name="txtNumeroParcelaND" value="" readonly>
               </div>
               <div class="form-group col-6">
                 <small class="mt-4"><strong>Vencimento:</strong></small>
@@ -152,11 +154,11 @@
                 <small class="mt-0"><strong></strong></small>
                 <nobr>
                   <button type="button" class="btn btn-danger btn" id="btnCancelarInclusaoParcelaND"><i class="fas fa-times"></i></button>
-                  <button type="button" class="btn btn-info btn" id="btnIncluirAlterarParcelaND"><i class="fas fa-check"></i></button>
+                  <button type="submit" class="btn btn-info btn" id="btnIncluirAlterarParcelaND"><i class="fas fa-check"></i></button>
                 </nobr>
               </div>
             </div>
-
+          </form>          
           <!--FIM do corpo do painel de Criar/Alterar Parcela-->
           </div>
         </div>
@@ -193,7 +195,7 @@
         <button type="button" class="btn btn-secondary" onclick="LimparCamposIncluirDespesa()">Limpar</button>
         <button type="button" class="btn btn-success" id="btnSalvarDespesaND">Salvar</button>
       </div>
-      </form>
+      <!-- </form> -->
     </div>
     <!-- Fim do Painel Principal -->
   </div>
