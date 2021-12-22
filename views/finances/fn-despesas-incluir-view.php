@@ -173,12 +173,12 @@
                   <thead class="thead-light">
                     <tr>
                       <th>Parcela</th>
-                      <th class = "">Descricao</th>
+                      <th class = "hidden">Descricao</th>
                       <th>Vencimento</th>
                       <th>Valor</th>
-                      <th class = "">Categoria</th>
-                      <th class = "">CodigoDeBarras</th>
-                      <th class = "">Observacoes</th>
+                      <th class = "hidden">Categoria</th>
+                      <th class = "hidden">CodigoDeBarras</th>
+                      <th class = "hidden">Observacoes</th>
                     </tr>
                   </thead>
                   <tbody id="tabelaParcelasBodyND">

@@ -104,7 +104,7 @@ function IncluirParcela(){
     //Captura os valores dos campos
   //let tabelaDeParcelas = document.getElementById("tabelaParcelasND");
   let tabelaDeParcelas = document.getElementById("tabelaParcelasBodyND");
-  let numeroDaParcela = $('#tabelaParcelasND tr').length - 1;
+  let numeroDaParcela = $('#tabelaParcelasND tr').length;
   let vencimento = $("#txtVencimentoParcelaND").val();
   let valor = parseFloat($("#txtValorParcelaND").val().replace('.',''));
   let descricao = document.getElementById("txtDescricaoParcelaND").value;
@@ -226,8 +226,14 @@ $('#btnSalvarDespesaND').click(function() {
   let descricao = $('#txtDescricaoND').val().trim();
   let valor = $('#txtValorND').val();
   if(descricao.length < 3){
-    $.notify("Informe uma descrição válida para a despesa.", 'error');
+    $.notify("Informe uma descrição.", 'error');
     $('#txtDescricaoND').focus();
+    return;
+  }
+
+  if($('#selCategoriaND')[0].checkValidity() == false){
+    $.notify("Selecione uma categoria.", 'error');
+    $('#selCategoriaND').focus();
     return;
   }
 
@@ -245,7 +251,7 @@ $('#btnSalvarDespesaND').click(function() {
 
   } else { //Inclusão de Despesa com Parcela
     //Faz a validação da tabela de parcelas
-    if($('#tabelaParcelasND tr').length - 1 <= 0){
+    if($('#tabelaParcelasND tr').length <= 1){
       $.notify("É necessário incluir pelo menos uma parcela para continuar.", 'error');
       $('#collapseCriarAlterarParcelaND').collapse("show");
       $( "#txtDescricaoParcelaND" ).focus();
