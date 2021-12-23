@@ -54,6 +54,9 @@
             elseif($requisicao == "incluirCategoria"){
                 $this->IncluirCategoria();
             }
+            elseif($requisicao == "listarDespesasMensal"){
+                $this->ListarDespesasMensal();
+            }
         }//DistribuirRequisicao
 
         /**
@@ -410,6 +413,8 @@
             $userID = $_POST['userID'];
             $descricao = $_POST['descricao'];
             $tipo = $_POST['tipo'];
+            //Padroniza o texto da descrição para capitalize
+            ucfirst(strtolower($descricao));
 
             $idRetorno = 0;
 
@@ -445,6 +450,53 @@
             exit;
 
         }//IncluirCategoria
+
+        /**
+         * Lista todas as despesas por mês 
+         * Esse método recebe via POST os parâmetros mes, ano e userID
+         */
+        public function ListarDespesasMensal(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $mes = $_POST['mes'];
+            $ano = $_POST['ano'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "SELECT fn_despesas.id,
+                fn_despesas.descricao,
+                SUM(fn_despesas_parcelas.valorpendente) AS valorpendente,
+                SUM(fn_despesas_parcelas.valorquitado) AS valorquitado,
+                fn_despesas_parcelas.quitado,
+                COUNT(fn_despesas_parcelas.ID) AS quantidadeparcelas
+                FROM fn_despesas_parcelas
+                    INNER JOIN fn_despesas ON fn_despesas_parcelas.fn_despesas_id = fn_despesas.id
+                WHERE usuarios_id = 62
+                    AND DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('2021-12-25', '%Y-%m')
+                GROUP BY fn_despesas.id, fn_despesas.descricao, Fn_despesas_parcelas.quitado
+                ORDER BY fn_despesas.descricao ASC";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar Despesas - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //O método fetchAll transforma o resultado da consulta em um array
+                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
+                $result = $consulta->fetchAll(PDO::FETCH_ASSOC);
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesas listadas com sucesso!",$result);
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao consultar Despesas - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//ListarDespesasMensal
 
         public function tempo_corrido($time) {
 

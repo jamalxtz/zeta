@@ -609,10 +609,10 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
 //-----------------------------------------------------------------------------------------------------------------
 //Listar Despesas
 
-function ListarDespesas(){
+function ListarDespesasMensal(){
   //Pega os dados dos campos
   let url = $('#idURL').val();
-  let varFuncao = "listarDespesas";
+  let requisicao = "listarDespesasMensal";
   let userID = $('#userID').val(); // ID do usuário logado
   let dataReferencia = $('#dataReferencia').val(); // 2121-02
 
@@ -623,14 +623,18 @@ function ListarDespesas(){
     return;
   }
 
+  let mes = "12";
+  let ano = "2021" 
+
   //Requisição Ajax para enviar os dados para o banco de dados
   $.ajax({
       url : url,
       type : 'post',
       data : {
-      varFuncao : varFuncao,
+      requisicao : requisicao,
       userID : userID,
-      dataReferencia : dataReferencia,      
+      mes : mes,  
+      ano : ano,    
     },
       dataType: 'json',
       beforeSend : function(){
@@ -639,10 +643,16 @@ function ListarDespesas(){
   })
   .done(function(msg){
     alert(msg.mensagem);
+    console.log(msg);
+    //faz a iteração no array de retorno
+    for(var k in msg[0]) {
+      console.log(k, msg[0][k]["descricao"]);
+   }
+
   })
   .fail(function(jqXHR, textStatus, msg){
-    alert("Erro no retorno de dados: "+textStatus+"\n"+msg);
-    console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+    alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Despesas: "+"\n"+jqXHR);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
   
 }//ListarDespesas

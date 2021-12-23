@@ -43,7 +43,7 @@
 
           <div class="form-group col-md-8">
             <small class="mt-2"><strong>Descrição:</strong></small>
-            <input type="text" class="form-control form-control-sm text-capitalize" id="txtDescricaoND" name="txtDescricaoND" required>
+            <input type="text" class="form-control form-control-sm" id="txtDescricaoND" name="txtDescricaoND" required>
           </div>
           <div class="form-group col-md-4">
             <small class="mt-4"><strong>Categoria:</strong></small>
@@ -230,7 +230,7 @@
         <div class="form-row">
           <div class="form-group col-12">
             <small class="mt-4"><strong>Descrição</strong></small>
-            <input type="text" class="form-control" id="txtDescricaoCategoriaNC" name="txtDescricaoCategoriaNC" value="" required>
+            <input type="text" class="form-control text-capitalize" id="txtDescricaoCategoriaNC" name="txtDescricaoCategoriaNC" value="" required>
           </div>
 
           <div class="form-group col-12">

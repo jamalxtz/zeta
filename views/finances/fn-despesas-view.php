@@ -12,7 +12,7 @@
       <li class="breadcrumb-item active">Despesas</li>
     </ol>
 
-    <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/ajax-finances-model.php">
+    <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
     <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="horta">
@@ -44,7 +44,7 @@
             <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-warning btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-info btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
           </div>
-          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesas()"><i class="fas fa-circle mr-1"></i></button>
+          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasMensal()"><i class="fas fa-circle mr-1"></i></button>
           <!-- <a type="button" href="<?php echo HOME_URI ?>finances" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Voltar"><i class="fas fa-reply mr-1"></i></a> -->
         </div>
         <p class="form_success"></p>
