@@ -48,7 +48,7 @@
           <div class="form-group col-md-4">
             <small class="mt-4"><strong>Categoria:</strong></small>
             <div class="input-group input-group-sm">
-              <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" required>
+              <select class="form-control form-control-sm" id="selCategoriaND" name="selCategoriaND" required>
                 <option selected></option>
                 <?php foreach ($listar_categorias as $fetch_userdata) : ?>
                   <option value="<?php echo $fetch_userdata['id'] ?>">
@@ -183,12 +183,12 @@
                   <thead class="thead-light">
                     <tr>
                       <th>Parcela</th>
-                      <th class = "hidden">Descricao</th>
+                      <th class = "">Descricao</th>
                       <th>Vencimento</th>
                       <th>Valor</th>
-                      <th class = "hidden">Categoria</th>
-                      <th class = "hidden">CodigoDeBarras</th>
-                      <th class = "hidden">Observacoes</th>
+                      <th class = "">Categoria</th>
+                      <th class = "">CodigoDeBarras</th>
+                      <th class = "">Observacoes</th>
                     </tr>
                   </thead>
                   <tbody id="tabelaParcelasBodyND">
@@ -212,6 +212,51 @@
 </main>
 
 
+<!--Modal Cadastrar Categoria-->
+<div class="modal fade" id='modalCadastrarCategoria' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-md" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <p class="modal-title" id="myModalLabel"><strong>Cadastrar Categoria</strong></p>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <!--Corpo do modal-->
+      <form id="formCadastrarCategoriaNC">
+
+        <div class="form-row">
+          <div class="form-group col-12">
+            <small class="mt-4"><strong>Descrição</strong></small>
+            <input type="text" class="form-control" id="txtDescricaoCategoriaNC" name="txtDescricaoCategoriaNC" value="" required>
+          </div>
+
+          <div class="form-group col-12">
+            <small class="mt-4"><strong>Tipo</strong></small>
+            <select class="form-control form-control-sm" id="selTipoCategoriaNC" name="selTipoCategoriaNC" disabled>
+              <option value="Receita">Receita</option>
+              <option value="Despesa" selected>Despesa</option>
+              <option value="Investimento">Investimento</option>
+            </select>
+          </div>
+        </div>
+
+      <!--FIM Corpo do modal-->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success" name="btnCadastrarCategoriaNC" value="btnCadastrarCategoriaNC">Salvar</button>
+      </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+<!--FIM do modal Cadastrar Categoria-->
+
 
 
 
@@ -234,7 +279,7 @@
 
 
 <!--Modal Quitar-->
-<div class="modal fade" id='modalCadastrarCategoria' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id='modal-quitar' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog  modal-md" role="document">
     <div class="modal-content">
 

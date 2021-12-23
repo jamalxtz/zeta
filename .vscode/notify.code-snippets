@@ -10,7 +10,10 @@
 	"scope": "javascript,typescript",
 	"prefix": "notify",
 	"body": [
-		"$.notify(msg.mensagem, 'warn');",
+		"Toast.fire({",
+			"icon: 'error'",
+			"title: msg.mensagem",
+		"})",
 	],
 	"description": "Notificação de alerta"
 	}

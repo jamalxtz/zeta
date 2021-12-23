@@ -51,6 +51,9 @@
             elseif($requisicao == "incluirDespesaFixa"){
                 $this->IncluirDespesaFixa();
             }
+            elseif($requisicao == "incluirCategoria"){
+                $this->IncluirCategoria();
+            }
         }//DistribuirRequisicao
 
         /**
@@ -63,6 +66,10 @@
             // Array de retorno
             $retorno = array('success' => $success,
                             'mensagem' => $mensagem);
+            //Se houver dados para retornar, o array de dados é incluído no array de retorno.
+            if($dados <> null){
+                array_push($retorno, $dados);
+            }
             echo json_encode($retorno, JSON_UNESCAPED_UNICODE);
         }//RetornoPadrao
 
@@ -391,6 +398,53 @@
             exit;
 
         }//IncluirDespesaFixa
+
+        /**
+         * Faz a inclusão de novas categorias
+         * Esse método recebe via POST os parâmetros para o cadastro e retorna o id da categoria cadastrada.
+         */
+        public function IncluirCategoria(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $descricao = $_POST['descricao'];
+            $tipo = $_POST['tipo'];
+
+            $idRetorno = 0;
+
+            //Salva os dados da Categoria no banco de dados
+            try{
+                $sql =  $db_con->query("INSERT INTO `fn_categorias` (`descricao`,`tipo`,`usuarios_id`) VALUES ('{$descricao}','{$tipo}',{$userID})");      
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao cadastrar categoria! - ".$e->getMessage(), "\n");
+                exit;
+            }
+
+            //Faz uma consulta para retornar o id da categoria cadastrada
+            try{
+                $sql =  $db_con->query("SELECT MAX(id) as id FROM fn_categorias WHERE usuarios_id = {$userID}");
+                $ultimoIDfncategorias = 0;
+                foreach ($sql as $value) {
+                    $ultimoIDfncategorias = intval($value['id']);
+                }
+                $idRetorno = $ultimoIDfncategorias;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao cadastrar categoria! - ".$e->getMessage(), "\n");
+                exit;
+            }
+
+            $dados = array(
+                "id" => $idRetorno,
+            );
+            
+            
+            $this->RetornoPadrao(true,"Categoria cadastrada com sucesso!",$dados);
+            exit;
+
+        }//IncluirCategoria
 
         public function tempo_corrido($time) {
 

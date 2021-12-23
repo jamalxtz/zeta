@@ -139,7 +139,7 @@
     <!-- Mascara que limita o numero de caracteres e insere pontos traços,etc -->
     <script src="<?php echo HOME_URI;?>views/_js/jquery.mask.js"></script>
     <!-- Exibe notificações flutuantes -->
-    <script src="<?php echo HOME_URI;?>views/_js/notify.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- <script src="<?php echo HOME_URI;?>views/_js/atendimentos.js"></script> -->
     <!-- <script src="<?php echo HOME_URI;?>views/_js/inicio/menu.js"></script> -->

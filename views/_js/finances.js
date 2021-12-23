@@ -1,5 +1,28 @@
+//#region DECLARAÇÃO DE VARIÁVEIS--------------------------------------------------------------------------------------
+
+//Configura um mini alerta do plugin sweetalert2 (https://sweetalert2.github.io/#examples), que é exibido através da função:
+// Toast.fire({
+//   icon: 'success',
+//   title: 'Signed in successfully'
+// })
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 2000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer)
+    toast.addEventListener('mouseleave', Swal.resumeTimer)
+  }
+})
+
+//#endregion
+
+//#region GERAÇÃO DE PARCELAS E DEMAIS FUNÇÕES DO CABEÇALHO DAS DESPESAS-----------------------------------------------
+
 //Função utilizada para gerar as parcelas ao criar uma despesa (Validado - Falta revisar os comentários)
-  // $('#btnGerarParcelasND').click(function() { //Não utilizo mais essa forma, pois a submissão do formulário já faz a validação dos campos
+// $('#btnGerarParcelasND').click(function() { //Não utilizo mais essa forma, pois a submissão do formulário já faz a validação dos campos
 $("#formCabecalhoDespesaND").on("submit", function (event) { 
   event.preventDefault();
 
@@ -79,7 +102,9 @@ $('#chkDespesaFixaND').click(function() {
   }
 })//Evento Click chkDespesaFixaND
 
-//-------------------------------------------------------------------------------------------------------------------------------
+//#endregion
+
+//#region INCLUSÃO E ALTERAÇÃO DE PARCELAS-----------------------------------------------------------------------------
 
 //Função utilizada para incluir ou editar parcelas individualmente (validado)
 //$('#btnIncluirAlterarParcelaND').click(function() { //Não utilizo mais essa forma, pois a submissão do formulário já faz a validação dos campos
@@ -147,8 +172,11 @@ function IncluirParcela(){
   
   //Limpa o campo de descrição
   $('#tabelaParcelasND tr').val("");
-  $.notify("Parcela incluída.", 'info');
-
+  //Exibe mensagem
+  Toast.fire({
+    icon: 'info',
+    title: "Parcela incluída."
+  })
 }//IncluirParcela
 
 //Faz a alteração de parcelas
@@ -180,7 +208,11 @@ function AlterarParcela(numeroParcela){
   $('td:eq(5)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(codigoDeBarras);
   $('td:eq(6)', $("#tabelaParcelasND tbody tr:eq("+ (numeroParcela - 1) +")")).text(observacoes);
 
-  $.notify("Parcela alterada.", 'info');
+  //Exibe mensagem
+  Toast.fire({
+    icon: 'info',
+    title: "Parcela alterada."
+  })
   
 }//AlterarParcela
 
@@ -218,7 +250,9 @@ $("#tabelaParcelasND tbody").on('click', 'tr', function () {
   $( "#txtDescricaoParcelaND" ).focus();
 })// Evento de click tabelaParcelasND
 
-//-------------------------------------------------------------------------------------------------------------------------------
+//#endregion
+
+//#region INCLUSÃO DE DESPESA E DESPESA FIXA---------------------------------------------------------------------------
 
 //Evento do botão que salva a despesa no banco de dados
 $('#btnSalvarDespesaND').click(function() {
@@ -226,13 +260,21 @@ $('#btnSalvarDespesaND').click(function() {
   let descricao = $('#txtDescricaoND').val().trim();
   let valor = $('#txtValorND').val();
   if(descricao.length < 3){
-    $.notify("Informe uma descrição.", 'error');
+    //Exibe mensagem
+    Toast.fire({
+      icon: 'error',
+      title: "Informe uma descrição."
+    })
     $('#txtDescricaoND').focus();
     return;
   }
 
   if($('#selCategoriaND')[0].checkValidity() == false){
-    $.notify("Selecione uma categoria.", 'error');
+    //Exibe mensagem
+    Toast.fire({
+      icon: 'error',
+      title: "Selecione uma categoria."
+    })
     $('#selCategoriaND').focus();
     return;
   }
@@ -243,7 +285,11 @@ $('#btnSalvarDespesaND').click(function() {
   if(chkDespesaFixa.checked) { //Inclusão de Despesa Fixa
     //Faz a validação do campo Valor
     if(valor == ""){
-      $.notify("Informe um valor válido.", 'error');
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "Informe um valor válido."
+      })
       $('#txtValorND').focus();
       return;
     }
@@ -252,7 +298,11 @@ $('#btnSalvarDespesaND').click(function() {
   } else { //Inclusão de Despesa com Parcela
     //Faz a validação da tabela de parcelas
     if($('#tabelaParcelasND tr').length <= 1){
-      $.notify("É necessário incluir pelo menos uma parcela para continuar.", 'error');
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "É necessário incluir pelo menos uma parcela para continuar."
+      })
       $('#collapseCriarAlterarParcelaND').collapse("show");
       $( "#txtDescricaoParcelaND" ).focus();
       return;
@@ -337,10 +387,17 @@ function IncluirDespesa(){
   .done(function(msg){
       //alert(msg.mensagem);
       if (msg.success == true){
-        $.notify(msg.mensagem, "success");
+        //Exibe mensagem
+        Toast.fire({
+          icon: 'success',
+          title: msg.mensagem
+        })
         LimparCamposIncluirDespesa();
       }else{
-        $.notify(msg.mensagem, "error");
+        Toast.fire({
+          icon: 'error',
+          title: msg.mensagem
+        })
       }
   })
   .fail(function(jqXHR, textStatus, msg){
@@ -382,10 +439,16 @@ function IncluirDespesaFixa(){
   .done(function(msg){
       //alert(msg.mensagem);
       if (msg.success == true){
-        $.notify(msg.mensagem, "success");
+        Toast.fire({
+          icon: 'success',
+          title: msg.mensagem
+        })
         LimparCamposIncluirDespesa();
       }else{
-        $.notify(msg.mensagem, "error");
+        Toast.fire({
+          icon: 'error',
+          title: msg.mensagem
+        })
       }
   })
   .fail(function(jqXHR, textStatus, msg){
@@ -425,7 +488,9 @@ function LimparCamposIncluirDespesa(limparSomenteCamposIncluirParcelas = false){
 
 }//LimparCamposIncluirDespesa
 
-//-------------------------------------------------------------------------------------------------------------------------------
+//#endregion
+
+//#region FUNÇÕES DE CONVERSÃO-----------------------------------------------------------------------------------------
 
 //Recebe a data no formato DD/MM/AAAA e retorna no padrão YYYY-MM-DD
 function FormataDataPadraoAmericano(data) {
@@ -471,16 +536,69 @@ function ConverterValorParaRealBrasileiro(valor, utilizarRS = true){
   return valor;
 }//ConverterValorParaRealBrasileiro
 
+//#endregion
+
+//#region CADASTRO DE CATEGORIA----------------------------------------------------------------------------------------
+
+//Função utilizada para cadastrar uma nova categoria
+$("#formCadastrarCategoriaNC").on("submit", function (event) { 
+  event.preventDefault();
+
+  let url = $('#idURL').val();
+  let requisicao = "incluirCategoria";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let descricao = $("#txtDescricaoCategoriaNC").val();
+  let tipo =  $("#selTipoCategoriaNC").val();
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      descricao : descricao,
+      tipo : tipo,    
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao+" \n "+ url );
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      //Fecha o modal
+      $('#modalCadastrarCategoria').modal('toggle');
+
+      $('select').append($('<option>', {
+        value: msg[0].id,
+        text: descricao
+      }));
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao cadastrar categoria: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao cadastrar categoria: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
 
 
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função cadastrar uma nova categoria
 
-
-
-
-
-
-
-
+//#endregion
 
 
 
