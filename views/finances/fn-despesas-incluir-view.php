@@ -46,15 +46,20 @@
             <input type="text" class="form-control form-control-sm text-capitalize" id="txtDescricaoND" name="txtDescricaoND" required>
           </div>
           <div class="form-group col-md-4">
-            <small class="mt-2"><strong>Categoria:</strong></small>
-            <select id="selCategoriaND" name="selCategoriaND" class="form-control form-control-sm" required>
-              <option selected></option>
-              <?php foreach ($listar_categorias as $fetch_userdata) : ?>
-                <option value="<?php echo $fetch_userdata['id'] ?>">
-                  <?php echo $fetch_userdata['descricao'] ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
+            <small class="mt-4"><strong>Categoria:</strong></small>
+            <div class="input-group input-group-sm">
+              <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" required>
+                <option selected></option>
+                <?php foreach ($listar_categorias as $fetch_userdata) : ?>
+                  <option value="<?php echo $fetch_userdata['id'] ?>">
+                    <?php echo $fetch_userdata['descricao'] ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+              <div class="input-group-append">
+                <button class="btn btn-secondary" type="button" data-toggle="modal" data-target="#modalCadastrarCategoria"><i class="fas fa-plus mr-1"></i></button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -65,9 +70,9 @@
           </div>
           <div class="form-group col-lg-5 col-6">
             <small class="mt-1"><strong>Valor:</strong></small>
-            <div class="input-group">
+            <div class="input-group input-group-sm">
               <div class="input-group-prepend">
-                <div class="input-group-text"><small>R$</small></div>
+                <div class="input-group-text">R$</div>
               </div>
               <input type="text" class="form-control form-control-sm mask-money" id="txtValorND" name="txtValorND" value="" required>
             </div>
@@ -108,14 +113,19 @@
               </div>
               <div class="form-group col-md-4">
                 <small class="mt-4"><strong>Categoria:</strong></small>
-                <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" required>
-                  <option selected></option>
-                  <?php foreach ($listar_categorias as $fetch_userdata) : ?>
-                    <option value="<?php echo $fetch_userdata['id'] ?>">
-                      <?php echo $fetch_userdata['descricao'] ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
+                <div class="input-group input-group-sm">
+                  <select class="form-control form-control-sm" id="selCategoriaParcelaND" name="selCategoriaParcelaND" required>
+                    <option selected></option>
+                    <?php foreach ($listar_categorias as $fetch_userdata) : ?>
+                      <option value="<?php echo $fetch_userdata['id'] ?>">
+                        <?php echo $fetch_userdata['descricao'] ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                  <div class="input-group-append">
+                    <button class="btn btn-secondary" type="button" data-toggle="modal" data-target="#modalCadastrarCategoria"><i class="fas fa-plus mr-1"></i></button>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -130,9 +140,9 @@
               </div>
               <div class="form-group col-6">
                 <small class="mt-4"><strong>Valor:</strong></small>
-                <div class="input-group">
+                <div class="input-group input-group-sm">
                   <div class="input-group-prepend">
-                    <div class="input-group-text"><small>R$</small></div>
+                    <div class="input-group-text">R$</div>
                   </div>
                   <input type="text" class="form-control form-control-sm mask-money" id="txtValorParcelaND" name="txtValorParcelaND" value="" required>
                 </div>
@@ -224,12 +234,12 @@
 
 
 <!--Modal Quitar-->
-<div class="modal fade" id='modal-quitar' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id='modalCadastrarCategoria' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog  modal-md" role="document">
     <div class="modal-content">
 
       <div class="modal-header">
-        <p class="modal-title" id="myModalLabel">Quitar <strong><?php echo $fetch_userdata['descricao'] ?></strong>?</p>
+        <p class="modal-title" id="myModalLabel"><strong>Cadastrar Categoria</strong></p>
         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -238,8 +248,6 @@
         <!--Corpo do modal-->
         <form enctype="multipart/form-data" method="post" action="">
 
-          <input class="hidden" type="text" id="id" name="id" value="<?php echo $fetch_userdata['id'] ?>">
-
           <div class="form-row">
             <div class="form-group col-6">
               <small class="mt-4"><strong>Valor Quitado:</strong></small>
@@ -247,12 +255,12 @@
                 <div class="input-group-prepend">
                   <div class="input-group-text">R$</div>
                 </div>
-                <input type="text" class="form-control mask-money" id="QDvalorquitado" name="QDvalorquitado" value="<?php echo $modelo->formatar_valor($fetch_userdata['valorpendente']); ?>" required>
+                <input type="text" class="form-control mask-money" id="QDvalorquitado" name="QDvalorquitado" required>
               </div>
             </div>
             <div class="form-group col-6">
               <small class="mt-4"><strong>Data de Quitação:</strong></small>
-              <input type="date" class="form-control" id="QDquitacao" name="QDquitacao" value="<?php echo $modelo->formatar_data($data); ?>" required>
+              <input type="date" class="form-control" id="QDquitacao" name="QDquitacao" required>
             </div>
           </div>
 
