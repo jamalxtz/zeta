@@ -466,11 +466,11 @@
             //Faz uma consulta para retornar um array com todas as despesas listadas
             try{
                 $sql = "SELECT fn_despesas.id,
-                fn_despesas.descricao,
-                SUM(fn_despesas_parcelas.valorpendente) AS valorpendente,
-                SUM(fn_despesas_parcelas.valorquitado) AS valorquitado,
-                fn_despesas_parcelas.quitado,
-                COUNT(fn_despesas_parcelas.ID) AS quantidadeparcelas
+                    fn_despesas.descricao,
+                    SUM(fn_despesas_parcelas.valorpendente) AS valorpendente,
+                    SUM(fn_despesas_parcelas.valorquitado) AS valorquitado,
+                    fn_despesas_parcelas.quitado,
+                    COUNT(fn_despesas_parcelas.ID) AS quantidadeparcelas
                 FROM fn_despesas_parcelas
                     INNER JOIN fn_despesas ON fn_despesas_parcelas.fn_despesas_id = fn_despesas.id
                 WHERE usuarios_id = 62

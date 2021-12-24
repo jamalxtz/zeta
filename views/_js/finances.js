@@ -10,7 +10,7 @@ const Toast = Swal.mixin({
   position: 'top-end',
   showConfirmButton: false,
   timer: 2000,
-  timerProgressBar: true,
+  timerProgressBar: false,
   didOpen: (toast) => {
     toast.addEventListener('mouseenter', Swal.stopTimer)
     toast.addEventListener('mouseleave', Swal.resumeTimer)
@@ -35,7 +35,7 @@ $("#formCabecalhoDespesaND").on("submit", function (event) {
   //   $('#txtParcelasND').val("10");
   // }
   
-  let valorTotal = parseFloat($("#txtValorND").val().replace('.',''));
+  let valorTotal = ConverterRealParaFloat($("#txtValorND").val());
   let valorEntrada = parseFloat($("#txtEntradaND").val()).toFixed(2);//Atualmente esse valor de entrada não é utilizado, deixei aqui só para usos futuro
   let parcelas = parseInt($("#txtParcelasND").val());
   let codCategoria =  parseInt($("#selCategoriaND").val());
@@ -60,14 +60,26 @@ $("#formCabecalhoDespesaND").on("submit", function (event) {
     let primeiraParcela = new Date(melhorDia);
 
     for(i = 0; i < parcelas; i++) {
+      //Verifica se tem diferença do valor informado com a soma de todas as parcelas e insere os centavos de diferença na última parcela
+      //if(i == parcelas - 1){
+      //Verifica se houve arredondamento para menos
+      //   alert("soma de todas as parcelas: " + valorParcela * parcelas);
+      //   alert("Valor total: " + valorTotal);
+      //   if((valorParcela * parcelas) < valorTotal){
+          
+      //     valorParcela = valorParcela + (valorTotal - (valorParcela * parcelas))
+      //   }
+      // }
+
+      //Faz a inclusção dos valores na tabela
       table += '<tr>'
       table += '<td>' + par  + '</td>';//Número da parcela
-      table += '<td>' + par  + '</td>';//Descrição
+      table += '<td class="hidden">' + par  + '</td>';//Descrição
       table += '<td>' + primeiraParcela.toLocaleDateString() + '</td>';//Vencimento
-      table += '<td>' + valorParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' }) + '</td>';//Valor
-      table += '<td>' + codCategoria  + '</td>';//Categoria
-      table += '<td>' + codigoDeBarras  + '</td>';//Categoria
-      table += '<td>' + observacoes  + '</td>';//Categoria
+      table += '<td>' + ConverterValorParaRealBrasileiro(valorParcela) + '</td>';//Valor
+      table += '<td class="hidden">' + codCategoria  + '</td>';//Categoria
+      table += '<td class="hidden">' + codigoDeBarras  + '</td>';//Categoria
+      table += '<td class="hidden">' + observacoes  + '</td>';//Categoria
       table += '</tr>';
       par++;
       primeiraParcela.setMonth(primeiraParcela.getMonth() + 1); // AUMENTA UM MÊS      
@@ -126,7 +138,7 @@ $("#formParcelaDespesaND").on("submit", function (event) {
 
 //Faz a inclusão de novas parcelas
 function IncluirParcela(){
-    //Captura os valores dos campos
+  //Captura os valores dos campos
   //let tabelaDeParcelas = document.getElementById("tabelaParcelasND");
   let tabelaDeParcelas = document.getElementById("tabelaParcelasBodyND");
   let numeroDaParcela = $('#tabelaParcelasND tr').length;
@@ -149,6 +161,7 @@ function IncluirParcela(){
 
   novaCelula = novaLinha.insertCell(1);
   novaCelula.innerHTML = descricao;
+  novaCelula.className = "hidden";
 
   novaCelula = novaLinha.insertCell(2);
   novaCelula.innerHTML = vencimento;
@@ -158,12 +171,15 @@ function IncluirParcela(){
 
   novaCelula = novaLinha.insertCell(4);
   novaCelula.innerHTML = codigoCategoria;
+  novaCelula.className = "hidden";
 
   novaCelula = novaLinha.insertCell(5);
   novaCelula.innerHTML = codigoDeBarras;
+  novaCelula.className = "hidden";
 
   novaCelula = novaLinha.insertCell(6);
   novaCelula.innerHTML = observacoes;
+  novaCelula.className = "hidden";
   
   //Bruno Verificar se compensa inserir um botão para excluir as parcelas ou então subir e realizar a exclusão
   // novaCelula = novaLinha.insertCell(3);
@@ -607,8 +623,8 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
 
 
 //-----------------------------------------------------------------------------------------------------------------
-//Listar Despesas
 
+//Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
 function ListarDespesasMensal(){
   //Pega os dados dos campos
   let url = $('#idURL').val();
@@ -642,20 +658,95 @@ function ListarDespesasMensal(){
       }
   })
   .done(function(msg){
-    alert(msg.mensagem);
+    //alert(msg.mensagem);
     console.log(msg);
-    //faz a iteração no array de retorno
+    //Limpa a tabela de Despesas
+    $("#tabelaDespesasBodyDP tr").remove();
+    //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
     for(var k in msg[0]) {
-      console.log(k, msg[0][k]["descricao"]);
-   }
-
+      //console.log(k, msg[0][k]["descricao"]);
+      InserirLinhaTabelaDespesas(msg[0][k]);
+    }
   })
   .fail(function(jqXHR, textStatus, msg){
     alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
     console.log("Erro ao listar Despesas: "+"\n"+jqXHR);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
   
-}//ListarDespesas
+}//ListarDespesasMensal
+
+//Inclui uma linha na tabela de Despesas com os dados recebidos por parâmetro
+function InserirLinhaTabelaDespesas(arrayDados){
+  let tabelaDeParcelas = document.getElementById("tabelaDespesasBodyDP");
+  let novaLinha = tabelaDeParcelas.insertRow(-1);
+  let novaCelula;
+  //Captura os valores do array
+  let id = arrayDados["id"];
+  let descricao = arrayDados["descricao"];
+  let valorPendente = arrayDados["valorpendente"];
+  let valorQuitado = arrayDados["valorquitado"];
+  let quitado = arrayDados["quitado"];
+  let quantidaDeParcelas = arrayDados["quantidadeparcelas"];
+  let valor;
+  let acoes;
+
+  //Formata as datas e valores para o padrão brasileiro
+  valorPendente = parseFloat(valorPendente);
+  valorPendente = ConverterValorParaRealBrasileiro(valorPendente,true)
+  valorQuitado = parseFloat(valorQuitado);
+  valorQuitado = ConverterValorParaRealBrasileiro(valorQuitado,true)
+
+  if(quitado == 'SIM'){
+    valor = valorQuitado;
+  }else{
+    valor = valorPendente;
+  }
+
+  //Insere os valores na tabela
+  novaCelula = novaLinha.insertCell(0); //Coluna ID
+  novaCelula.innerHTML = id;
+  novaCelula.className = "hidden";
+
+  novaCelula = novaLinha.insertCell(1);//Coluna Descrição
+  novaCelula.innerHTML = descricao;
+  
+  novaCelula = novaLinha.insertCell(2);//Coluna Valor
+  if(quitado == 'SIM'){
+    novaCelula.innerHTML = '<strong>'+valor+'</strong>';
+  }else{
+    novaCelula.innerHTML = valor;
+    novaCelula.className = "text-muted";
+  }
+  
+  novaCelula = novaLinha.insertCell(3);//Coluna Quitado
+  novaCelula.innerHTML = quitado;
+  novaCelula.className = "hidden";
+
+  novaCelula = novaLinha.insertCell(4);//Coluna Quantidade Parcelas
+  novaCelula.innerHTML = quantidaDeParcelas;
+  novaCelula.className = "hidden";
+  
+  novaCelula = novaLinha.insertCell(5);//Coluna Ações
+  if(quitado == 'SIM'){
+    acoes = '<nobr>';
+    acoes += '<button class="btn btn-info btn-sm" disabled><i class="fas fa-pen"></i></button>';
+    acoes += '<a href="" class="btn btn-secondary btn-sm" role="button" data-toggle="modal" id="modal-estornar-despesa" data-id="'+id+'"><strong class="ml-1 mr-1">E</strong></a>';
+    acoes += '</nobr>';
+  }else{
+    acoes = '<nobr>';
+    acoes += '<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modal-editar-despesa" data-id="'+id+'"><i class="fas fa-pen"></i></button>';
+    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
+    acoes += '</nobr>';
+  }
+  novaCelula.innerHTML = acoes;
+  novaCelula.className = "text-center";
+
+  //Exibe mensagem
+  Toast.fire({
+    icon: 'info',
+    title: "Tabela de despesas atualizada."
+  })
+}//InserirLinhaTabelaDespesa
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -694,5 +785,16 @@ $('#modal-editar-despesa').on('show.bs.modal', function (event) {
         console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
     });
   //Fim da requisição Ajax para enviar os dados para o banco de dados
+  
+})
+
+//Modal Quitar Despesa
+$('#modal-quitar-despesa').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var id = button.data('id') // Extract info from data-* attributes
+  var qtdeParcelas = button.data('qtdeparcelas')
+  var modal = $(this)
+  modal.find('#txtIdModalQuitarDespesaDP').val(id) // Passa o id salvo no botão para o campo id do modal
+  modal.find('#txtQtdeParcelasModalQuitarDespesaDP').val(qtdeParcelas)
   
 })
