@@ -40,11 +40,12 @@
         <!-- Corpo do Painel Principal -->
         <div class="d-flex align-items-center justify-content-between">
           <div>
+            <img src onerror='ListarDespesasMensal()'>
             <a type="button" href="<?php echo HOME_URI ?>despesas/incluir" class="btn btn-danger btn" role="button" data-toggle="tooltip" data-placement="top" title="Incluir Despesa">+<i class="fas fa-credit-card mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-warning btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-info btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
           </div>
-          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasMensal()"><i class="fas fa-circle mr-1"></i></button>
+          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasMensal()"><i class="fas fa-sync-alt mr-1"></i></button>
           <!-- <a type="button" href="<?php echo HOME_URI ?>finances" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Voltar"><i class="fas fa-reply mr-1"></i></a> -->
         </div>
         <p class="form_success"></p>
@@ -130,7 +131,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <p class="modal-title" id="myModalLabel">Quitar <strong>Despesa</strong>?</p>
+        <p class="modal-title" id="myModalLabel"><strong>Quitar Despesa?</strong></p>
         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -140,11 +141,17 @@
       <form id="formModalQuitarDespesaDP">
         
         <!-- Inputs Ocultos -->
-        <input class="" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
-        <input class="" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
-
+        <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
+        <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+        
+        <div id = "alert_placeholder"></div>
+        
         <div class="form-row">
-          <div class="form-group col-6">
+          <div class="form-group col-md-6">
+            <small class="mt-4"><strong>Data de Quitação:</strong></small>
+            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
+          </div>
+          <div class="form-group col-md-6">
             <small class="mt-4"><strong>Valor Quitado:</strong></small>
             <div class="input-group">
               <div class="input-group-prepend">
@@ -152,10 +159,6 @@
               </div>
               <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
             </div>
-          </div>
-          <div class="form-group col-6">
-            <small class="mt-4"><strong>Data de Quitação:</strong></small>
-            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
           </div>
         </div>
 

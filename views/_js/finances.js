@@ -528,6 +528,15 @@ function FormatarDataPadraoBrasileiro(data){
   return dataFormatada;
 }//FormatarDataPadraoBrasileiro
 
+//Retorna a data atual no padrão Americao YYYY-MM-DD (aceito pelos inputs tipo date)
+function DataAtual(){
+  var today = new Date();
+  var dy = today.getDate();
+  var mt = today.getMonth()+1;
+  var yr = today.getFullYear();
+  return yr+"-"+mt+"-"+dy;
+}//DataAtual
+
 //Recebe o valor no formato 1.222.222,56 e retorna no padrão 1222222.56
 function ConverterRealParaFloat(valor){
   if(valor === ""){
@@ -619,7 +628,10 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
 
 
 
+window.onload = function() {
+  alert("Carregou a página");
 
+};
 
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -658,15 +670,21 @@ function ListarDespesasMensal(){
       }
   })
   .done(function(msg){
-    //alert(msg.mensagem);
-    console.log(msg);
-    //Limpa a tabela de Despesas
-    $("#tabelaDespesasBodyDP tr").remove();
-    //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
-    for(var k in msg[0]) {
-      //console.log(k, msg[0][k]["descricao"]);
-      InserirLinhaTabelaDespesas(msg[0][k]);
+    if(msg.success == true){
+      //Limpa a tabela de Despesas
+      $("#tabelaDespesasBodyDP tr").remove();
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
+      for(var k in msg[0]) {
+        //console.log(k, msg[0][k]["descricao"]);
+        InserirLinhaTabelaDespesas(msg[0][k]);
+      }
+    }else{
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
     }
+    console.log(msg);
   })
   .fail(function(jqXHR, textStatus, msg){
     alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
@@ -708,7 +726,12 @@ function InserirLinhaTabelaDespesas(arrayDados){
   novaCelula.className = "hidden";
 
   novaCelula = novaLinha.insertCell(1);//Coluna Descrição
-  novaCelula.innerHTML = descricao;
+  if(quantidaDeParcelas > 1){
+    novaCelula.innerHTML = descricao+'<nobr><small class="text-muted"> ('+quantidaDeParcelas+'X)</small></nobr>';
+  }else{
+    novaCelula.innerHTML = descricao;
+  }
+  
   
   novaCelula = novaLinha.insertCell(2);//Coluna Valor
   if(quitado == 'SIM'){
@@ -735,7 +758,7 @@ function InserirLinhaTabelaDespesas(arrayDados){
   }else{
     acoes = '<nobr>';
     acoes += '<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modal-editar-despesa" data-id="'+id+'"><i class="fas fa-pen"></i></button>';
-    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
+    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valor="'+valorPendente+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
     acoes += '</nobr>';
   }
   novaCelula.innerHTML = acoes;
@@ -790,11 +813,21 @@ $('#modal-editar-despesa').on('show.bs.modal', function (event) {
 
 //Modal Quitar Despesa
 $('#modal-quitar-despesa').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget) // Button that triggered the modal
-  var id = button.data('id') // Extract info from data-* attributes
-  var qtdeParcelas = button.data('qtdeparcelas')
-  var modal = $(this)
+  let button = $(event.relatedTarget) // Button that triggered the modal
+  let id = button.data('id') // Extract info from data-* attributes
+  let qtdeParcelas = button.data('qtdeparcelas')
+  let valor = button.data('valor')
+  let modal = $(this)
   modal.find('#txtIdModalQuitarDespesaDP').val(id) // Passa o id salvo no botão para o campo id do modal
   modal.find('#txtQtdeParcelasModalQuitarDespesaDP').val(qtdeParcelas)
+  //Quando houver mais de 1 parcela na mesma despesa, informo ao usuaário que não será possível editar o valor de quitação, pois todas as parcelas serão quitadas
+  if(qtdeParcelas > 1){
+    let message = "<strong>Atenção</strong>, a despesa selecionada possui <strong>"+qtdeParcelas+"</strong> parcelas com o vencimento nesse mesmo mês, portanto elas foram agrupadas e o valor de quitação não pode ser alterado. Caso seja necessário alterar o valor de quitação, clique em editar despesa e altere o valor conforme desejar."
+    $('#alert_placeholder').append('<div id="alertdiv" class="alert alert-info"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+    modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valor).attr('readonly', true);
+  }else{
+    modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valor).attr('readonly', false);
+  }
+  modal.find('#txtDataQuitacaoModalQuitarDespesaDP').val(DataAtual());
   
 })
