@@ -57,6 +57,12 @@
             elseif($requisicao == "listarDespesasMensal"){
                 $this->ListarDespesasMensal();
             }
+            elseif($requisicao == "quitarDespesa"){
+                $this->QuitarDespesa();
+            }
+            elseif($requisicao == "estornarDespesa"){
+                $this->EstornarDespesa();
+            }
         }//DistribuirRequisicao
 
         /**
@@ -460,8 +466,8 @@
             require '../conexao.php';
             //Recebe os dados via POST
             $userID = $_POST['userID'];
-            $mes = $_POST['mes'];
-            $ano = $_POST['ano'];
+            $dataReferencia = $_POST['dataReferencia'];
+            $dataReferencia = $dataReferencia.'-01';
 
             //Faz uma consulta para retornar um array com todas as despesas listadas
             try{
@@ -470,12 +476,14 @@
                     SUM(COALESCE(fn_despesas_parcelas.valorpendente,0)) AS valorpendente,
                     SUM(COALESCE(fn_despesas_parcelas.valorquitado,0)) AS valorquitado,
                     fn_despesas_parcelas.quitado,
+                    fn_despesas_parcelas.vencimento,
+                    fn_despesas_parcelas.quitacao,
                     COUNT(fn_despesas_parcelas.ID) AS quantidadeparcelas
                 FROM fn_despesas_parcelas
                     INNER JOIN fn_despesas ON fn_despesas_parcelas.fn_despesas_id = fn_despesas.id
-                WHERE usuarios_id = 62
-                    AND DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('2021-12-25', '%Y-%m')
-                GROUP BY fn_despesas.id, fn_despesas.descricao, Fn_despesas_parcelas.quitado
+                WHERE usuarios_id = {$userID}
+                    AND DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
+                GROUP BY fn_despesas.id, fn_despesas.descricao, Fn_despesas_parcelas.quitado, fn_despesas_parcelas.vencimento, fn_despesas_parcelas.quitacao
                 ORDER BY fn_despesas.descricao ASC";
 
                 $consulta =  $db_con->query($sql);
@@ -497,6 +505,95 @@
                 exit;
             }
         }//ListarDespesasMensal
+
+        /**
+         * Quita Despesa
+         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento, quitacao, valorQuitado
+         */
+        public function QuitarDespesa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $idDespesa = $_POST['idDespesa'];
+            $qtdeParcelas = $_POST['qtdeParcelas'];
+            $vencimento = $_POST['vencimento'];
+            $quitacao = $_POST['quitacao'];
+            $valorQuitado = $_POST['valorQuitado'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                if(intval($qtdeParcelas) > 1){
+                    $sql = "UPDATE fn_despesas_parcelas SET
+                        valorquitado = valorpendente,
+                        quitado = 'SIM',
+                        quitacao = '{$quitacao}'
+                    WHERE fn_despesas_id = {$idDespesa}
+                        AND vencimento = '{$vencimento}'";
+                }else{
+                    $sql = "UPDATE fn_despesas_parcelas SET
+                        valorquitado = '{$valorQuitado}',
+                        quitado = 'SIM',
+                        quitacao = '{$quitacao}'
+                    WHERE fn_despesas_id = {$idDespesa}
+                        AND vencimento = '{$vencimento}'";
+                }
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao quitar despesa - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesa quitada com sucesso!");
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao quitar despesa - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//QuitarDespesa
+
+        /**
+         * Estorna Despesa
+         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento
+         */
+        public function EstornarDespesa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $idDespesa = $_POST['idDespesa'];
+            $qtdeParcelas = $_POST['qtdeParcelas'];
+            $vencimento = $_POST['vencimento'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "UPDATE fn_despesas_parcelas SET
+                    valorquitado = NULL,
+                    quitado = 'NÃO',
+                    quitacao = NULL
+                WHERE fn_despesas_id = {$idDespesa}
+                    AND vencimento = '{$vencimento}'";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao estornar despesa - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesa estornada com sucesso!");
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao estornar despesa - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//EstornarDespesa
 
         public function tempo_corrido($time) {
 

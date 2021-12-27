@@ -33,7 +33,10 @@ google.charts.load('current', {'packages':['corechart']});
         ]);
 
         var options = {
-          title: 'Despesas Mensal'
+          title: 'Despesas Mensal',
+          legend: { position: 'bottom', alignment: 'midlle' },
+          is3D:true,
+          height:400,
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('grafico-despesas'));

@@ -19,17 +19,6 @@
 
     <!-- Painel do Painel Principal -->
     <div class="card shadow mb-4">
-
-      <?php
-        // Lista os dados
-        $lista_despesas = $modelo->listar_despesas($parametros);
-        $lista_total = $modelo->listar_total_despesas($parametros);
-        // Crrega os métodos que alteram os dados
-        $modelo->excluir_despesa();
-        $modelo->incluir_despesa(); //Mesmo método utilizado para incluir e editar
-        $modelo->quitar_despesa();
-        $modelo->estornar_despesa();
-      ?>
       <div class="card-header d-flex justify-content-between">
         <div><i class="fas fa-chart-area mr-1"></i>Análise Mensal</div>
         <div class="col-lg-3 col-md-4 col-6">
@@ -42,8 +31,8 @@
         <div class="d-flex align-items-center justify-content-between">
           <div>
             <a type="button" href="<?php echo HOME_URI ?>despesas/incluir" class="btn btn-danger btn" role="button" data-toggle="tooltip" data-placement="top" title="Incluir Despesa">+<i class="fas fa-credit-card mr-1"></i></a>
-            <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-warning btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
-            <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-info btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
+            <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
+            <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
           </div>
           <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasMensal()"><i class="fas fa-sync-alt mr-1"></i></button>
           <!-- <a type="button" href="<?php echo HOME_URI ?>finances" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Voltar"><i class="fas fa-reply mr-1"></i></a> -->
@@ -70,6 +59,7 @@
                   <tr>
                     <th class="hidden">ID</th>
                     <th>Descrição</th>
+                    <th>Vencimento</th>
                     <th>Valor</th>
                     <th class="hidden">Quitado</th>
                     <th class="hidden">Qtde Parcelas</th>
@@ -91,11 +81,15 @@
           </div>
 
         </div>
-        <!-- FIM Corpo do Painel Principal -->
+      <!-- FIM Corpo do Painel Principal -->
       </div>
-    </div>
+      <div class="card-footer bg-dark text-white text-center">
+        <h3>Total: <strong id="totalDespesasMensalDP"></strong></h3>
+      </div>
 
+    </div>
     <!-- Fim do Painel Principal -->
+
   </div>
 </main>
 
@@ -111,37 +105,37 @@
         </button>
       </div>
       <div class="modal-body modalDeleteAlinhar">
-        <!--Corpo do modal-->
-        <form id="formModalQuitarDespesaDP">
+      <!--Corpo do modal-->
+      <form id="formModalQuitarDespesaDP">
 
-          <!-- Inputs Ocultos -->
-          <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
-          <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+        <!-- Inputs Ocultos -->
+        <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
+        <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+        <input class="hidden" type="text" id="txtVencimentoModalQuitarDespesaDP" name="txtVencimentoQuitarDespesaDP" value="">
 
-          <div id="alert_placeholder"></div>
+        <div id="alert_placeholder"></div>
 
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <small class="mt-4"><strong>Data de Quitação:</strong></small>
-              <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
-            </div>
-            <div class="form-group col-md-6">
-              <small class="mt-4"><strong>Valor Quitado:</strong></small>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">R$</div>
-                </div>
-                <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <small class="mt-4"><strong>Data de Quitação:</strong></small>
+            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
+          </div>
+          <div class="form-group col-md-6">
+            <small class="mt-4"><strong>Valor Quitado:</strong></small>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">R$</div>
               </div>
+              <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
             </div>
           </div>
-
-          <!--FIM Corpo do modal-->
+        </div>
+      <!--FIM Corpo do modal-->
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-success" name="btnQuitarModalQuitarDespesaDP" value="btnQuitarModalQuitarDespesaDP">Quitar</button>
+        <button type="submit" class="btn btn-success" id="btnQuitarModalQuitarDespesaDP">Quitar</button>
       </div>
       </form>
 
@@ -150,308 +144,47 @@
 </div>
 <!--FIM do modal Quitar-->
 
-<!--Modal Editar -->
-<div class="modal fade" id="modal-editar-despesa" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
-  <div class="modal-dialog  modal-lg" role="document">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <p class="modal-title" id="myModalLabel">Editar Despesa</p>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <!--Corpo do modal-->
-        <form enctype="multipart/form-data" method="post" action="">
-
-          <input class="" type="text" id="modal-editar-id" name="id" value="">
-
-          <div class="form-row">
-            <div class="form-group col-md-12">
-              <small class="mt-4"><strong>Descrição:</strong></small>
-              <input type="text" class="form-control text-capitalize" id="NDdescricao" name="NDdescricao" value="" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Valor:</strong></small>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">R$</div>
-                </div>
-                <input type="text" class="form-control mask-money" id="NDvalor" name="NDvalor" value="" required>
-
-              </div>
-            </div>
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Vencimento:</strong></small>
-              <input type="date" class="form-control" id="NDvencimento" name="NDvencimento" value="" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="NDfixo" id="NDfixo">
-              <label class="form-check-label" for="NDfixo">
-                <small class="mt-4"><strong>Despesa Fixa</strong></small>
-              </label>
-            </div>
-          </div>
-
-          <!--FIM Corpo do modal-->
-      </div>
-
-      <div class="modal-footer d-flex align-items-center justify-content-between">
-        <button type="submit" class="btn btn-danger" name="excluirDespesaBTN" value="excluirDespesa"><i class="fas fa-trash"></i></button>
-
-        <div>
-          <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-success" name="incluirDespesaBTN" value="incluirDespesa">Salvar</button>
-        </div>
-      </div>
-      </form>
-
-    </div>
-  </div>
-</div>
-<!--Fim Modal Editar -->
-
-<!--Modal Add Despesa-->
-<div class="modal fade" id='add-despesa' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog  modal-lg" role="document">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <p class="modal-title" id="myModalLabel">Nova Despesa</p>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <!--Corpo do modal-->
-        <form enctype="multipart/form-data" method="post" action="">
-
-          <div class="form-row">
-            <div class="form-group col-md-12">
-              <small class="mt-4"><strong>Descrição:</strong></small>
-              <input type="text" class="form-control text-capitalize" id="NDdescricao" name="NDdescricao" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-5">
-              <small class="mt-4"><strong>Valor:</strong></small>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">R$</div>
-                </div>
-                <input type="text" class="form-control mask-money" id="NDvalor" name="NDvalor" value="" required>
-              </div>
-            </div>
-            <div class="form-group col-5">
-              <small class="mt-4"><strong>Vencimento:</strong></small>
-              <input type="date" class="form-control" id="NDvencimento" name="NDvencimento" value="" required>
-            </div>
-            <div class="form-group col-2">
-              <small class="mt-4"><strong>Parcelas:</strong></small>
-              <input id="NDparcelas" name="NDparcelas" type="number" class="form-control" value="1" required />
-            </div>
-          </div>
-
-          <!-- Não utilizado-->
-          <div class="col-md-2 hidden">
-            <div class="form-group">
-              <small class="mt-4"><strong>Entrada:</strong></small>
-              <input id="valorPago" name="valorPago" type="text" class="form-control moeda" value="0" required />
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="form-group col-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="NDfixo" id="NDfixo">
-                <label class="form-check-label" for="NDfixo">
-                  <small class="mt-4"><strong>Despesa Fixa</strong></small>
-                </label>
-              </div>
-            </div>
-            <!-- Botão de Calcular-->
-            <div class="col-6 text-right">
-              <small class="mt-4"><strong></strong></small>
-              <button type="button" id="calcular" class="btn btn-info">Gerar Parcelas</button>
-            </div>
-          </div>
-
-          <!--Tabela que mostra as parcelas geradas-->
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="clearfix form-actions">
-                <div class="table-responsive">
-                  <table class="table table-sm display compact table-hover table-bordered" id="tabelaParcelas" width="100%" cellspacing="0">
-                    <thead class="thead-light">
-                      <tr>
-                        <th>Parcela</th>
-                        <th>Data</th>
-                        <th>Valor</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          <!--FIM Corpo do modal-->
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
-        <!-- <button type="submit" class="btn btn-success" name="incluirDespesaBTN" value="incluirDespesa">Salvar</button>  -->
-        <button type="button" class="btn btn-success" id="incluirDespesaBTN" value="incluirDespesa">Salvar</button>
-      </div>
-      </form>
-
-    </div>
-  </div>
-</div>
-<!--Fim Modal Add Despesa -->
-
-<!--Modal Add Conta à Receber-->
-<div class="modal fade" id='add-conta-a-receber' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog  modal-lg" role="document">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <p class="modal-title" id="myModalLabel">Conta à Receber</p>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <!--Corpo do modal-->
-        <form enctype="multipart/form-data" method="post" action="">
-
-          <div class="form-row">
-            <div class="form-group col-md-12">
-              <small class="mt-4"><strong>Descrição:</strong></small>
-              <input type="text" class="form-control" id="NDdescricao" name="NDdescricao" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Valor:</strong></small>
-              <div class="input-group">
-                <input type="text" class="form-control mask-money" id="NDvalor" name="NDvalor" value="">
-                <div class="input-group-append">
-                  <div class="input-group-text">R$</div>
-                </div>
-              </div>
-            </div>
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Vencimento:</strong></small>
-              <input type="date" class="form-control" id="NDvencimento" name="NDvencimento" value="">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="NDfixo" id="NDfixo">
-              <label class="form-check-label" for="NDfixo">
-                <small class="mt-4"><strong>Despesa Fixa</strong></small>
-              </label>
-            </div>
-          </div>
-
-          <!--FIM Corpo do modal-->
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-success">Salvar</button>
-      </div>
-      </form>
-
-    </div>
-  </div>
-</div>
-<!--FIM Modal Add Conta à Receber-->
-
 <!--Modal Estornar-->
-<div class="modal fade" id='modal-estornar' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id='modal-estornar-despesa' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog  modal-lg" role="document">
     <div class="modal-content">
 
       <div class="modal-header">
-        <p class="modal-title" id="myModalLabel">Estornar <strong><?php echo $fetch_userdata['descricao'] ?></strong>?</p>
+        <p class="modal-title" id="myModalLabel"><strong>Estornar Despesa?</strong></p>
         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <!--Corpo do modal-->
-        <form enctype="multipart/form-data" method="post" action="">
+        <form id="formModalEstornarDespesaDP">
 
-          <input class="" type="text" id="modal-estornar-id" name="id" value="">
+          <!-- Inputs Ocultos -->
+          <input class="hidden" type="text" id="txtIdModalEstornarDespesaDP" name="txtIdModalEstornarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtQtdeParcelasModalEstornarDespesaDP" name="txtQtdeParcelasModalEstornarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtVencimentoModalEstornarDespesaDP" name="txtVencimentoModalEstornarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtValorPendenteModalEstornarDespesaDP" name="txtVencimentoModalEstornarDespesaDP" value="">
 
           <div class="form-row">
             <div class="form-group col-md-12">
               <small class="mt-4"><strong>Descrição:</strong></small>
-              <input type="text" class="form-control" id="NDdescricao" name="NDdescricao" required value="<?php echo $fetch_userdata['descricao'] ?>" readonly>
+              <input type="text" class="form-control" id="txtDescricaoModalEstornarDespesaDP" name="txtDescricaoModalEstornarDespesaDP" required value="" readonly>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Valor Pendente:</strong></small>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">R$</div>
-                </div>
-                <input type="text" class="form-control mask-money" id="NDvalor" name="NDvalor" value="<?php echo $modelo->formatar_valor($fetch_userdata['valorpendente']); ?>" readonly>
-
-              </div>
+            <div class="form-group col-lg-6">
+              <small class="mt-4"><strong>Data de Quitação:</strong></small>
+              <input type="date" class="form-control" id="txtQuitacaoModalEstornarDespesaDP" name="txtQuitacaoModalEstornarDespesaDP" value="" readonly>
             </div>
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Vencimento:</strong></small>
-              <input type="date" class="form-control" id="NDvencimento" name="NDvencimento" value="<?php echo $modelo->formatar_data($fetch_userdata['vencimento']); ?>" readonly>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="NDfixo" id="NDfixo" <?php if ($fetch_userdata['fixo'] == "SIM") {
-                                                                                          echo "checked";
-                                                                                        } ?> disabled>
-              <label class="form-check-label" for="NDfixo">
-                <small class="mt-4"><strong>Despesa Fixa</strong></small>
-              </label>
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="form-row">
-            <div class="form-group col-6">
+            <div class="form-group col-lg-6">
               <small class="mt-4"><strong>Valor Quitado:</strong></small>
               <div class="input-group">
                 <div class="input-group-prepend">
                   <div class="input-group-text">R$</div>
                 </div>
-                <input type="text" class="form-control mask-money" id="QDvalorquitado" name="QDvalorquitado" value="<?php echo $modelo->formatar_valor($fetch_userdata['valorpendente']); ?>" readonly>
+                <input type="text" class="form-control mask-money" id="txtQuitadoModalEstornarDespesaDP" name="txtQuitadoModalEstornarDespesaDP" value="" readonly>
               </div>
-            </div>
-            <div class="form-group col-6">
-              <small class="mt-4"><strong>Data de Quitação:</strong></small>
-              <input type="date" class="form-control" id="QDquitacao" name="QDquitacao" value="<?php echo $modelo->formatar_data($fetch_userdata['quitacao']); ?>" readonly>
             </div>
           </div>
 
@@ -460,7 +193,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-danger" name="estornarDespesaBTN" value="estornarDespesa">Estornar</button>
+        <button type="submit" class="btn btn-danger" id="btnEstornarModalEstornarDespesaDP">Estornar</button>
       </div>
       </form>
 

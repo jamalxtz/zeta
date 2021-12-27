@@ -128,3 +128,6 @@ border: 1px dashed red !important;
     min-height: 450px;
   }
  
+.texto-riscado{
+    text-decoration: line-through;
+}

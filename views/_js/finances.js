@@ -1,4 +1,4 @@
-//#region DECLARAÇÃO DE VARIÁVEIS--------------------------------------------------------------------------------------
+//#region DECLARAÇÃO DE VARIÁVEIS E FUNÇÕES GLOBAIS--------------------------------------------------------------------
 
 //Configura um mini alerta do plugin sweetalert2 (https://sweetalert2.github.io/#examples), que é exibido através da função:
 // Toast.fire({
@@ -16,6 +16,16 @@ const Toast = Swal.mixin({
     toast.addEventListener('mouseleave', Swal.resumeTimer)
   }
 })
+
+window.onload = function() {
+  //Verifica qual página está sendo carregada (existe um input em cada página com o nome dela no value)
+  if ( $('#pagina').val() == "despesas"){
+    //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
+    $('#txtDataReferenciaDP').val("2021-12");
+
+    ListarDespesasMensal();
+  }
+};
 
 //#endregion
 
@@ -518,6 +528,17 @@ function FormataDataPadraoAmericano(data) {
   // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
 }//FormataDataPadraoAmericano
 
+//Recebe a data no formato YYYY-MM-DD HH:MM:SS e retorna no padrão YYYY-MM-DD aceita pelos inputs do tipo date
+function FormataDataBancoDeDadosParaInput(data) {
+  data = data.substring(0, 10);
+  var ano  = data.split("-")[0];
+  var mes  = data.split("-")[1];
+  var dia  = data.split("-")[2];
+
+  return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
+  // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
+}//FormataDataBancoDeDadosParaInput
+
 //Recebe a data no formato YYYY-MM-DD e retorna no padrão DD/MM/AAAA 
 function FormatarDataPadraoBrasileiro(data){
   //Troca os traços por vírgulas
@@ -542,6 +563,7 @@ function ConverterRealParaFloat(valor){
   if(valor === ""){
       valor =  0;
   }else{
+      // valor = valor.replace("R$ ","");
       valor = valor.replace(".","");
       valor = valor.replace(",",".");
       valor = parseFloat(valor);
@@ -626,20 +648,7 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
 //#endregion
 
 
-
-
-window.onload = function() {
-  //Verifica qual página está sendo carregada (existe um input em cada página com o nome dela no value)
-  if ( $('#pagina').val() == "despesas"){
-    //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
-    $('#txtDataReferenciaDP').val("2021-12");
-
-    ListarDespesasMensal();
-  }
-};
-
-
-//-----------------------------------------------------------------------------------------------------------------
+//#region LISTAR DESPESAS E FUNÇÕES EXECUTADAS NA TELA DE DESPESAS-----------------------------------------------------
 
 //Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
 function ListarDespesasMensal(){
@@ -658,9 +667,6 @@ function ListarDespesasMensal(){
     return;
   }
 
-  let mes = "12";
-  let ano = "2021" 
-
   //Requisição Ajax para enviar os dados para o banco de dados
   $.ajax({
       url : url,
@@ -668,8 +674,7 @@ function ListarDespesasMensal(){
       data : {
       requisicao : requisicao,
       userID : userID,
-      mes : mes,  
-      ano : ano,    
+      dataReferencia : dataReferencia,      
     },
       dataType: 'json',
       beforeSend : function(){
@@ -685,12 +690,16 @@ function ListarDespesasMensal(){
         //console.log(k, msg[0][k]["descricao"]);
         InserirLinhaTabelaDespesas(msg[0][k]);
         //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de despesas
-        totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
-        totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+        if(msg[0][k]["quitado"] == "SIM"){
+          totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+        }else{
+          totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+        }
       }
       //Exibe os totais no rodapé da tabela de despesas
       $("#idTotalPendente").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
       $("#idTotalQuitado").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
+      $("#totalDespesasMensalDP").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes + totalDespesasQuitadas,true));
     }else{
       Toast.fire({
         icon: 'error',
@@ -714,24 +723,27 @@ function InserirLinhaTabelaDespesas(arrayDados){
   //Captura os valores do array
   let id = arrayDados["id"];
   let descricao = arrayDados["descricao"];
+  let vencimento = arrayDados["vencimento"];
   let valorPendente = arrayDados["valorpendente"];
   let valorQuitado = arrayDados["valorquitado"];
   let quitado = arrayDados["quitado"];
+  let quitacao = arrayDados["quitacao"];
   let quantidaDeParcelas = arrayDados["quantidadeparcelas"];
   let valor;
   let acoes;
 
   //Formata as datas e valores para o padrão brasileiro
   valorPendente = parseFloat(valorPendente);
-  valorPendente = ConverterValorParaRealBrasileiro(valorPendente,true)
   valorQuitado = parseFloat(valorQuitado);
-  valorQuitado = ConverterValorParaRealBrasileiro(valorQuitado,true)
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
 
   if(quitado == 'SIM'){
     valor = valorQuitado;
   }else{
     valor = valorPendente;
   }
+
+  valor = ConverterValorParaRealBrasileiro(valor,true);
 
   //Insere os valores na tabela
   novaCelula = novaLinha.insertCell(0); //Coluna ID
@@ -740,13 +752,19 @@ function InserirLinhaTabelaDespesas(arrayDados){
 
   novaCelula = novaLinha.insertCell(1);//Coluna Descrição
   if(quantidaDeParcelas > 1){
-    novaCelula.innerHTML = descricao+'<nobr><small class="text-muted"> ('+quantidaDeParcelas+'X)</small></nobr>';
+    novaCelula.innerHTML = '<nobr>'+descricao+'<small class="text-muted"> ('+quantidaDeParcelas+'X)</small></nobr>';
   }else{
-    novaCelula.innerHTML = descricao;
+    novaCelula.innerHTML = '<nobr>'+descricao+'</nobr>';
   }
+  if(quitado == 'SIM'){
+    novaCelula.className = "texto-riscado";
+  }
+
+  novaCelula = novaLinha.insertCell(2);//Coluna Vencimento
+  novaCelula.innerHTML = vencimento;
+  novaCelula.className = "text-muted";
   
-  
-  novaCelula = novaLinha.insertCell(2);//Coluna Valor
+  novaCelula = novaLinha.insertCell(3);//Coluna Valor
   if(quitado == 'SIM'){
     novaCelula.innerHTML = '<strong>'+valor+'</strong>';
   }else{
@@ -754,63 +772,75 @@ function InserirLinhaTabelaDespesas(arrayDados){
     novaCelula.className = "text-muted";
   }
   
-  novaCelula = novaLinha.insertCell(3);//Coluna Quitado
+  novaCelula = novaLinha.insertCell(4);//Coluna Quitado
   novaCelula.innerHTML = quitado;
   novaCelula.className = "hidden";
 
-  novaCelula = novaLinha.insertCell(4);//Coluna Quantidade Parcelas
+  novaCelula = novaLinha.insertCell(5);//Coluna Quantidade Parcelas
   novaCelula.innerHTML = quantidaDeParcelas;
   novaCelula.className = "hidden";
   
-  novaCelula = novaLinha.insertCell(5);//Coluna Ações
+  novaCelula = novaLinha.insertCell(6);//Coluna Ações
   if(quitado == 'SIM'){
     acoes = '<nobr>';
     acoes += '<button class="btn btn-info btn-sm" disabled><i class="fas fa-pen"></i></button>';
-    acoes += '<a href="" class="btn btn-secondary btn-sm" role="button" data-toggle="modal" id="modal-estornar-despesa" data-id="'+id+'"><strong class="ml-1 mr-1">E</strong></a>';
+    acoes += '<a href="" class="btn btn-secondary btn-sm" role="button" data-toggle="modal" data-target="#modal-estornar-despesa" data-id="'+id+'" data-descricao="'+descricao+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-valorquitado="'+valorQuitado+'" data-vencimento="'+vencimento+'" data-quitacao="'+quitacao+'"><strong class="ml-1 mr-1">E</strong></a>';
     acoes += '</nobr>';
   }else{
     acoes = '<nobr>';
     acoes += '<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modal-editar-despesa" data-id="'+id+'"><i class="fas fa-pen"></i></button>';
-    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valor="'+valorPendente+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
+    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-vencimento="'+vencimento+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
     acoes += '</nobr>';
   }
   novaCelula.innerHTML = acoes;
   novaCelula.className = "text-center";
 
   //Exibe mensagem
-  Toast.fire({
-    icon: 'info',
-    title: "Tabela de despesas atualizada."
-  })
+  // Toast.fire({
+  //   icon: 'info',
+  //   title: "Tabela de despesas atualizada."
+  // })
 }//InserirLinhaTabelaDespesa
 
-//Função utilizada para quitar despesa
+//Carrega o Modal Quitar Despesa
+$('#modal-quitar-despesa').on('show.bs.modal', function (event) {
+  let button = $(event.relatedTarget) // Button that triggered the modal
+  let id = button.data('id') // Extract info from data-* attributes
+  let qtdeParcelas = button.data('qtdeparcelas')
+  let valorPendente = button.data('valorpendente')
+  valorPendente = ConverterValorParaRealBrasileiro(valorPendente, false);
+  let vencimento = button.data('vencimento')
+  let modal = $(this)
+  modal.find('#txtIdModalQuitarDespesaDP').val(id) // Passa o id salvo no botão para o campo id do modal
+  modal.find('#txtQtdeParcelasModalQuitarDespesaDP').val(qtdeParcelas)
+  modal.find('#txtVencimentoModalQuitarDespesaDP').val(vencimento)
+  //Quando houver mais de 1 parcela na mesma despesa, informo ao usuário que não será possível editar o valor de quitação, pois todas as parcelas serão quitadas
+  if(qtdeParcelas > 1){
+    let message = "<strong>Atenção</strong>, a despesa selecionada possui <strong>"+qtdeParcelas+"</strong> parcelas com o vencimento na mesma data, portanto elas foram agrupadas e o valor de quitação não pode ser alterado. Caso seja necessário alterar o valor de quitação, clique em editar despesa e altere o valor conforme desejar."
+    $('#alert_placeholder').append('<div id="alertdiv" class="alert alert-info"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+    modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valorPendente).attr('readonly', true);
+  }else{
+    modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valorPendente).attr('readonly', false);
+    $('#alert_placeholder').remove();
+  }
+  modal.find('#txtDataQuitacaoModalQuitarDespesaDP').val(DataAtual());
+})//Carrega o Modal Quitar Despesa
+
+//Quitar Despesa
 $("#formModalQuitarDespesaDP").on("submit", function (event) { 
   event.preventDefault();
 
   let url = $('#idURL').val();
   let requisicao = "quitarDespesa";
   let userID = $('#userID').val(); // ID do usuário logado
+  let idDespesa = $('#txtIdModalQuitarDespesaDP').val();
+  let qtdeParcelas = $("#txtQtdeParcelasModalQuitarDespesaDP").val();
+  let vencimento = $("#txtVencimentoModalQuitarDespesaDP").val();
+  let quitacao = $("#txtDataQuitacaoModalQuitarDespesaDP").val();
+  let valorQuitado = $('#txtValorQuitadoModalQuitarDespesaDP').val();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  trabalhar aqui amanfa-flip-horizontal
-
-  
-  let descricao = $("#txtDescricaoCategoriaNC").val();
-  let tipo =  $("#selTipoCategoriaNC").val();
+  valorQuitado = ConverterRealParaFloat(valorQuitado);
+  vencimento = FormataDataPadraoAmericano(vencimento);
 
   //Requisição Ajax para enviar os dados para o banco de dados
   $.ajax({
@@ -819,104 +849,138 @@ $("#formModalQuitarDespesaDP").on("submit", function (event) {
     data : {
       requisicao : requisicao,
       userID : userID,  
-      descricao : descricao,
-      tipo : tipo,    
+      idDespesa : idDespesa,
+      qtdeParcelas : qtdeParcelas,
+      vencimento : vencimento,   
+      quitacao : quitacao,  
+      valorQuitado : valorQuitado,
     },
     dataType: 'json',
     beforeSend : function(){
-      //alert(requisicao+" \n "+ url );
+      //alert(vencimento);
     }
   })
   .done(function(msg){
     //alert(msg.mensagem);
     if (msg.success == true){
       //Fecha o modal
-      $('#modalCadastrarCategoria').modal('toggle');
+      $('#modal-quitar-despesa').modal('hide');
 
-      $('select').append($('<option>', {
-        value: msg[0].id,
-        text: descricao
-      }));
+      ListarDespesasMensal();
+
       //Exibe mensagem
       Toast.fire({
         icon: 'success',
         title: msg.mensagem
       })
+     
     }else{
       //Exibe mensagem
       Toast.fire({
         icon: 'error',
         title: msg.mensagem
       })
+      console.log(msg.mensagem);
     }
   })
   .fail(function(jqXHR, textStatus, msg){
-    alert("Erro ao cadastrar categoria: "+"\n"+jqXHR.responseText);
-    console.log("Erro ao cadastrar categoria: "+"\n"+jqXHR);
+    alert("Erro ao quitar despesa: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao quitar despesa: "+"\n"+jqXHR);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
-
 
   //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
   return false;
-}); //FIM da função cadastrar uma nova categoria
+}); //FIM da função Quitar Despesa
 
-//-----------------------------------------------------------------------------------------------------------------
+//Carrega o Modal Estornar Despesa
+$('#modal-estornar-despesa').on('show.bs.modal', function (event) {
+  //Coleta os dados informados no botão que chama o modal data-* attributes
+  let button = $(event.relatedTarget); // Button that triggered the modal
+  let id = button.data('id'); // Extract info from data-* attributes
+  let qtdeParcelas = button.data('qtdeparcelas');
+  let vencimento = button.data('vencimento');
+  let valorPendente = button.data('valorpendente');
 
-$('#modal-editar-despesa').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget) // Button that triggered the modal
-  var recipient = button.data('id') // Extract info from data-* attributes
-  var modal = $(this)
-  modal.find('#modal-editar-id').val(recipient) // Passa o id salvo no botão para o campo id do modal
-  
+  let descricao = button.data('descricao');
+  let quitacao = button.data('quitacao');
+  let valorQuitado = button.data('valorquitado');
+  //Formata os valores coletados
+  valorPendente = ConverterValorParaRealBrasileiro(valorPendente, false);
+  quitacao = FormataDataBancoDeDadosParaInput(quitacao);
+  valorQuitado = ConverterValorParaRealBrasileiro(valorQuitado, false);
+  //Preenche os dados coletados no modal
+  let modal = $(this);
+  modal.find('#txtIdModalEstornarDespesaDP').val(id);
+  modal.find('#txtQtdeParcelasModalEstornarDespesaDP').val(qtdeParcelas);
+  modal.find('#txtVencimentoModalEstornarDespesaDP').val(vencimento);
+  modal.find('#txtValorPendenteModalEstornarDespesaDP').val(valorPendente);
+
+  modal.find('#txtDescricaoModalEstornarDespesaDP').val(descricao);
+  modal.find('#txtQuitacaoModalEstornarDespesaDP').val(quitacao);
+  modal.find('#txtQuitadoModalEstornarDespesaDP').val(valorQuitado);
+})//Carrega o Modal Estornar Despesa
+
+//Estornar Despesa
+$("#formModalEstornarDespesaDP").on("submit", function (event) { 
+  event.preventDefault();
+
   let url = $('#idURL').val();
-  let varFuncao = "buscarDadosDespesa";
-  let id = $('#modal-editar-id').val(); // ID da despesa
+  let requisicao = "estornarDespesa";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataParametro = $('#dataParametro').val(); // Data em que está cadastrada a despesa
-  //alert(url);
-  //Requisição Ajax para enviar os dados para o banco de dados
-    $.ajax({
-         url : url,
-         type : 'post',
-         data : {
-              varFuncao : varFuncao,
-              id : id, 
-              userID : userID,
-              dataParametro : dataParametro,         
-         },
-         dataType: 'json',
-         beforeSend : function(){
-            //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
-         }
-    })
-    .done(function(msg){
-        console.log(msg.mensagem);
-    })
-    .fail(function(jqXHR, textStatus, msg){
-        alert("Erro no retorno de dados: "+textStatus+"\n"+msg);
-        console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
-    });
-  //Fim da requisição Ajax para enviar os dados para o banco de dados
-  
-})
+  let idDespesa = $('#txtIdModalEstornarDespesaDP').val();
+  let qtdeParcelas = $("#txtQtdeParcelasModalEstornarDespesaDP").val();
+  let vencimento = $("#txtVencimentoModalEstornarDespesaDP").val();
 
-//Modal Quitar Despesa
-$('#modal-quitar-despesa').on('show.bs.modal', function (event) {
-  let button = $(event.relatedTarget) // Button that triggered the modal
-  let id = button.data('id') // Extract info from data-* attributes
-  let qtdeParcelas = button.data('qtdeparcelas')
-  let valor = button.data('valor')
-  let modal = $(this)
-  modal.find('#txtIdModalQuitarDespesaDP').val(id) // Passa o id salvo no botão para o campo id do modal
-  modal.find('#txtQtdeParcelasModalQuitarDespesaDP').val(qtdeParcelas)
-  //Quando houver mais de 1 parcela na mesma despesa, informo ao usuaário que não será possível editar o valor de quitação, pois todas as parcelas serão quitadas
-  if(qtdeParcelas > 1){
-    let message = "<strong>Atenção</strong>, a despesa selecionada possui <strong>"+qtdeParcelas+"</strong> parcelas com o vencimento nesse mesmo mês, portanto elas foram agrupadas e o valor de quitação não pode ser alterado. Caso seja necessário alterar o valor de quitação, clique em editar despesa e altere o valor conforme desejar."
-    $('#alert_placeholder').append('<div id="alertdiv" class="alert alert-info"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
-    modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valor).attr('readonly', true);
-  }else{
-    modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valor).attr('readonly', false);
-  }
-  modal.find('#txtDataQuitacaoModalQuitarDespesaDP').val(DataAtual());
-  
-})//Modal Quitar Despesa
+  vencimento = FormataDataPadraoAmericano(vencimento);
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      idDespesa : idDespesa,
+      qtdeParcelas : qtdeParcelas,
+      vencimento : vencimento,   
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(vencimento);
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      //Fecha o modal
+      $('#modal-estornar-despesa').modal('hide');
+
+      ListarDespesasMensal();
+
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+     
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+      console.log(msg.mensagem);
+    }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao estornar despesa: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao estornar despesa: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função Estornar Despesa
+
+//#endregion
+
+
