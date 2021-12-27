@@ -15,7 +15,7 @@
     <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
-    <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="horta">
+    <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="despesas">
 
     <!-- Painel do Painel Principal -->
     <div class="card shadow mb-4">
@@ -32,15 +32,15 @@
       ?>
       <div class="card-header d-flex justify-content-between">
         <div><i class="fas fa-chart-area mr-1"></i>Análise Mensal</div>
-        <div class="col-lg-3 col-md-4 col-6"> <!--form-control-->
-          <input type="month" class="form-control form-control-sm" id="dataReferencia" name="dataReferencia" value="">
+        <div class="col-lg-3 col-md-4 col-6">
+          <!--form-control-->
+          <input type="month" class="form-control form-control-sm" id="txtDataReferenciaDP" name="txtDataReferenciaDP" value="">
         </div>
       </div>
       <div class="card-body">
         <!-- Corpo do Painel Principal -->
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <img src onerror='ListarDespesasMensal()'>
             <a type="button" href="<?php echo HOME_URI ?>despesas/incluir" class="btn btn-danger btn" role="button" data-toggle="tooltip" data-placement="top" title="Incluir Despesa">+<i class="fas fa-credit-card mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-warning btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-info btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
@@ -55,73 +55,47 @@
 
           <div class="col-xl-6">
             <!--Painel de Despesas-->
-            <div class="card mb-4">
-              <div class="card-header d-flex align-items-center justify-content-between">
-                <span><i class="fas fa-chart-bar mr-1"></i>Despesas</span>
-                Março, 2021
-              </div>
-              <div class="card-body">
-                <!--Inicio do corpo do painel-->
+            <div class="table-responsive">
 
-                <div class="table-responsive">
-                  <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasDP" width="100%" cellspacing="0">
-                    <thead class="thead-dark">
-                      <tr>
-                        <th class="hidden">ID</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th  class="hidden">Quitado</th>
-                        <th  class="hidden">Qtde Parcelas</th>
-                        <th>Ação</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tabelaDespesasBodyDP">
-                    </tbody>
-                  </table>
-                </div>
-
-                <!--FIM do corpo do painel-->
-              </div>
-              <div class="card-footer d-flex align-items-center justify-content-between">
-                <?php foreach ($lista_total as $fetch_userdata) : ?>
-
-                  <small class="small text-muted" data-toggle="tooltip" data-placement="top" title="Total Pendente">R$
-                    <?php
-                    echo $modelo->formatar_valor($fetch_userdata['TotalPendente']);
-                    ?>
-                  </small>
-
-                  <small>
-                    <strong data-toggle="tooltip" data-placement="top" title="Total Quitado">R$
-                      <?php
-                      echo $modelo->formatar_valor($fetch_userdata['TotalQuitado']);
-                      ?>
-                    </strong>
-                  </small>
-
-                <?php endforeach; ?>
-              </div>
+              <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasDP" width="100%" cellspacing="0">
+                <caption>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <small class="small text-muted" data-toggle="tooltip" data-placement="top" title="Total Pendente" id="idTotalPendente"></small>
+                    <small>
+                      <strong data-toggle="tooltip" data-placement="top" title="Total Quitado" id="idTotalQuitado"></strong>
+                    </small>
+                  </div>
+                </caption>
+                <thead class="thead-dark">
+                  <tr>
+                    <th class="hidden">ID</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th class="hidden">Quitado</th>
+                    <th class="hidden">Qtde Parcelas</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaDespesasBodyDP">
+                </tbody>
+              </table>
             </div>
-            <!--FIM Painel de Despesas-->
+
           </div>
+          <!--FIM Painel de Despesas-->
 
           <div class="col-xl-6">
             <!--Painel de Gráficos-->
-            <div class="card mb-4">
-              <div class="card-header"><i class="fas fa-chart-area mr-1"></i>Gráfico</div>
-              <div class="card-body">
-                <canvas id="graficoDespesas" width="100%" height="60"></canvas>
-              </div>
-            </div>
+            <div class="charts" id="grafico-despesas"></div>
             <!--FIM Painel de Gráficos-->
           </div>
 
         </div>
-      <!-- FIM Corpo do Painel Principal -->
+        <!-- FIM Corpo do Painel Principal -->
       </div>
     </div>
 
-  <!-- Fim do Painel Principal -->
+    <!-- Fim do Painel Principal -->
   </div>
 </main>
 
@@ -137,32 +111,32 @@
         </button>
       </div>
       <div class="modal-body modalDeleteAlinhar">
-      <!--Corpo do modal-->
-      <form id="formModalQuitarDespesaDP">
-        
-        <!-- Inputs Ocultos -->
-        <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
-        <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
-        
-        <div id = "alert_placeholder"></div>
-        
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <small class="mt-4"><strong>Data de Quitação:</strong></small>
-            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
-          </div>
-          <div class="form-group col-md-6">
-            <small class="mt-4"><strong>Valor Quitado:</strong></small>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">R$</div>
+        <!--Corpo do modal-->
+        <form id="formModalQuitarDespesaDP">
+
+          <!-- Inputs Ocultos -->
+          <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+
+          <div id="alert_placeholder"></div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <small class="mt-4"><strong>Data de Quitação:</strong></small>
+              <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
+            </div>
+            <div class="form-group col-md-6">
+              <small class="mt-4"><strong>Valor Quitado:</strong></small>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">R$</div>
+                </div>
+                <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
               </div>
-              <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
             </div>
           </div>
-        </div>
 
-        <!--FIM Corpo do modal-->
+          <!--FIM Corpo do modal-->
       </div>
 
       <div class="modal-footer">

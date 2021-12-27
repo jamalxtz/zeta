@@ -128,9 +128,8 @@
     <!-- Script Principal -->
     <script src="<?php echo HOME_URI;?>views/_js/scripts.js"></script>
     <!-- Script Graficos -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script src="<?php echo HOME_URI;?>views/_js/chart/chart-area-demo.js"></script>
-    <script src="<?php echo HOME_URI;?>views/_js/chart/chart-bar-demo.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="<?php echo HOME_URI;?>views/_js/chart/google-charts-custom.js"></script>
     <!-- Script Tabelas -->
     <script src="<?php echo HOME_URI;?>views/_js/dataTables.min.js"></script>
     <script src="<?php echo HOME_URI;?>views/_js/dataTables-custom.js"></script>

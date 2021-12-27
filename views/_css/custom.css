@@ -121,3 +121,10 @@ fieldset input:required {
 fieldset select:required {
 border: 1px dashed red !important;
 }
+
+/*Deixa os gráficos do google charts responsivos*/
+.chart {
+    width: 100%; 
+    min-height: 450px;
+  }
+ 

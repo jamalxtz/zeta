@@ -1,11 +1,16 @@
-
 $(document).ready(function() {
 	//monta a tabela de acordo com o framework DataTable
     var table = $('#dataTable').DataTable();
+    var linhas;
 
     //pega a tabela e as linhas da tabela, usaremos essa variavel para pegar os dados da linha selecionada
     var tabela = document.getElementById("dataTable");
-	var linhas = tabela.getElementsByTagName("tr");
+    if (tabela != null) {
+        linhas = tabela.getElementsByTagName("tr");
+    }else{
+        return;
+    }
+	
     
 	//função que seleciona a linha que clicamos na tabela
     $('#dataTable tbody').on( 'click', 'tr', function () {

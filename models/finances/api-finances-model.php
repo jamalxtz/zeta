@@ -467,8 +467,8 @@
             try{
                 $sql = "SELECT fn_despesas.id,
                     fn_despesas.descricao,
-                    SUM(fn_despesas_parcelas.valorpendente) AS valorpendente,
-                    SUM(fn_despesas_parcelas.valorquitado) AS valorquitado,
+                    SUM(COALESCE(fn_despesas_parcelas.valorpendente,0)) AS valorpendente,
+                    SUM(COALESCE(fn_despesas_parcelas.valorquitado,0)) AS valorquitado,
                     fn_despesas_parcelas.quitado,
                     COUNT(fn_despesas_parcelas.ID) AS quantidadeparcelas
                 FROM fn_despesas_parcelas

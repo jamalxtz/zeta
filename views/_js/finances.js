@@ -629,8 +629,13 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
 
 
 window.onload = function() {
-  alert("Carregou a página");
+  //Verifica qual página está sendo carregada (existe um input em cada página com o nome dela no value)
+  if ( $('#pagina').val() == "despesas"){
+    //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
+    $('#txtDataReferenciaDP').val("2021-12");
 
+    ListarDespesasMensal();
+  }
 };
 
 
@@ -642,12 +647,14 @@ function ListarDespesasMensal(){
   let url = $('#idURL').val();
   let requisicao = "listarDespesasMensal";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataReferencia = $('#dataReferencia').val(); // 2121-02
+  let dataReferencia = $('#txtDataReferenciaDP').val(); // 2121-02
+  let totalDespesasPendentes = 0;
+  let totalDespesasQuitadas = 0;
 
   //Valida os dados
   if(dataReferencia == null || dataReferencia == ""){
     alert("A data de referência não pode ser vazia!");
-    $('#dataReferencia').focus();
+    $('#txtDataReferenciaDP').focus();
     return;
   }
 
@@ -677,7 +684,13 @@ function ListarDespesasMensal(){
       for(var k in msg[0]) {
         //console.log(k, msg[0][k]["descricao"]);
         InserirLinhaTabelaDespesas(msg[0][k]);
+        //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de despesas
+        totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+        totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
       }
+      //Exibe os totais no rodapé da tabela de despesas
+      $("#idTotalPendente").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
+      $("#idTotalQuitado").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
     }else{
       Toast.fire({
         icon: 'error',
@@ -771,6 +784,82 @@ function InserirLinhaTabelaDespesas(arrayDados){
   })
 }//InserirLinhaTabelaDespesa
 
+//Função utilizada para quitar despesa
+$("#formModalQuitarDespesaDP").on("submit", function (event) { 
+  event.preventDefault();
+
+  let url = $('#idURL').val();
+  let requisicao = "quitarDespesa";
+  let userID = $('#userID').val(); // ID do usuário logado
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  trabalhar aqui amanfa-flip-horizontal
+
+  
+  let descricao = $("#txtDescricaoCategoriaNC").val();
+  let tipo =  $("#selTipoCategoriaNC").val();
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      descricao : descricao,
+      tipo : tipo,    
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao+" \n "+ url );
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      //Fecha o modal
+      $('#modalCadastrarCategoria').modal('toggle');
+
+      $('select').append($('<option>', {
+        value: msg[0].id,
+        text: descricao
+      }));
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao cadastrar categoria: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao cadastrar categoria: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+
+
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função cadastrar uma nova categoria
+
 //-----------------------------------------------------------------------------------------------------------------
 
 $('#modal-editar-despesa').on('show.bs.modal', function (event) {
@@ -830,4 +919,4 @@ $('#modal-quitar-despesa').on('show.bs.modal', function (event) {
   }
   modal.find('#txtDataQuitacaoModalQuitarDespesaDP').val(DataAtual());
   
-})
+})//Modal Quitar Despesa
