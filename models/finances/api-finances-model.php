@@ -16,6 +16,8 @@
     */
     if (isset($_POST['requisicao'])){
         $requisicao = $_POST['requisicao'];
+    }elseif (isset($_GET['requisicao'])){
+        $requisicao = $_GET['requisicao'];
     }else{
         $requisicao = "";
     }
@@ -36,32 +38,36 @@
          * Recebe a requisição via post e chama o método reponsável por tratar aquela determinada requisição.
          */
         public function DistribuirRequisicao($requisicao){
-            if($requisicao == ""){
-                $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
-            }
-            elseif($requisicao == "consultaSimples"){
-                $this->ConsultaSimples();
-            }
-            elseif($requisicao == "criarBancoDeDados"){
-                $this->CriarBancoDeDados();
-            }
-            elseif($requisicao == "incluirDespesa"){
-                $this->IncluirDespesa();
-            }
-            elseif($requisicao == "incluirDespesaFixa"){
-                $this->IncluirDespesaFixa();
-            }
-            elseif($requisicao == "incluirCategoria"){
-                $this->IncluirCategoria();
-            }
-            elseif($requisicao == "listarDespesasMensal"){
-                $this->ListarDespesasMensal();
-            }
-            elseif($requisicao == "quitarDespesa"){
-                $this->QuitarDespesa();
-            }
-            elseif($requisicao == "estornarDespesa"){
-                $this->EstornarDespesa();
+            switch ($requisicao) {
+                case "consultaSimples":
+                    $this->ConsultaSimples();
+                    break;
+                case "criarBancoDeDados":
+                    $this->CriarBancoDeDados();
+                    break;
+                case "incluirDespesa":
+                    $this->IncluirDespesa();
+                    break;
+                case "incluirDespesaFixa":
+                    $this->IncluirDespesaFixa();
+                    break;
+                case "incluirCategoria":
+                    $this->IncluirCategoria();
+                    break;
+                case "listarDespesasMensal":
+                    $this->ListarDespesasMensal();
+                    break;
+                case "quitarDespesa":
+                    $this->QuitarDespesa();
+                    break;
+                case "estornarDespesa":
+                    $this->EstornarDespesa();
+                    break;
+                case "listarDadosDespesaPendentePorCodigo":
+                    $this->ListarDadosDespesaPendentePorCodigo();
+                    break;
+                default:
+                    $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
         }//DistribuirRequisicao
 
@@ -594,6 +600,62 @@
                 exit;
             }
         }//EstornarDespesa
+
+        /**
+         * Retorna os dados de uma despesa específica por código (Informações do cabeçalho da despesa e as parcelas que esão pendentes)
+         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento
+         */
+        public function ListarDadosDespesaPendentePorCodigo(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $despesaID = $_POST['despesaID'];
+            $dataReferencia = $_POST['dataReferencia'];
+            $arrayRetorno = [];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "SELECT * FROM fn_despesas WHERE id = {$despesaID} AND usuarios_id = {$userID}";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar Despesas - ".$e->getMessage(), "\n");
+                    exit;
+                }
+                //O método fetchAll transforma o resultado da consulta em um array
+                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
+                $arrayCabecalhoDespesa = $consulta->fetchAll(PDO::FETCH_ASSOC);
+                array_push($arrayRetorno, $arrayCabecalhoDespesa);
+
+                //Consulta as parcelas -------------------------------------------------------------------------
+
+                $sql = "SELECT * FROM fn_despesas_parcelas 
+                WHERE fn_despesas_id = {$despesaID} 
+                    AND quitado = 'NÃO' 
+                    AND vencimento = '{$dataReferencia}'";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar Despesas - ".$e->getMessage(), "\n");
+                    exit;
+                }
+                //O método fetchAll transforma o resultado da consulta em um array
+                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
+                $arrayParcelasDespesa = $consulta->fetchAll(PDO::FETCH_ASSOC);
+                array_push($arrayRetorno, $arrayParcelasDespesa);
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesas listadas com sucesso!",$arrayRetorno);
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao consultar Despesas - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//ListarDadosDespesaPendentePorCodigo
 
         public function tempo_corrido($time) {
 

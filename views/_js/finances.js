@@ -1,3 +1,6 @@
+//*********************************************************************************************************************
+//**********                                    FUNÇÕES GLOBAIS                                              **********                  
+//*********************************************************************************************************************
 //#region DECLARAÇÃO DE VARIÁVEIS E FUNÇÕES GLOBAIS--------------------------------------------------------------------
 
 //Configura um mini alerta do plugin sweetalert2 (https://sweetalert2.github.io/#examples), que é exibido através da função:
@@ -22,13 +25,89 @@ window.onload = function() {
   if ( $('#pagina').val() == "despesas"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
     $('#txtDataReferenciaDP').val("2021-12");
-
     ListarDespesasMensal();
   }
+  else if ( $('#pagina').val() == "editarDespesa"){
+    //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
+    PreencherCamposEditarDespesa();
+  }
+  
 };
 
 //#endregion
 
+//#region FUNÇÕES DE CONVERSÃO-----------------------------------------------------------------------------------------
+
+//Recebe a data no formato DD/MM/AAAA e retorna no padrão YYYY-MM-DD
+function FormataDataPadraoAmericano(data) {
+  var dia  = data.split("/")[0];
+  var mes  = data.split("/")[1];
+  var ano  = data.split("/")[2];
+
+  return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
+  // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
+}//FormataDataPadraoAmericano
+
+//Recebe a data no formato YYYY-MM-DD HH:MM:SS e retorna no padrão YYYY-MM-DD aceita pelos inputs do tipo date
+function FormataDataBancoDeDadosParaInput(data) {
+  data = data.substring(0, 10);
+  var ano  = data.split("-")[0];
+  var mes  = data.split("-")[1];
+  var dia  = data.split("-")[2];
+
+  return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
+  // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
+}//FormataDataBancoDeDadosParaInput
+
+//Recebe a data no formato YYYY-MM-DD e retorna no padrão DD/MM/AAAA 
+function FormatarDataPadraoBrasileiro(data){
+  //Troca os traços por vírgulas
+  data = data.replace(/-/g, ",");
+  //Formata as datas e valores para o padrão brasileiro
+  let dataFormatada = new Date(data);
+  dataFormatada = dataFormatada.toLocaleDateString();
+  return dataFormatada;
+}//FormatarDataPadraoBrasileiro
+
+//Retorna a data atual no padrão Americao YYYY-MM-DD (aceito pelos inputs tipo date)
+function DataAtual(){
+  var today = new Date();
+  var dy = today.getDate();
+  var mt = today.getMonth()+1;
+  var yr = today.getFullYear();
+  return yr+"-"+mt+"-"+dy;
+}//DataAtual
+
+//Recebe o valor no formato 1.222.222,56 e retorna no padrão 1222222.56
+function ConverterRealParaFloat(valor){
+  if(valor === ""){
+      valor =  0;
+  }else{
+      // valor = valor.replace("R$ ","");
+      valor = valor.replace(".","");
+      valor = valor.replace(",",".");
+      valor = parseFloat(valor);
+  }
+  return valor;
+}//ConverterRealParaFloat
+
+//Recebe o valor no formato 1222222.56 e retorna no padrão (R$ 1.222.222,56) ou (1.222.222,56)
+function ConverterValorParaRealBrasileiro(valor, utilizarRS = true){
+  if(utilizarRS === true){
+    //Com R$
+    valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' })
+  }else{
+    //Cem R$
+    valor = valor.toLocaleString('pt-br', {minimumFractionDigits: 2});
+  }
+  return valor;
+}//ConverterValorParaRealBrasileiro
+
+//#endregion
+
+//*********************************************************************************************************************
+//**********                                   INCLUIR DESPESAS                                              **********                  
+//*********************************************************************************************************************
 //#region GERAÇÃO DE PARCELAS E DEMAIS FUNÇÕES DO CABEÇALHO DAS DESPESAS-----------------------------------------------
 
 //Função utilizada para gerar as parcelas ao criar uma despesa (Validado - Falta revisar os comentários)
@@ -516,75 +595,6 @@ function LimparCamposIncluirDespesa(limparSomenteCamposIncluirParcelas = false){
 
 //#endregion
 
-//#region FUNÇÕES DE CONVERSÃO-----------------------------------------------------------------------------------------
-
-//Recebe a data no formato DD/MM/AAAA e retorna no padrão YYYY-MM-DD
-function FormataDataPadraoAmericano(data) {
-  var dia  = data.split("/")[0];
-  var mes  = data.split("/")[1];
-  var ano  = data.split("/")[2];
-
-  return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
-  // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
-}//FormataDataPadraoAmericano
-
-//Recebe a data no formato YYYY-MM-DD HH:MM:SS e retorna no padrão YYYY-MM-DD aceita pelos inputs do tipo date
-function FormataDataBancoDeDadosParaInput(data) {
-  data = data.substring(0, 10);
-  var ano  = data.split("-")[0];
-  var mes  = data.split("-")[1];
-  var dia  = data.split("-")[2];
-
-  return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
-  // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
-}//FormataDataBancoDeDadosParaInput
-
-//Recebe a data no formato YYYY-MM-DD e retorna no padrão DD/MM/AAAA 
-function FormatarDataPadraoBrasileiro(data){
-  //Troca os traços por vírgulas
-  data = data.replace(/-/g, ",");
-  //Formata as datas e valores para o padrão brasileiro
-  let dataFormatada = new Date(data);
-  dataFormatada = dataFormatada.toLocaleDateString();
-  return dataFormatada;
-}//FormatarDataPadraoBrasileiro
-
-//Retorna a data atual no padrão Americao YYYY-MM-DD (aceito pelos inputs tipo date)
-function DataAtual(){
-  var today = new Date();
-  var dy = today.getDate();
-  var mt = today.getMonth()+1;
-  var yr = today.getFullYear();
-  return yr+"-"+mt+"-"+dy;
-}//DataAtual
-
-//Recebe o valor no formato 1.222.222,56 e retorna no padrão 1222222.56
-function ConverterRealParaFloat(valor){
-  if(valor === ""){
-      valor =  0;
-  }else{
-      // valor = valor.replace("R$ ","");
-      valor = valor.replace(".","");
-      valor = valor.replace(",",".");
-      valor = parseFloat(valor);
-  }
-  return valor;
-}//ConverterRealParaFloat
-
-//Recebe o valor no formato 1222222.56 e retorna no padrão (R$ 1.222.222,56) ou (1.222.222,56)
-function ConverterValorParaRealBrasileiro(valor, utilizarRS = true){
-  if(utilizarRS === true){
-    //Com R$
-    valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 , style: 'currency', currency: 'BRL' })
-  }else{
-    //Cem R$
-    valor = valor.toLocaleString('pt-br', {minimumFractionDigits: 2});
-  }
-  return valor;
-}//ConverterValorParaRealBrasileiro
-
-//#endregion
-
 //#region CADASTRO DE CATEGORIA----------------------------------------------------------------------------------------
 
 //Função utilizada para cadastrar uma nova categoria
@@ -647,7 +657,9 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
 
 //#endregion
 
-
+//*********************************************************************************************************************
+//**********                                    LISTAR DESPESAS                                              **********                  
+//*********************************************************************************************************************
 //#region LISTAR DESPESAS E FUNÇÕES EXECUTADAS NA TELA DE DESPESAS-----------------------------------------------------
 
 //Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
@@ -662,7 +674,10 @@ function ListarDespesasMensal(){
 
   //Valida os dados
   if(dataReferencia == null || dataReferencia == ""){
-    alert("A data de referência não pode ser vazia!");
+    Toast.fire({
+      icon: 'error',
+      title: "A data de referência não pode ser vazia!"
+    })
     $('#txtDataReferenciaDP').focus();
     return;
   }
@@ -983,4 +998,77 @@ $("#formModalEstornarDespesaDP").on("submit", function (event) {
 
 //#endregion
 
+//*********************************************************************************************************************
+//**********                                    EDITAR DESPESAS                                              **********                  
+//*********************************************************************************************************************
+//Faz uma consulta no banco de dados e retorna todas os dados da despesa à ser editada
+function PreencherCamposEditarDespesa(){
+  //Pega os dados dos campos
+  let url = $('#idURL').val();
+  let requisicao = "listarDadosDespesaPendentePorCodigo";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let despesaID = $('#txtDespesaID').val();
+  let dataReferencia = $('#txtDataVencimentoDespesa').val();
 
+  let totalDespesasPendentes = 0;
+  let totalDespesasQuitadas = 0;
+
+  //Valida os dados
+  if(despesaID == null || despesaID == ""){
+    Toast.fire({
+      icon: 'error',
+      title: "Não foi encontrado o ID da despesa a ser atualizada!"
+    })
+    return;
+  }
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+      url : url,
+      type : 'post',
+      data : {
+      requisicao : requisicao,
+      userID : userID,
+      despesaID : despesaID,
+      dataReferencia : dataReferencia,      
+    },
+      dataType: 'json',
+      beforeSend : function(){
+        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+      }
+  })
+  .done(function(msg){
+    if(msg.success == true){
+      console.log(msg);
+      return;
+      //Limpa a tabela de Despesas
+      $("#tabelaDespesasBodyED tr").remove();
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
+      for(var k in msg[0]) {
+        console.log(k, msg[0][k]["descricao"]);
+        //InserirLinhaTabelaDespesas(msg[0][k]);
+        //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de despesas
+        if(msg[0][k]["quitado"] == "SIM"){
+          totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+        }else{
+          totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+        }
+      }
+      //Exibe os totais no rodapé da tabela de despesas
+      $("#idTotalPendente").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
+      $("#idTotalQuitado").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
+      $("#totalDespesasMensalDP").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes + totalDespesasQuitadas,true));
+    }else{
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao listar os dados da Despesa: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar os dados da Despesa: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+  
+}//PreencherCamposEditarDespesa

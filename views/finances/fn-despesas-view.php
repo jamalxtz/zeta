@@ -12,6 +12,7 @@
       <li class="breadcrumb-item active">Despesas</li>
     </ol>
 
+    <!-- Hidden Inputs -->
     <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
