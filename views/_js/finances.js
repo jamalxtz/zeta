@@ -803,7 +803,7 @@ function InserirLinhaTabelaDespesas(arrayDados){
     acoes += '</nobr>';
   }else{
     acoes = '<nobr>';
-    acoes += '<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modal-editar-despesa" data-id="'+id+'"><i class="fas fa-pen"></i></button>';
+    acoes += '<a href="" class="btn btn-info btn-sm"  role="button" data-toggle="modal" data-target="#modal-editar-despesa" data-id="'+id+'" data-vencimento="'+vencimento+'"><i class="fas fa-pen"></i></a>';
     acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-vencimento="'+vencimento+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
     acoes += '</nobr>';
   }
@@ -1001,8 +1001,54 @@ $("#formModalEstornarDespesaDP").on("submit", function (event) {
 //*********************************************************************************************************************
 //**********                                    EDITAR DESPESAS                                              **********                  
 //*********************************************************************************************************************
+
+//Carrega o Modal Estornar Despesa
+$('#modal-editar-despesa').on('show.bs.modal', function (event) {
+  //Coleta os dados informados no botão que chama o modal data-* attributes
+  let button = $(event.relatedTarget); // Button that triggered the modal
+  let id = button.data('id'); // Extract info from data-* attributes
+  let vencimento = button.data('vencimento');
+
+  //Formata os valores coletados
+
+  //Armazena os dados coletados em uma sessionStorage (armazenado no navegador)
+  id = JSON.stringify(id);
+  sessionStorage.setItem('idDespesa', id ); //('chave', valor)
+  vencimento = JSON.stringify(vencimento);
+  sessionStorage.setItem('vencimento', vencimento );
+  /*Para recuperar esse valores basta:
+  *var dadosArquivados = JSON.parse(sessionStorage.getItem('chave'));
+  *link de referencia: https://pt.stackoverflow.com/questions/75557/passando-valores-js-para-outra-pagina-html
+  *Exemplo de uso
+  *let dadosArquivados = JSON.parse(sessionStorage.getItem('vencimento'));
+  *alert(dadosArquivados);
+  */
+
+  //Redireciona para a página de Editar Despesas
+  window.location.replace($("#urlEditarDespesa").val());
+  return;
+})//Carrega o Modal Estornar Despesa
+
 //Faz uma consulta no banco de dados e retorna todas os dados da despesa à ser editada
 function PreencherCamposEditarDespesa(){
+  //Pega os dados da sessionStorage
+  let dadosArquivados = JSON.parse(sessionStorage.getItem('vencimento'));
+
+
+
+
+
+
+Bruno trabalhar aqui
+
+?Colocar os dados armazenados na session Storage nos campos
+
+
+
+
+
+
+
   //Pega os dados dos campos
   let url = $('#idURL').val();
   let requisicao = "listarDadosDespesaPendentePorCodigo";

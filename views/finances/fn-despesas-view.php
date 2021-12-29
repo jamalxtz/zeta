@@ -14,6 +14,7 @@
 
     <!-- Hidden Inputs -->
     <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
+    <input class="hidden" type="text" id="urlEditarDespesa" value="<?php echo HOME_URI ?>despesas/editar">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
     <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="despesas">
@@ -202,3 +203,54 @@
   </div>
 </div>
 <!--FIM do modal Estornar-->
+
+<!--Modal Quitar-->
+<div class="modal fade" id='modal-editar-despesa' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-md" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <p class="modal-title" id="myModalLabel"><strong>Quitar Despesa?</strong></p>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body modalDeleteAlinhar">
+      <!--Corpo do modal-->
+      <form id="formModalQuitarDespesaDP">
+
+        <!-- Inputs Ocultos -->
+        <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
+        <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+        <input class="hidden" type="text" id="txtVencimentoModalQuitarDespesaDP" name="txtVencimentoQuitarDespesaDP" value="">
+
+        <div id="alert_placeholder"></div>
+
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <small class="mt-4"><strong>Data de Quitação:</strong></small>
+            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
+          </div>
+          <div class="form-group col-md-6">
+            <small class="mt-4"><strong>Valor Quitado:</strong></small>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">R$</div>
+              </div>
+              <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
+            </div>
+          </div>
+        </div>
+      <!--FIM Corpo do modal-->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success" id="btnQuitarModalQuitarDespesaDP">Quitar</button>
+      </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+<!--FIM do modal Quitar-->
