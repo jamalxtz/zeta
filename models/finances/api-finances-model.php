@@ -66,6 +66,12 @@
                 case "listarDadosDespesaPendentePorCodigo":
                     $this->ListarDadosDespesaPendentePorCodigo();
                     break;
+                case "incluirParcelaDespesa":
+                    $this->IncluirParcelaDespesa(null,null);
+                    break;
+                case "alterarParcelaDespesa":
+                    $this->AlterarParcelaDespesa();
+                    break;
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
@@ -354,14 +360,85 @@
             //Recebe os dados do arrayParcelasDespesa, em seguida percorre todo o array através do foreach e insere os dados das parcelas no banco de dados
             $arrayParcelasDespesa = [];
             $arrayParcelasDespesa = $_POST['arrayDespesa'][1];
+
+            /**Bruno se tiver tudo funcionando, apagar essse código comentado abaixo
+             * ele errá utilizado para incluir as parcelas das despesas, porém achei melhor separar as funções
+             * para dar mais dinamicidade a API 
+             */
+            // $parcela = "";
+            // $vencimento = "";
+            // $valor = "";
+            // $qteParcelas = sizeof($arrayParcelasDespesa);
+            // $categoriaParcela = 0;
+ 
+            // foreach ($arrayParcelasDespesa as $value) {
+            //     $parcela = $value['Parcela'];//Número da parcela informado na descrição da parcela
+            //     $vencimento = $value['Vencimento'];
+            //     $vencimento = implode("-",array_reverse(explode("/",$vencimento)));//Entender e documentar essa função aqui
+            //     $valor = strval($value['Valor']);
+            //     $descricaoParcela = $parcela;
+            //     $categoriaParcela = $value['Categoria'];
+            //     $codigoDeBarras = $value['CodigoDeBarras'];
+            //     $observacoes = $value['Observacoes'];
+                
+            //     try{
+            //         $sql =  $db_con->query("INSERT INTO `fn_despesas_parcelas`
+            //         (`descricao`,`valorpendente`,`vencimento`,`quitado`,`codigo_de_barras`,`observacoes`,`fn_categorias_id`,`fn_despesas_id`) 
+            //         VALUES 
+            //         ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO','{$codigoDeBarras}','{$observacoes}','{$categoriaParcela}','{$IDfndespesas}')");           
+            //     }
+            //     catch (Exception $e){
+            //         $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
+            //         exit;
+            //     }
+            // }
+            $despesasForamCadastradas  = $this->IncluirParcelaDespesa($arrayParcelasDespesa, $IDfndespesas);
+
+            if ($despesasForamCadastradas == true){
+                $this->RetornoPadrao(true,"Despesa cadastrada com sucesso!");
+                exit;
+            }else{
+                $this->RetornoPadrao(false,"Erro ao cadastrar as parcelas da despesa!");
+                exit;
+                //Bruno fazer a chamada do método para excluir Despesa, uma vez que a despesa foi cadastrada porem deu erro ao cadastrar as parcelas
+            }
             
+        }//IncluirDespesa
+
+        /**
+         * Faz a inclusão das parcelas de despesa no banco de dados
+         * Esse método recebe via parâmetro ou via POST um array contendo os dados das parcelas a serem cadastradas
+         * E também a o ID da despesa que já deverá ter sido previamente cadastrada
+         * Antes todo o processo era feito de forma unica no método 'IncluirDespesa', porém surgiu a necessidade de incrementar parcelas em despesas
+         * Esse método retorna boleano, indicando se a operação de cadastro foi realizada com sucesso ou não
+         */
+        public function IncluirParcelaDespesa($arrayDadosParcela = [], $IDfndespesas){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+
+            $modoDeInclusao =  "ViaParametro";
+
+            /*Verifica se os dados da despesa foram recebidos via parâmetro (função utilizada ao cadastrar uma nova despesa)
+             *senão ele verifica se existe algo no POST, utilizado na tela de editar despesa quando o usuário inclui uma nova despesa
+             */
+            if(empty($arrayDadosParcela)){
+                $arrayDadosParcela = [];
+                if (isset($_POST['arrayParcelaDespesa'])){
+                    $arrayDadosParcela = $_POST['arrayParcelaDespesa'];
+                    $modoDeInclusao =  "ViaPOST";
+                }
+                if (isset($_POST['idDespesa'])){
+                    $IDfndespesas = $_POST['idDespesa'];
+                }
+            }
+
             $parcela = "";
             $vencimento = "";
             $valor = "";
-            $qteParcelas = sizeof($arrayParcelasDespesa);
+            $qteParcelas = sizeof($arrayDadosParcela);
             $categoriaParcela = 0;
  
-            foreach ($arrayParcelasDespesa as $value) {
+            foreach ($arrayDadosParcela as $value) {
                 $parcela = $value['Parcela'];//Número da parcela informado na descrição da parcela
                 $vencimento = $value['Vencimento'];
                 $vencimento = implode("-",array_reverse(explode("/",$vencimento)));//Entender e documentar essa função aqui
@@ -378,15 +455,88 @@
                     ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO','{$codigoDeBarras}','{$observacoes}','{$categoriaParcela}','{$IDfndespesas}')");           
                 }
                 catch (Exception $e){
-                    $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");
+                    if($modoDeInclusao ==  "ViaPOST"){
+                        $this->RetornoPadrao(false,"Erro ao cadastrar parcela! - ".$e->getMessage(), "\n");
+                        exit;
+                    }else{//ViaParametro
+                        return false;
+                        exit;
+                    }
+                }
+            }
+            if($modoDeInclusao ==  "ViaPOST"){
+                $this->RetornoPadrao(true,"Parcela cadastrada com sucesso!");
+                exit;
+            }else{//ViaParametro
+                return true;
+                exit;
+            }
+            
+        }//IncluirParcelaDespesa
+
+        public function AlterarParcelaDespesa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+
+            $arrayDadosParcela = $_POST['arrayParcelaDespesa'];
+            $IDfndespesas = $_POST['idDespesa'];
+            $IDParcela = $_POST['idParcela'];
+
+            $parcela = "";
+            $vencimento = "";
+            $valor = "";
+            $qteParcelas = sizeof($arrayDadosParcela);
+            $categoriaParcela = 0;
+ 
+            foreach ($arrayDadosParcela as $value) {
+                $parcela = $value['Parcela'];//Número da parcela informado na descrição da parcela
+                $vencimento = $value['Vencimento'];
+                $vencimento = implode("-",array_reverse(explode("/",$vencimento)));//Entender e documentar essa função aqui
+                $valor = strval($value['Valor']);
+                $descricaoParcela = $parcela;
+                $categoriaParcela = $value['Categoria'];
+                $codigoDeBarras = $value['CodigoDeBarras'];
+                $observacoes = $value['Observacoes'];
+                
+                try{
+                    $sql =  $db_con->query("UPDATE fn_despesas_parcelas SET 
+                        descricao = '{$descricaoParcela}',
+                        valorpendente = '{$valor}',
+                        vencimento = '{$vencimento}',
+                        codigo_de_barras = '{$codigoDeBarras}',
+                        observacoes = '{$observacoes}',
+                        fn_categorias_id = '{$categoriaParcela}'
+                    WHERE fn_despesas_id = {$IDfndespesas} 
+                        AND id = {$IDParcela}");           
+                }
+                catch (Exception $e){
+                    $this->RetornoPadrao(false,"Erro ao alterar parcela! - ".$e->getMessage(), "\n");
                     exit;
                 }
             }
-            
-            $this->RetornoPadrao(true,"Despesa cadastrada com sucesso!");
+            $this->RetornoPadrao(true,"Parcela alterada com sucesso!");
             exit;
+        }//AlterarParcelaDespesa
 
-        }//IncluirDespesa
+        public function ExcluirParcelaDespesa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+
+            $userID = $_POST['userID'];
+            $IDfndespesas = $_POST['idDespesa'];
+            $IDParcela = $_POST['idParcela'];
+
+            try{
+                $sql =  $db_con->query("DELETE FROM fn_despesas_parcelas WHERE fn_despesas_id='{$IDfndespesas}' AND id = '{$IDParcela}'");           
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao excluir parcela! - ".$e->getMessage(), "\n");
+                exit;
+            }
+
+            $this->RetornoPadrao(true,"Parcela excluída com sucesso!");
+            exit;
+        }//ExcluirParcelaDespesa
 
         /**
          * Faz a inclusão de despesas fixas
@@ -397,12 +547,13 @@
             //Recebe os dados do arrayCabecalhoDespesa
             $userID = $_POST['userID'];
             $descricao = $_POST['descricao'];
+            $vencimento = $_POST['vencimento'];
             $valor = $_POST['valor'];
             $categoria = $_POST['categoria'];
         
             //Salva a despesa no banco de dados
             try{
-                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`descricao`,`fixo`,`valor_despesa_fixa`,`categorias_id`,`usuarios_id`) VALUES ('{$descricao}','SIM','{$valor}','{$categoria}','{$userID}')");      
+                $sql =  $db_con->query("INSERT INTO `fn_despesas` (`descricao`,`fixo`,`vencimento_despesa_fixa`,`valor_despesa_fixa`,`categorias_id`,`usuarios_id`) VALUES ('{$descricao}','SIM','{$vencimento}','{$valor}','{$categoria}','{$userID}')");      
             }
             catch (Exception $e){
                 $this->RetornoPadrao(false,"Erro ao cadastrar despesa! - ".$e->getMessage(), "\n");

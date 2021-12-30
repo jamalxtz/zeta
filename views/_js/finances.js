@@ -189,14 +189,12 @@ $('#chkDespesaFixaND').click(function() {
   if(chkDespesaFixa.checked) {//Ao ativar o cadastro de despesa fixa.
     //Apaga todas as linhas da tabela de parcela 
     $("#tabelaParcelasBodyND tr").remove();
-    $('#txtVencimentoND').prop('readonly', true);
     $('#txtParcelasND').prop('readonly', true);
     $('#btnGerarParcelasND').prop('disabled', true);
     $('#btnCollapseCriarAlterarParcelaND').prop('disabled', true);
     $('#collapseCriarAlterarParcelaND').collapse("hide");
 
   } else {//Ao desabilitar o cadastro de despesa fixa.
-    $('#txtVencimentoND').prop('readonly', false);
     $('#txtParcelasND').prop('readonly', false);
     $('#btnGerarParcelasND').prop('disabled', false);
     $('#btnCollapseCriarAlterarParcelaND').prop('disabled', false);
@@ -363,6 +361,7 @@ $("#tabelaParcelasND tbody").on('click', 'tr', function () {
 $('#btnSalvarDespesaND').click(function() {
   //Faz a validação dos campos obrigatórios
   let descricao = $('#txtDescricaoND').val().trim();
+  let vecimento = $('#txtVencimentoND').val();
   let valor = $('#txtValorND').val();
   if(descricao.length < 3){
     //Exibe mensagem
@@ -388,6 +387,16 @@ $('#btnSalvarDespesaND').click(function() {
   let chkDespesaFixa = document.getElementById('chkDespesaFixaND');
 
   if(chkDespesaFixa.checked) { //Inclusão de Despesa Fixa
+    //Faz a validação do campo Vencimento
+    if($('#txtVencimentoND')[0].checkValidity() == false){
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "Selecione uma data de vencimento."
+      })
+      $('#txtVencimentoND').focus();
+      return;
+    }
     //Faz a validação do campo Valor
     if(valor == ""){
       //Exibe mensagem
@@ -522,6 +531,7 @@ function IncluirDespesaFixa(){
   let requisicao = "incluirDespesaFixa";
   let userID = $('#userID').val(); // ID do usuário logado
   let descricao = $('#txtDescricaoND').val();
+  let vencimento = $('#txtVencimentoND').val();
   let valor = $('#txtValorND').val();
   let categoria = $("#selCategoriaND").val();
 
@@ -533,6 +543,7 @@ function IncluirDespesaFixa(){
           requisicao : requisicao,
           userID : userID,
           descricao : descricao,
+          vencimento : vencimento,
           valor : valor,
           categoria : categoria,      
         },
@@ -558,7 +569,7 @@ function IncluirDespesaFixa(){
   })
   .fail(function(jqXHR, textStatus, msg){
       alert("Erro ao cadastrar despesa: "+"\n"+jqXHR.responseText);
-      console.log("Erro ao cadastrar despesa: "+"\n"+jqXHR);
+      console.log("Erro ao cadastrar despesa: "+"\n"+jqXHR.responseText);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
 }//IncluirDespesaFixa
 
@@ -732,8 +743,8 @@ function ListarDespesasMensal(){
 
 //Inclui uma linha na tabela de Despesas com os dados recebidos por parâmetro
 function InserirLinhaTabelaDespesas(arrayDados){
-  let tabelaDeParcelas = document.getElementById("tabelaDespesasBodyDP");
-  let novaLinha = tabelaDeParcelas.insertRow(-1);
+  let tabelaDeDespesas = document.getElementById("tabelaDespesasBodyDP");
+  let novaLinha = tabelaDeDespesas.insertRow(-1);
   let novaCelula;
   //Captura os valores do array
   let id = arrayDados["id"];
@@ -778,6 +789,8 @@ function InserirLinhaTabelaDespesas(arrayDados){
   novaCelula = novaLinha.insertCell(2);//Coluna Vencimento
   novaCelula.innerHTML = vencimento;
   novaCelula.className = "text-muted";
+  //Bruno usar um date diff aqui para pintar de vermelho as parcelas atrasadas if(DataAtual())
+  //novaCelula.className = "text-danger";
   
   novaCelula = novaLinha.insertCell(3);//Coluna Valor
   if(quitado == 'SIM'){
@@ -1003,6 +1016,7 @@ $("#formModalEstornarDespesaDP").on("submit", function (event) {
 //*********************************************************************************************************************
 
 //Carrega o Modal Estornar Despesa
+//Bruno aqui não tem modal nenhum apenas aproveitei a função, trocar essa função aqui por um evento de click
 $('#modal-editar-despesa').on('show.bs.modal', function (event) {
   //Coleta os dados informados no botão que chama o modal data-* attributes
   let button = $(event.relatedTarget); // Button that triggered the modal
@@ -1030,34 +1044,23 @@ $('#modal-editar-despesa').on('show.bs.modal', function (event) {
 })//Carrega o Modal Estornar Despesa
 
 //Faz uma consulta no banco de dados e retorna todas os dados da despesa à ser editada
-function PreencherCamposEditarDespesa(){
-  //Pega os dados da sessionStorage
-  let dadosArquivados = JSON.parse(sessionStorage.getItem('vencimento'));
-
-
-
-
-
-
-Bruno trabalhar aqui
-
-?Colocar os dados armazenados na session Storage nos campos
-
-
-
-
-
-
+function PreencherCamposEditarDespesa(){ 
+  //Insere os dados da sessionStorage nos campos
+  $('#txtDespesaID').val(JSON.parse(sessionStorage.getItem('idDespesa')));
+  $('#txtDataVencimentoDespesa').val(JSON.parse(sessionStorage.getItem('vencimento')));
 
   //Pega os dados dos campos
   let url = $('#idURL').val();
   let requisicao = "listarDadosDespesaPendentePorCodigo";
   let userID = $('#userID').val(); // ID do usuário logado
-  let despesaID = $('#txtDespesaID').val();
-  let dataReferencia = $('#txtDataVencimentoDespesa').val();
+  //Pega os dados da sessionStorage
+  let despesaID = JSON.parse(sessionStorage.getItem('idDespesa'));
+  let dataReferencia = JSON.parse(sessionStorage.getItem('vencimento'));
 
-  let totalDespesasPendentes = 0;
-  let totalDespesasQuitadas = 0;
+  dataReferencia = FormataDataPadraoAmericano(dataReferencia);
+
+  //Deixa a data de vencimento padronizada na inclusão de novas parcelas
+  $("#txtVencimentoParcelaED").val(dataReferencia);
 
   //Valida os dados
   if(despesaID == null || despesaID == ""){
@@ -1080,30 +1083,42 @@ Bruno trabalhar aqui
     },
       dataType: 'json',
       beforeSend : function(){
-        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+        //alert(requisicao+" \n "+ url+" \n "+ dataReferencia +" \n "+ despesaID );
       }
   })
   .done(function(msg){
     if(msg.success == true){
-      console.log(msg);
-      return;
-      //Limpa a tabela de Despesas
-      $("#tabelaDespesasBodyED tr").remove();
-      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
-      for(var k in msg[0]) {
-        console.log(k, msg[0][k]["descricao"]);
-        //InserirLinhaTabelaDespesas(msg[0][k]);
-        //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de despesas
-        if(msg[0][k]["quitado"] == "SIM"){
-          totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
-        }else{
-          totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
-        }
+      /*O retorno dessa requisição é um array contendo 2 arrays dentro. 
+      *O primeiro array[0] contém os dados do cabeçalho da despesa, os dados que estão na tabela fn_despesas
+      *O segundo array[1] contém as parcelas dessa despesa, os dados que estão na tabela fn_despesas_parcelas
+      */
+
+      let despesaFixa;
+      if(msg[0][0][0]["fixo"] == "SIM"){
+        despesaFixa = true
+        $('#chkDespesaFixaED').prop( "checked", true );
+      }else{
+        despesaFixa = false
       }
-      //Exibe os totais no rodapé da tabela de despesas
-      $("#idTotalPendente").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
-      $("#idTotalQuitado").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
-      $("#totalDespesasMensalDP").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes + totalDespesasQuitadas,true));
+
+      //Preenche os dados do cabeçalho da despesa 
+      $("#txtDescricaoED").val(msg[0][0][0]["descricao"]);
+      $("#selCategoriaED").val(msg[0][0][0]["categorias_id"]);
+      if(despesaFixa == true){
+        $("#txtVencimentoED").val(msg[0][0][0]["vencimento_despesa_fixa"]);
+        $("#txtValorED").val(msg[0][0][0]["valor_despesa_fixa"]);
+      }else{
+        $("#agrupamentoCampoCategoriaED").addClass("hidden");
+        $("#agrupamentoCamposVencimentoValorED").addClass("hidden");
+      }
+
+      //Limpa a tabela de parcelas
+      $("#tabelaParcelasBodyED tr").remove();
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de parcelas
+      for(var k in msg[0][1]) {
+        //console.log(k, msg[0][1][k]["descricao"]);
+        InserirLinhaTabelaParcelas(msg[0][1][k]);
+      }
     }else{
       Toast.fire({
         icon: 'error',
@@ -1116,5 +1131,382 @@ Bruno trabalhar aqui
     alert("Erro ao listar os dados da Despesa: "+"\n"+jqXHR.responseText);
     console.log("Erro ao listar os dados da Despesa: "+"\n"+jqXHR);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
-  
 }//PreencherCamposEditarDespesa
+
+//Inclui uma linha na tabela de Despesas com os dados recebidos por parâmetro
+function InserirLinhaTabelaParcelas(arrayDados){
+  let tabelaDeParcelas = document.getElementById("tabelaParcelasBodyED");
+  let novaLinha = tabelaDeParcelas.insertRow(-1);
+  let novaCelula;
+  //Captura os valores do array
+  let id = arrayDados["id"];
+  let descricao = arrayDados["descricao"];
+  let valorPendente = arrayDados["valorpendente"];
+  let vencimento = arrayDados["vencimento"];
+  let valorQuitado = arrayDados["valorquitado"];
+  let quitado = arrayDados["quitado"];
+  let quitacao = arrayDados["quitacao"];
+  let codigoDeBarras = arrayDados["codigo_de_barras"];
+  let observacoes = arrayDados["observacoes"];
+  let categoria = arrayDados["fn_categorias_id"];
+  let quantidaDeParcelas = arrayDados["quantidadeparcelas"];
+  let valor;
+  let acoes;
+
+  //Formata as datas e valores para o padrão brasileiro
+  valorPendente = parseFloat(valorPendente);
+  valorQuitado = parseFloat(valorQuitado);
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
+
+  if(quitado == 'SIM'){
+    valor = valorQuitado;
+  }else{
+    valor = valorPendente;
+  }
+
+  valor = ConverterValorParaRealBrasileiro(valor,true);
+
+  //Insere os valores na tabela
+  novaCelula = novaLinha.insertCell(0); //Coluna Parcela
+  novaCelula.innerHTML = id;
+  novaCelula.className = ""; //hidden
+
+  novaCelula = novaLinha.insertCell(1);//Coluna Descrição
+  novaCelula.innerHTML = '<nobr>'+descricao+'</nobr>';
+
+  novaCelula = novaLinha.insertCell(2);//Coluna Vencimento
+  novaCelula.innerHTML = vencimento;
+  
+  novaCelula = novaLinha.insertCell(3);//Coluna Valor
+  novaCelula.innerHTML = valor;
+
+  novaCelula = novaLinha.insertCell(4);//Coluna Categoria
+  novaCelula.innerHTML = categoria;
+  novaCelula.className = ""; //hidden
+  
+  novaCelula = novaLinha.insertCell(5);//Coluna Código de Barras
+  novaCelula.innerHTML = codigoDeBarras;
+  novaCelula.className = ""; //hidden
+
+  novaCelula = novaLinha.insertCell(6);//Coluna Observações
+  novaCelula.innerHTML = observacoes;
+  novaCelula.className = ""; //hidden
+  
+  novaCelula = novaLinha.insertCell(7);//Coluna Ações
+  acoes = '<nobr>';
+  acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-excluir-despesa" data-id="'+id+'" data-descricao="'+descricao+'"  data-vencimento="'+vencimento+'"><i class="fas fa-trash ml-1 mr-1"></i></a>';
+  acoes += '</nobr>';
+  novaCelula.innerHTML = acoes;
+  novaCelula.className = "text-center";
+
+  //Exibe mensagem
+  // Toast.fire({
+  //   icon: 'info',
+  //   title: "Tabela de despesas atualizada."
+  // })
+}//InserirLinhaTabelaDespesa
+
+//#region INCLUSÃO E ALTERAÇÃO DE PARCELAS-----------------------------------------------------------------------------
+
+//Função utilizada para incluir ou editar parcelas individualmente (validado)
+//$('#btnIncluirAlterarParcelaND').click(function() { //Não utilizo mais essa forma, pois a submissão do formulário já faz a validação dos campos
+$("#formParcelaDespesaED").on("submit", function (event) { 
+  event.preventDefault();
+  //Verifica se o usuário está incluindo ou alterando uma parcela
+  let numeroParcela = $('#txtNumeroParcelaED').val();
+
+  if(numeroParcela == ""){ // Modo de Inclusão
+    IncluirParcelaED();
+    LimparCamposEditarDespesa(true);
+    $('#collapseCriarAlterarParcelaED').collapse("hide");
+  }else{ // Modo de Alteração
+    AlterarParcelaED(numeroParcela);
+    LimparCamposEditarDespesa(true);
+    $('#collapseCriarAlterarParcelaED').collapse("hide");
+  }
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função utilizada para incluir ou editar parcelas individualmente
+
+//Faz a inclusão da nova parcela direto no banco de dados
+function IncluirParcelaED(){
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = "incluirParcelaDespesa";
+
+  let idDespesa = $("#txtDespesaID").val();
+  let descricao = document.getElementById("txtDescricaoParcelaED").value;
+  let vencimento = $("#txtVencimentoParcelaED").val();
+  let valor = parseFloat($("#txtValorParcelaED").val().replace('.',''));
+  let codigoCategoria = parseInt($("#selCategoriaParcelaED").val());
+  let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaED").value;
+  let observacoes = document.getElementById("txtObservacoesParcelaED").value;
+
+  let objParcelaDespesa = {Parcela:descricao,
+    Vencimento:vencimento,
+    Valor:valor,
+    Categoria:codigoCategoria,
+    CodigoDeBarras:codigoDeBarras,
+    Observacoes:observacoes};
+  /** ALERTA DE GAMBIARRA!
+   * Ainda não sei o motivo. mas para conseguir utilizar o array no PHP tive que utilizar esse push aqui no JS (estudar mais sobre isso)
+   */
+  let arrayParcelaDespesa = [];
+  arrayParcelaDespesa.push(objParcelaDespesa);
+  
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      idDespesa : idDespesa,
+      arrayParcelaDespesa,    
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao+" \n "+ url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      PreencherCamposEditarDespesa();
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao incluir parcela: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao incluir parcela: "+"\n"+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//IncluirParcelaED
+
+//Faz a inclusão da nova parcela direto no banco de dados
+function AlterarParcelaED(){
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = "alterarParcelaDespesa";
+
+  let idDespesa = $("#txtDespesaID").val();
+  let idParcela = $("#txtNumeroParcelaED").val();
+  let descricao = document.getElementById("txtDescricaoParcelaED").value;
+  let vencimento = $("#txtVencimentoParcelaED").val();
+  let valor = parseFloat($("#txtValorParcelaED").val().replace('.',''));
+  let codigoCategoria = parseInt($("#selCategoriaParcelaED").val());
+  let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaED").value;
+  let observacoes = document.getElementById("txtObservacoesParcelaED").value;
+
+  let objParcelaDespesa = {Parcela:descricao,
+    Vencimento:vencimento,
+    Valor:valor,
+    Categoria:codigoCategoria,
+    CodigoDeBarras:codigoDeBarras,
+    Observacoes:observacoes};
+  /** ALERTA DE GAMBIARRA!
+   * Ainda não sei o motivo. mas para conseguir utilizar o array no PHP tive que utilizar esse push aqui no JS (estudar mais sobre isso)
+   */
+  let arrayParcelaDespesa = [];
+  arrayParcelaDespesa.push(objParcelaDespesa);
+  
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      idDespesa : idDespesa,
+      idParcela : idParcela,
+      arrayParcelaDespesa,    
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao+" \n "+ url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      PreencherCamposEditarDespesa();
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao alterar parcela: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao alterar parcela: "+"\n"+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//AlterarParcelaED
+
+//Evento executado ao clicar no botão de cancelar inclus]ao ou alteração de parcelas
+$('#btnCancelarInclusaoParcelaED').click(function() { 
+  LimparCamposEditarDespesa(true);
+  $('#collapseCriarAlterarParcelaED').collapse("hide");
+});//Evento Inclusão/Alteração parcelas
+
+//Ao clicar nas linhas da tabela de despesa os dados da parcela sobem para serem editados
+$("#tabelaParcelasED tbody").on('click', 'tr', function () {
+  $('#collapseCriarAlterarParcelaED').collapse("show");
+
+  let parcela = $('td:eq(0)', this).text().trim();
+  let descricao = $('td:eq(1)', this).text().trim();
+  let vencimento = $('td:eq(2)', this).text().trim();
+  let valor = $('td:eq(3)', this).text().trim();
+  let categoria = $('td:eq(4)', this).text().trim();
+  let codigoDeBarras = $('td:eq(5)', this).text().trim();
+  let observacoes = $('td:eq(6)', this).text().trim();
+  //Converte a data de vencimento para o padrão americano, o input do tipo date só recebe datas no formato YYYY-MM-DD
+  vencimento = FormataDataPadraoAmericano(vencimento);
+  //Remove o R$ se tiver
+  valor = valor.replace("R$","");
+  valor = valor.trim();
+  valor = ConverterValorParaRealBrasileiro(valor, false);
+
+  $('#txtDescricaoParcelaED').val(descricao);
+  $('#selCategoriaParcelaED').val(categoria);
+  $('#txtNumeroParcelaED').val(parcela);
+  $('#txtVencimentoParcelaED').val(vencimento);
+  $('#txtValorParcelaED').val(valor);
+  $('#txtCodigoDeBarrasParcelaED').val(codigoDeBarras);
+  $('#txtObservacoesParcelaED').val(observacoes);
+
+  $( "#txtDescricaoParcelaED" ).focus();
+})// Evento de click tabelaParcelasED
+
+//Faz a limpeza de todos os campos da tela
+function LimparCamposEditarDespesa(limparSomenteCamposIncluirParcelas = false){
+  //Campos de inclusão/Alteração de parcelas
+  $('#txtDescricaoParcelaED').val("");
+  // $('#selCategoriaParcelaED').val() = "";
+  $('#txtNumeroParcelaED').val("");
+  $('#txtValorParcelaED').val("");
+  $('#txtCodigoDeBarrasParcelaED').val("");
+  $('#txtObservacoesParcelaED').val("");
+
+  //Se o parâmetro estiver preenchido executa a limpeza só até aqui
+  if(limparSomenteCamposIncluirParcelas == true){
+    return;
+  }
+
+  //Campos do cabeçalho da despesa
+  // $('#chkDespesaFixaED').prop( "checked", false );  não vou limpar esse campo porque pode ser possivel que o usuário esteja fazendo o cadastro só de despesas fixas
+  $('#txtDescricaoED').val("");
+  // $('#selCategoriaND').val() = "";
+  $('#txtVencimentoED').val("");
+  $('#txtValorED').val("");
+  $('#txtParcelasED').val("1");
+  
+  //Limpa a tabela de parcelas
+  $("#tabelaParcelasBodyED tr").remove();
+  //Esconde os campos de inclusão/Alteração de parcelas
+  $('#collapseCriarAlterarParcelaED').collapse("hide");
+
+}//LimparCamposEditarDespesa
+
+//#endregion
+
+//#region EXCLUSÃO DE PARCELAS-----------------------------------------------------------------------------------------
+
+//Carrega o Modal Deletar Despesa
+$('#modal-deletar-parcela-despesa').on('show.bs.modal', function (event) {
+  //Coleta os dados informados no botão que chama o modal data-* attributes
+  let button = $(event.relatedTarget); // Button that triggered the modal
+  let id = button.data('id'); // Extract info from data-* attributes
+  let vencimento = button.data('vencimento');
+
+
+
+
+
+bruno trabalhar aqui, preencher os dados do modal e testar a exclusão de parcelas
+
+
+
+
+
+
+
+  //Formata os valores coletados
+
+  DeletarParcelaDespesaED
+
+  return;
+})//Carrega o Modal Deletar Despesa
+
+//Faz a exclusão de parcelas, pega o id da parcela a ser excluida no input oculto do modal excluir e envia na requisição ajax
+function DeletarParcelaDespesaED(){
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = "excluirParcelaDespesa";
+
+  let idDespesa = $("#txtDespesaID").val();
+  let idParcela = $("#txtModalExcluirNumeroParcelaED").val();
+  
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      idDespesa : idDespesa,
+      idParcela : idParcela,  
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao+" \n "+ url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      PreencherCamposEditarDespesa();
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao excluir parcela: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao excluir parcela: "+"\n"+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//DeletarParcelaDespesaED
+
+//#endregion

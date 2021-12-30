@@ -18,8 +18,8 @@
     <!--Hidden Inputs -->
     <input type="text" class="hidden" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
     <input type="text" class="hidden" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
-    <input type="text" class="" id="txtDespesaID" value="2">
-    <input type="text" class="" id="txtDataVencimentoDespesa" value="2021-12-15">
+    <input type="text" class="hidden" id="txtDespesaID" value="">
+    <input type="text" class="hidden" id="txtDataVencimentoDespesa" value="">
     <input type="text" class="hidden" name="pagina" id="pagina" value="editarDespesa">
 
     <!-- Painel do Painel Principal -->
@@ -36,16 +36,16 @@
         <div class="form-row">
           <div class="form-group col-12 text-right">
             <div class="custom-control custom-switch">
-              <input type="checkbox" class="custom-control-input" id="chkDespesaFixaED" name="chkDespesaFixaED">
+              <input type="checkbox" class="custom-control-input" id="chkDespesaFixaED" name="chkDespesaFixaED" disabled>
               <label class="custom-control-label" for="chkDespesaFixaED"><small><strong>Despesa Fixa</strong></small></label>
             </div>
           </div>
 
-          <div class="form-group col-md-8">
+          <div class="form-group col-md-8" id="agrupamentoCampoDescricaoED">
             <small class="mt-2"><strong>Descrição:</strong></small>
             <input type="text" class="form-control form-control-sm" id="txtDescricaoED" name="txtDescricaoED" required>
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" id="agrupamentoCampoCategoriaED">
             <small class="mt-4"><strong>Categoria:</strong></small>
             <div class="input-group input-group-sm">
               <select class="form-control form-control-sm" id="selCategoriaED" name="selCategoriaED" required>
@@ -63,7 +63,7 @@
           </div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" id="agrupamentoCamposVencimentoValorED">
           <div class="form-group col-lg-5 col-6">
             <small class="mt1"><strong>Vencimento:</strong></small>
             <input type="date" class="form-control form-control-sm" id="txtVencimentoED" name="txtVencimentoED" value="" required>
@@ -182,13 +182,14 @@
                 <table class="table table-sm display compact table-hover table-bordered" id="tabelaParcelasED" width="100%" cellspacing="0">
                   <thead class="thead-light">
                     <tr>
-                      <th>Parcela</th>
-                      <th class = "hidden">Descricao</th>
+                      <th class = "">Parcela</th>
+                      <th>Descricao</th>
                       <th>Vencimento</th>
                       <th>Valor</th>
-                      <th class = "hidden">Categoria</th>
-                      <th class = "hidden">CodigoDeBarras</th>
-                      <th class = "hidden">Observacoes</th>
+                      <th class = "">Categoria</th>
+                      <th class = "">CodigoDeBarras</th>
+                      <th class = "">Observacoes</th>
+                      <th class = "">Excluir</th>
                     </tr>
                   </thead>
                   <tbody id="tabelaParcelasBodyED">
@@ -210,7 +211,6 @@
     <!-- Fim do Painel Principal -->
   </div>
 </main>
-
 
 <!--Modal Cadastrar Categoria-->
 <div class="modal fade" id='modalCadastrarCategoria' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -253,3 +253,32 @@
   </div>
 </div>
 <!--FIM do modal Cadastrar Categoria-->
+
+<!-- Modal Deletar Parcela-->
+<div class="modal fade" id='modal-deletar-parcela-despesa' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-md" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <p class="modal-title" id="modalDeletarParcelaDespesaTitleED"></strong>?</p>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body modalDeleteAlinhar">
+        <!--Corpo do modal-->
+        <input type="text" class="form-control" id="txtModalExcluirNumeroParcelaED"  value="">
+        <img class="modalDelete" src="<?php echo HOME_URI ?>views/_images/delete.jpg" alt="">
+        <!--FIM Corpo do modal-->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Não</button>
+        <a class="btn btn-danger" onclick="DeletarParcelaDespesaED()">Sim</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- FIM Modal Deletar Parcela-->

@@ -204,7 +204,15 @@
 </div>
 <!--FIM do modal Estornar-->
 
-<!--Modal Quitar-->
+
+
+
+
+
+
+
+
+<!--Esse modal está aqui por gambiarra, trocar o evento do botão de acionar modal para click-->
 <div class="modal fade" id='modal-editar-despesa' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog  modal-md" role="document">
     <div class="modal-content">
