@@ -72,6 +72,9 @@
                 case "alterarParcelaDespesa":
                     $this->AlterarParcelaDespesa();
                     break;
+                case "excluirParcelaDespesa":
+                    $this->ExcluirParcelaDespesa();
+                    break;
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }

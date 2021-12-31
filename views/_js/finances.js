@@ -1,5 +1,5 @@
 //*********************************************************************************************************************
-//**********                                    FUNÇÕES GLOBAIS                                              **********                  
+//*******************************************   FUNÇÕES GLOBAIS   *****************************************************                  
 //*********************************************************************************************************************
 //#region DECLARAÇÃO DE VARIÁVEIS E FUNÇÕES GLOBAIS--------------------------------------------------------------------
 
@@ -105,8 +105,70 @@ function ConverterValorParaRealBrasileiro(valor, utilizarRS = true){
 
 //#endregion
 
+//#region CADASTRO DE CATEGORIA----------------------------------------------------------------------------------------
+
+//Função utilizada para cadastrar uma nova categoria
+$("#formCadastrarCategoriaNC").on("submit", function (event) { 
+  event.preventDefault();
+
+  let url = $('#idURL').val();
+  let requisicao = "incluirCategoria";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let descricao = $("#txtDescricaoCategoriaNC").val();
+  let tipo =  $("#selTipoCategoriaNC").val();
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+      requisicao : requisicao,
+      userID : userID,  
+      descricao : descricao,
+      tipo : tipo,    
+    },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao+" \n "+ url );
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      //Fecha o modal
+      $('#modalCadastrarCategoria').modal('toggle');
+
+      $('select').append($('<option>', {
+        value: msg[0].id,
+        text: descricao
+      }));
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao cadastrar categoria: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao cadastrar categoria: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+
+
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função cadastrar uma nova categoria
+
+//#endregion
+
 //*********************************************************************************************************************
-//**********                                   INCLUIR DESPESAS                                              **********                  
+//******************************************   INCLUIR DESPESAS   *****************************************************                  
 //*********************************************************************************************************************
 //#region GERAÇÃO DE PARCELAS E DEMAIS FUNÇÕES DO CABEÇALHO DAS DESPESAS-----------------------------------------------
 
@@ -606,70 +668,8 @@ function LimparCamposIncluirDespesa(limparSomenteCamposIncluirParcelas = false){
 
 //#endregion
 
-//#region CADASTRO DE CATEGORIA----------------------------------------------------------------------------------------
-
-//Função utilizada para cadastrar uma nova categoria
-$("#formCadastrarCategoriaNC").on("submit", function (event) { 
-  event.preventDefault();
-
-  let url = $('#idURL').val();
-  let requisicao = "incluirCategoria";
-  let userID = $('#userID').val(); // ID do usuário logado
-  let descricao = $("#txtDescricaoCategoriaNC").val();
-  let tipo =  $("#selTipoCategoriaNC").val();
-
-  //Requisição Ajax para enviar os dados para o banco de dados
-  $.ajax({
-    url : url,
-    type : 'post',
-    data : {
-      requisicao : requisicao,
-      userID : userID,  
-      descricao : descricao,
-      tipo : tipo,    
-    },
-    dataType: 'json',
-    beforeSend : function(){
-      //alert(requisicao+" \n "+ url );
-    }
-  })
-  .done(function(msg){
-    //alert(msg.mensagem);
-    if (msg.success == true){
-      //Fecha o modal
-      $('#modalCadastrarCategoria').modal('toggle');
-
-      $('select').append($('<option>', {
-        value: msg[0].id,
-        text: descricao
-      }));
-      //Exibe mensagem
-      Toast.fire({
-        icon: 'success',
-        title: msg.mensagem
-      })
-    }else{
-      //Exibe mensagem
-      Toast.fire({
-        icon: 'error',
-        title: msg.mensagem
-      })
-    }
-  })
-  .fail(function(jqXHR, textStatus, msg){
-    alert("Erro ao cadastrar categoria: "+"\n"+jqXHR.responseText);
-    console.log("Erro ao cadastrar categoria: "+"\n"+jqXHR);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-
-
-  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
-  return false;
-}); //FIM da função cadastrar uma nova categoria
-
-//#endregion
-
 //*********************************************************************************************************************
-//**********                                    LISTAR DESPESAS                                              **********                  
+//*******************************************   LISTAR DESPESAS   *****************************************************                  
 //*********************************************************************************************************************
 //#region LISTAR DESPESAS E FUNÇÕES EXECUTADAS NA TELA DE DESPESAS-----------------------------------------------------
 
@@ -711,17 +711,28 @@ function ListarDespesasMensal(){
     if(msg.success == true){
       //Limpa a tabela de Despesas
       $("#tabelaDespesasBodyDP tr").remove();
+
+      let arrayGraficoDespesas = [['Despesa', 'Valor']];
+      let valorDespesa;
+      let contador;
       //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
       for(var k in msg[0]) {
         //console.log(k, msg[0][k]["descricao"]);
+
+        //Chama a a função que irá inserir as linhas de despesa na tabela, uma a uma
         InserirLinhaTabelaDespesas(msg[0][k]);
         //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de despesas
         if(msg[0][k]["quitado"] == "SIM"){
           totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+          valorDespesa = parseFloat(msg[0][k]["valorquitado"]);
         }else{
           totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+          valorDespesa = parseFloat(msg[0][k]["valorpendente"]);
         }
+        //Cria um array com os dados da parcela para montar o gráfico de despesas
+        arrayGraficoDespesas[parseFloat(k) + 1] = [msg[0][k]["descricao"], valorDespesa]; 
       }
+      GraficoDespesaMensal(arrayGraficoDespesas);
       //Exibe os totais no rodapé da tabela de despesas
       $("#idTotalPendente").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
       $("#idTotalQuitado").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
@@ -1011,9 +1022,46 @@ $("#formModalEstornarDespesaDP").on("submit", function (event) {
 
 //#endregion
 
+//#region GRÁFICOS DE DESPESA------------------------------------------------------------------------------------------
+
+function GraficoDespesaMensal(arrayGraficoDespesas){
+  google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChartDespesas);
+
+        function drawChartDespesas() {
+
+          var data = google.visualization.arrayToDataTable(arrayGraficoDespesas);
+
+          //Formata os valores
+          var formatCurrency = new google.visualization.NumberFormat({
+            pattern: '$###,###,###.00'
+          });
+          formatCurrency.format(data, 1);
+
+          var options = {
+            title: 'Despesas Mensal',
+            legend: { position: 'bottom', alignment: 'midlle' },
+            is3D:true,
+            height:400,
+            vAxis: {format:'$###,###,###.00'}, // Money format
+          };
+
+          var chart = new google.visualization.PieChart(document.getElementById('grafico-despesas'));
+
+          chart.draw(data, options);
+        }
+
+  $(window).resize(function(){
+    drawChartDespesas();
+  });
+}
+
+//#endregion
+
 //*********************************************************************************************************************
-//**********                                    EDITAR DESPESAS                                              **********                  
+//*******************************************   EDITAR DESPESAS   *****************************************************                  
 //*********************************************************************************************************************
+//#region CARREGA OS DADOS DA DESPESA E ALIMENTA A TABELA DE PARCELAS--------------------------------------------------
 
 //Carrega o Modal Estornar Despesa
 //Bruno aqui não tem modal nenhum apenas aproveitei a função, trocar essa função aqui por um evento de click
@@ -1169,7 +1217,7 @@ function InserirLinhaTabelaParcelas(arrayDados){
   //Insere os valores na tabela
   novaCelula = novaLinha.insertCell(0); //Coluna Parcela
   novaCelula.innerHTML = id;
-  novaCelula.className = ""; //hidden
+  novaCelula.className = "hidden";
 
   novaCelula = novaLinha.insertCell(1);//Coluna Descrição
   novaCelula.innerHTML = '<nobr>'+descricao+'</nobr>';
@@ -1182,19 +1230,19 @@ function InserirLinhaTabelaParcelas(arrayDados){
 
   novaCelula = novaLinha.insertCell(4);//Coluna Categoria
   novaCelula.innerHTML = categoria;
-  novaCelula.className = ""; //hidden
+  novaCelula.className = "hidden";
   
   novaCelula = novaLinha.insertCell(5);//Coluna Código de Barras
   novaCelula.innerHTML = codigoDeBarras;
-  novaCelula.className = ""; //hidden
+  novaCelula.className = "hidden";
 
   novaCelula = novaLinha.insertCell(6);//Coluna Observações
   novaCelula.innerHTML = observacoes;
-  novaCelula.className = ""; //hidden
+  novaCelula.className = "hidden";
   
   novaCelula = novaLinha.insertCell(7);//Coluna Ações
   acoes = '<nobr>';
-  acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-excluir-despesa" data-id="'+id+'" data-descricao="'+descricao+'"  data-vencimento="'+vencimento+'"><i class="fas fa-trash ml-1 mr-1"></i></a>';
+  acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-deletar-parcela-despesa" data-id="'+id+'" data-descricao="'+descricao+'"  data-vencimento="'+vencimento+'"><i class="fas fa-trash ml-1 mr-1"></i></a>';
   acoes += '</nobr>';
   novaCelula.innerHTML = acoes;
   novaCelula.className = "text-center";
@@ -1205,6 +1253,8 @@ function InserirLinhaTabelaParcelas(arrayDados){
   //   title: "Tabela de despesas atualizada."
   // })
 }//InserirLinhaTabelaDespesa
+
+//#endregion
 
 //#region INCLUSÃO E ALTERAÇÃO DE PARCELAS-----------------------------------------------------------------------------
 
@@ -1425,6 +1475,7 @@ function LimparCamposEditarDespesa(limparSomenteCamposIncluirParcelas = false){
   //Limpa a tabela de parcelas
   $("#tabelaParcelasBodyED tr").remove();
   //Esconde os campos de inclusão/Alteração de parcelas
+  
   $('#collapseCriarAlterarParcelaED').collapse("hide");
 
 }//LimparCamposEditarDespesa
@@ -1439,22 +1490,21 @@ $('#modal-deletar-parcela-despesa').on('show.bs.modal', function (event) {
   let button = $(event.relatedTarget); // Button that triggered the modal
   let id = button.data('id'); // Extract info from data-* attributes
   let vencimento = button.data('vencimento');
+  let descricao = button.data('descricao');
 
+  let modal = $(this)
+  modal.find('#txtModalExcluirNumeroParcelaED').val(id) // Passa o id salvo no botão para o campo id do modal
+  modal.find('#modalDeletarParcelaDespesaTitleED').text("Deseja realmente exluir a parcela: "+descricao)
 
-
-
-
-bruno trabalhar aqui, preencher os dados do modal e testar a exclusão de parcelas
-
-
-
-
-
-
-
-  //Formata os valores coletados
-
-  DeletarParcelaDespesaED
+  //ALERTA DE GAMBIARRA!
+  /**O botão de exluir parcela fica dentro da tabela de parcelas, porem essa tabela tem um evento de click nas linhas (tr) 
+   * Que ao serem clicadas, sobe os dados para o painel de edição, porém quando eu clico no botão de excluir parcela
+   * não quero que esse evento aconteça, mas o momento não sei como impedir isso, então criei a gambiarra abaixo para limpar os campos
+   * e fechar o painel de edição.
+   */
+   LimparCamposEditarDespesa(true);
+   $('#collapseCriarAlterarParcelaED').collapse('hide');
+  
 
   return;
 })//Carrega o Modal Deletar Despesa
@@ -1488,7 +1538,11 @@ function DeletarParcelaDespesaED(){
   .done(function(msg){
     //alert(msg.mensagem);
     if (msg.success == true){
+      //Fecha o modal
+      $('#modal-deletar-parcela-despesa').modal('toggle');
+
       PreencherCamposEditarDespesa();
+
       //Exibe mensagem
       Toast.fire({
         icon: 'success',

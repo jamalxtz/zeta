@@ -40,6 +40,9 @@
               <label class="custom-control-label" for="chkDespesaFixaED"><small><strong>Despesa Fixa</strong></small></label>
             </div>
           </div>
+          <!-- <div class="form-group col-12 text-right">
+            <button class="btn-sm btn btn-link" type="button" data-toggle="modal" data-target="#modalCadastrarCategoria">Remover Despesa Fixa</button>
+          </div> -->
 
           <div class="form-group col-md-8" id="agrupamentoCampoDescricaoED">
             <small class="mt-2"><strong>Descrição:</strong></small>
@@ -182,14 +185,14 @@
                 <table class="table table-sm display compact table-hover table-bordered" id="tabelaParcelasED" width="100%" cellspacing="0">
                   <thead class="thead-light">
                     <tr>
-                      <th class = "">Parcela</th>
-                      <th>Descricao</th>
+                      <th class = "hidden">Parcela</th>
+                      <th>Descrição</th>
                       <th>Vencimento</th>
                       <th>Valor</th>
-                      <th class = "">Categoria</th>
-                      <th class = "">CodigoDeBarras</th>
-                      <th class = "">Observacoes</th>
-                      <th class = "">Excluir</th>
+                      <th class = "hidden">Categoria</th>
+                      <th class = "hidden">CodigoDeBarras</th>
+                      <th class = "hidden">Observacoes</th>
+                      <th class = "text-center">Excluir</th>
                     </tr>
                   </thead>
                   <tbody id="tabelaParcelasBodyED">
@@ -260,7 +263,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <p class="modal-title" id="modalDeletarParcelaDespesaTitleED"></strong>?</p>
+        <p class="modal-title"><strong id="modalDeletarParcelaDespesaTitleED"></strong></p>
         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -268,7 +271,7 @@
 
       <div class="modal-body modalDeleteAlinhar">
         <!--Corpo do modal-->
-        <input type="text" class="form-control" id="txtModalExcluirNumeroParcelaED"  value="">
+        <input type="text" class="form-control hidden" id="txtModalExcluirNumeroParcelaED"  value="">
         <img class="modalDelete" src="<?php echo HOME_URI ?>views/_images/delete.jpg" alt="">
         <!--FIM Corpo do modal-->
       </div>

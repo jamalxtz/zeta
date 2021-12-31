@@ -1,52 +1,34 @@
-// google.load("visualization", "1", {packages:["corechart"]});
-// google.setOnLoadCallback(drawChart1);
-// function drawChart1() {
-//   var data = google.visualization.arrayToDataTable([
-//     ['Year', 'Sales', 'Expenses'],
-//     ['2004',  1000,      400],
-//     ['2005',  1170,      460],
-//     ['2006',  660,       1120],
-//     ['2007',  1030,      540]
-//   ]);
 
-//   var options = {
-//     title: 'Company Performance',
-//     hAxis: {title: 'Year', titleTextStyle: {color: 'red'}}
-//  };
+function GraficoDespesaMensal(arrayGraficoDespesas){
+  google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChartDespesas);
 
-// var chart = new google.visualization.PieChart(document.getElementById('grafico-despesas'));
-//   chart.draw(data, options);
-// }
+        function drawChartDespesas() {
 
-google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawChartDespesas);
+          var data = google.visualization.arrayToDataTable([
+            ['Task', 'Hours per Day'],
+            ['Work',     150.20],
+            ['Eat',      600.30],
+            ['Commute',  158.69],
+            ['Watch TV', 87.8],
+            ['Sleep',    12.50]
+          ]);
 
-      function drawChartDespesas() {
+          var options = {
+            title: 'Despesas Mensal',
+            legend: { position: 'bottom', alignment: 'midlle' },
+            is3D:true,
+            height:400,
+          };
 
-        var data = google.visualization.arrayToDataTable([
-          ['Task', 'Hours per Day'],
-          ['Work',     150.20],
-          ['Eat',      600.30],
-          ['Commute',  158.69],
-          ['Watch TV', 87.8],
-          ['Sleep',    12.50]
-        ]);
+          var chart = new google.visualization.PieChart(document.getElementById('grafico-despesas'));
 
-        var options = {
-          title: 'Despesas Mensal',
-          legend: { position: 'bottom', alignment: 'midlle' },
-          is3D:true,
-          height:400,
-        };
+          chart.draw(data, options);
+        }
 
-        var chart = new google.visualization.PieChart(document.getElementById('grafico-despesas'));
-
-        chart.draw(data, options);
-      }
-
-$(window).resize(function(){
-  drawChart1();
-  drawChartDespesas();
-});
+  $(window).resize(function(){
+    drawChartDespesas();
+  });
+}
 
 // Reminder: you need to put https://www.google.com/jsapi in the head of your document or as an external resource on codepen //
