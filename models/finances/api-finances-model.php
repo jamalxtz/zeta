@@ -75,6 +75,15 @@
                 case "excluirParcelaDespesa":
                     $this->ExcluirParcelaDespesa();
                     break;
+                case "alterarDespesa":
+                    $this->AlterarDespesa();
+                    break;
+                case "alterarDespesaFixa":
+                    $this->AlterarDespesaFixa();
+                    break;
+                case "atualizarDataReferencia":
+                    $this->AtualizarDataReferencia();
+                    break;
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
@@ -127,16 +136,7 @@
 
             //Faz uma consulta para retornar o id que será utilizado para cadastrar a Despesa
             try{
-                $sql = "-- phpMyAdmin SQL Dump
-                -- version 5.0.2
-                -- https://www.phpmyadmin.net/
-                --
-                -- Host: 127.0.0.1:3306
-                -- Tempo de geração: 21-Dez-2021 às 20:28
-                -- Versão do servidor: 5.7.31
-                -- versão do PHP: 7.3.21
-                
-                SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
+                $sql = "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
                 START TRANSACTION;
                 SET time_zone = '+00:00';
                 
@@ -153,6 +153,22 @@
                 -- --------------------------------------------------------
                 
                 --
+                -- Estrutura da tabela `configuracoes`
+                --
+                
+                DROP TABLE IF EXISTS `configuracoes`;
+                CREATE TABLE IF NOT EXISTS `configuracoes` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `tema` varchar(255) DEFAULT NULL,
+                  `data_referencia` varchar(255) DEFAULT NULL,
+                  `usuarios_id` int(11) NOT NULL,
+                  PRIMARY KEY (`id`),
+                  KEY `fk_configuracoes_usuarios_id` (`usuarios_id`)
+                ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+                
+                -- --------------------------------------------------------
+                
+                --
                 -- Estrutura da tabela `fn_categorias`
                 --
                 
@@ -165,14 +181,17 @@
                   `usuarios_id` int(11) NOT NULL,
                   PRIMARY KEY (`id`),
                   KEY `fk_fn_categorias_usuarios` (`usuarios_id`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+                ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
                 
                 --
                 -- Extraindo dados da tabela `fn_categorias`
                 --
                 
                 INSERT INTO `fn_categorias` (`id`, `descricao`, `tipo`, `imagem`, `usuarios_id`) VALUES
-                (2, 'Outras', 'Despesa', '', 62);
+                (15, 'Lazer', 'Despesa', NULL, 62),
+                (16, 'Alimentação', 'Despesa', NULL, 62),
+                (17, 'Despesas de Casa', 'Despesa', NULL, 62),
+                (18, 'Transporte', 'Despesa', NULL, 62);
                 
                 -- --------------------------------------------------------
                 
@@ -185,13 +204,14 @@
                   `id` int(11) NOT NULL AUTO_INCREMENT,
                   `descricao` varchar(255) DEFAULT NULL,
                   `fixo` varchar(5) DEFAULT NULL,
+                  `vencimento_despesa_fixa` datetime DEFAULT NULL,
                   `valor_despesa_fixa` varchar(255) DEFAULT NULL,
                   `categorias_id` int(11) NOT NULL,
                   `usuarios_id` int(11) NOT NULL,
                   PRIMARY KEY (`id`,`usuarios_id`,`categorias_id`) USING BTREE,
                   KEY `fk_fn_despesas_usuarios_idx` (`usuarios_id`),
                   KEY `fk_fn_despesas_fn_categorias` (`categorias_id`)
-                ) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
+                ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
                 
                 -- --------------------------------------------------------
                 
@@ -215,7 +235,7 @@
                   PRIMARY KEY (`id`,`fn_categorias_id`,`fn_despesas_id`),
                   KEY `fk_fn_despesas_parcelas_fn_categorias1_idx` (`fn_categorias_id`),
                   KEY `fk_fn_despesas_parcelas_fn_despesas1_idx` (`fn_despesas_id`)
-                ) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
+                ) ENGINE=MyISAM AUTO_INCREMENT=104 DEFAULT CHARSET=latin1;
                 
                 -- --------------------------------------------------------
                 
@@ -293,8 +313,8 @@
                 --
                 
                 INSERT INTO `usuarios` (`id`, `cpf`, `rg`, `nome`, `sobrenome`, `email`, `telefone`, `celular`, `cep`, `logradouro`, `complemento`, `bairro`, `cidade`, `estado`, `imagem`, `cadastro`, `senha`, `dica`, `user_session_id`, `user_permissions`, `user`, `situacao`) VALUES
-                (62, '75463458120', '58364152', 'Bruno Mateus', 'Silva Souza', 'bruno_mss@outlook.com', '35862047', '62994626462', '74583050', 'Rua Trajano de Sá Guimaraes', 'Qd 09 Lt 05', 'Vila Maria Dilce', 'Goiânia', 'GO', 'foto3x4png_426531666.png', NULL, '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'hid07vkouoir68rh4fkhl64pt5', '9e10nsc88tm4juljfqb57qmiof', 'a:2:{i:0;s:19:\"AcessarAreaRestrita\";i:1;s:16:\"AcessarSiteAdmin\";}', 'bruno_mss@outlook.com', 'Ativo'),
-                (63, '00442953260', '4399743', 'Renan', 'Além Silva', 'renanalem@alemtecnologia.com.br', '35868027', '62985134662', '8798465', '5646546546', '654654654', '465465465', '4564654', '54654654', '5jpg_963156278.jpg', '2020-07-19', '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'Senha 123', '111eda0e3dc780ff0ef3c31f51574d73', 'a:2:{i:0;s:13:\"user-register\";i:1;s:18:\"gerenciar-noticias\";}', 'renanalem@alemtecnologia.com.br', ''),
+                (62, '75463458120', '58364152', 'Bruno Mateus', 'Silva Souza', 'bruno_mss@outlook.com', '35862047', '62994626462', '74583050', 'Rua Trajano de Sá Guimaraes', 'Qd 09 Lt 05', 'Vila Maria Dilce', 'Goiânia', 'GO', 'foto3x4png_426531666.png', NULL, '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'hid07vkouoir68rh4fkhl64pt5', '7fj3b71mo509tcrdo2gnlipi3s', 'a:2:{i:0;s:19:\"AcessarAreaRestrita\";i:1;s:16:\"AcessarSiteAdmin\";}', 'bruno_mss@outlook.com', 'Ativo'),
+                (63, '004.429.532-60', '4399743', 'Renan', 'Além Silva', 'renanalem@alemtecnologia.com.br', '(35) 8680-27', '(62) 9 8513-4662', '87984-65', '5646546546', '654654654', '465465465', '4564654', '54654654', '5jpg_963156278.jpg', '2020-07-19', '$2a$08$icg7xTO4I72ef15BJz9EgeY5WKjfFtCLXjLob1t/U6rMYXUWrH2x6', 'Senha 123', '111eda0e3dc780ff0ef3c31f51574d73', 'a:2:{i:0;s:19:\"AcessarAreaRestrita\";i:1;s:16:\"AcessarSiteAdmin\";}', 'renanalem@alemtecnologia.com.br', 'Ativo'),
                 (64, '75463458121', '1254635', 'Carlos daniel', 'souza pires', 'carlos@gmail.com', '62 3586-2047', '62 9 9462-6462', '74583050', 'Rua Trajano de Sá Guimarães', 'Qd 09 Lt 05', 'Jardim Clarissa', 'Goiânia', 'GO', 'foto3x4png_1156961214.png', '2021-03-16', '$2a$08$sthdPYQtn63aaqBii7nX2u5J08NSslg2yX5eFIyo.Vs7oStd6Cb7q', 'teste', NULL, 'AcessarAreaRestrita', 'carlos@gmail.com', 'Ativo');
                 
                 --
@@ -569,6 +589,90 @@
         }//IncluirDespesaFixa
 
         /**
+         * Alterar Despesa
+         * Altera apenas o cabeçalho da despesa
+         * Esse método recebe via POST os parâmetros userID, idDespesa, descricão
+         */
+        public function AlterarDespesa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $idDespesa = $_POST['idDespesa'];
+            $descricao = $_POST['descricao'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "UPDATE fn_despesas SET
+                    descricao = '{$descricao}',
+                    fixo = NULL,
+                    vencimento = NULL,
+                    valor = NULL
+                WHERE id = {$idDespesa}
+                    AND usuarios_id = {$userID}";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao alterar despesa - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesa alterada com sucesso!");
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao alterar despesa - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//AlterarDespesa
+
+         /**
+         * Alterar Despesa FIxa
+         * Altera apenas o cabeçalho da despesa
+         * Esse método recebe via POST os parâmetros userID, idDespesa, descricão
+         */
+        public function AlterarDespesaFixa(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $idDespesa = $_POST['idDespesa'];
+            $descricao = $_POST['descricao'];
+            $vencimento = $_POST['vencimento'];
+            $valor = $_POST['valor'];
+            $categoria = $_POST['categoria'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "UPDATE fn_despesas SET
+                    descricao = '{$descricao}',
+                    vencimento_despesa_fixa = '{$vencimento}',
+                    valor_despesa_fixa = '{$valor}',
+                    categorias_id = {$categoria},
+                    fixo = 'SIM'
+                WHERE id = {$idDespesa}
+                    AND usuarios_id = {$userID}"; 
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao alterar despesa fixa - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesa fixa alterada com sucesso!");
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao alterar despesa fixa - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//AlterarDespesaFixa
+
+        /**
          * Faz a inclusão de novas categorias
          * Esse método recebe via POST os parâmetros para o cadastro e retorna o id da categoria cadastrada.
          */
@@ -810,6 +914,41 @@
                 exit;
             }
         }//ListarDadosDespesaPendentePorCodigo
+
+        /**
+         * Atualizar Data de Referência
+         * Atualiza a data do mes que é utilizada como referencia para consultar as receitas e despesas
+         * Esse método recebe via POST os parâmetros userID, dataReferencia
+         */
+        public function AtualizarDataReferencia(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $dataReferencia = $_POST['dataReferencia'];
+
+            try{
+                $sql = "REPLACE INTO configuracoes
+                ( usuario_id, data_referencia )
+                VALUES
+                ( {$userID} , '{$dataReferencia}' )";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao atualizar data de referência - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Data de referência atualizada com sucesso!");
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao atualizar data de referência - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//AtualizarDataReferencia
 
         public function tempo_corrido($time) {
 

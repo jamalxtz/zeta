@@ -206,7 +206,6 @@
       <!-- FIM Corpo do Painel Principal -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="LimparCamposIncluirDespesa()">Limpar</button>
         <button type="button" class="btn btn-success" id="btnSalvarDespesaED">Salvar</button>
       </div>
       <!-- </form> -->

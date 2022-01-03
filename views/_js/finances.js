@@ -292,7 +292,7 @@ function IncluirParcela(){
   let tabelaDeParcelas = document.getElementById("tabelaParcelasBodyND");
   let numeroDaParcela = $('#tabelaParcelasND tr').length;
   let vencimento = $("#txtVencimentoParcelaND").val();
-  let valor = parseFloat($("#txtValorParcelaND").val().replace('.',''));
+  let valor = ConverterRealParaFloat($("#txtValorParcelaND").val());
   let descricao = document.getElementById("txtDescricaoParcelaND").value;
   let codigoCategoria = parseInt($("#selCategoriaParcelaND").val());
   let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaND").value;
@@ -423,7 +423,7 @@ $("#tabelaParcelasND tbody").on('click', 'tr', function () {
 $('#btnSalvarDespesaND').click(function() {
   //Faz a validação dos campos obrigatórios
   let descricao = $('#txtDescricaoND').val().trim();
-  let vecimento = $('#txtVencimentoND').val();
+  let vencimento = $('#txtVencimentoND').val();
   let valor = $('#txtValorND').val();
   if(descricao.length < 3){
     //Exibe mensagem
@@ -1020,6 +1020,55 @@ $("#formModalEstornarDespesaDP").on("submit", function (event) {
   return false;
 }); //FIM da função Estornar Despesa
 
+//Salva a data de referência quando alterada
+$("#txtDataReferenciaDP").blur(function(){
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = 'atualizarDataReferencia';
+  let dataReferencia = $('#txtDataReferenciaDP').val();//yyyy-MM
+
+  dataReferencia = dataReferencia+'01';//yyyy-MM-DD
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+    requisicao : requisicao,
+    userID : userID,
+    dataReferencia : dataReferencia,
+  },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao + url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      PreencherCamposEditarDespesa();
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'success',
+        title: msg.mensagem
+      })
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
+    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+});//FIM Salva a data de referência quando alterada
+
 //#endregion
 
 //#region GRÁFICOS DE DESPESA------------------------------------------------------------------------------------------
@@ -1153,7 +1202,7 @@ function PreencherCamposEditarDespesa(){
       $("#txtDescricaoED").val(msg[0][0][0]["descricao"]);
       $("#selCategoriaED").val(msg[0][0][0]["categorias_id"]);
       if(despesaFixa == true){
-        $("#txtVencimentoED").val(msg[0][0][0]["vencimento_despesa_fixa"]);
+        $("#txtVencimentoED").val(msg[0][0][0]["vencimento_despesa_fixa"].substring(0,10));
         $("#txtValorED").val(msg[0][0][0]["valor_despesa_fixa"]);
       }else{
         $("#agrupamentoCampoCategoriaED").addClass("hidden");
@@ -1288,7 +1337,7 @@ function IncluirParcelaED(){
   let idDespesa = $("#txtDespesaID").val();
   let descricao = document.getElementById("txtDescricaoParcelaED").value;
   let vencimento = $("#txtVencimentoParcelaED").val();
-  let valor = parseFloat($("#txtValorParcelaED").val().replace('.',''));
+  let valor = ConverterRealParaFloat($("#txtValorParcelaED"));
   let codigoCategoria = parseInt($("#selCategoriaParcelaED").val());
   let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaED").value;
   let observacoes = document.getElementById("txtObservacoesParcelaED").value;
@@ -1356,7 +1405,7 @@ function AlterarParcelaED(){
   let idParcela = $("#txtNumeroParcelaED").val();
   let descricao = document.getElementById("txtDescricaoParcelaED").value;
   let vencimento = $("#txtVencimentoParcelaED").val();
-  let valor = parseFloat($("#txtValorParcelaED").val().replace('.',''));
+  let valor = ConverterRealParaFloat($("#txtValorParcelaED").val());
   let codigoCategoria = parseInt($("#selCategoriaParcelaED").val());
   let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaED").value;
   let observacoes = document.getElementById("txtObservacoesParcelaED").value;
@@ -1562,5 +1611,185 @@ function DeletarParcelaDespesaED(){
     console.log("Erro ao excluir parcela: "+"\n"+jqXHR.responseText);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
 }//DeletarParcelaDespesaED
+
+//#endregion
+
+//#region ALTERAÇÃO DE DESPESA E DESPESA FIXA (CABEÇALHO)--------------------------------------------------------------
+
+//Evento do botão que salva a despesa no banco de dados
+$('#btnSalvarDespesaED').click(function() {
+  //Faz a validação dos campos obrigatórios
+  let descricao = $('#txtDescricaoED').val().trim();
+
+  if(descricao.length < 3){
+    //Exibe mensagem
+    Toast.fire({
+      icon: 'error',
+      title: "Informe uma descrição."
+    })
+    $('#txtDescricaoED').focus();
+    return;
+  }
+
+  //Verifica se irá fazer a inclusão de uma despesa com parcelas ou uma despesa fixa
+  let chkDespesaFixa = document.getElementById('chkDespesaFixaED');
+
+  if(chkDespesaFixa.checked) { //Inclusão de Despesa Fixa
+    //Faz a validação do campo Categoria
+    if($('#selCategoriaED')[0].checkValidity() == false){
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "Selecione uma categoria."
+      })
+      $('#selCategoriaED').focus();
+      return;
+    }
+    //Faz a validação do campo Vencimento
+    if($('#txtVencimentoED')[0].checkValidity() == false){
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "Selecione uma data de vencimento."
+      })
+      $('#txtVencimentoED').focus();
+      return;
+    }
+    //Faz a validação do campo Valor
+    if($('#txtValorED') == ""){
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "Informe um valor válido."
+      })
+      $('#txtValorED').focus();
+      return;
+    }
+    AlterarDespesaFixa()
+
+  } else { //Inclusão de Despesa com Parcela
+    //Faz a validação da tabela de parcelas
+    if($('#tabelaParcelasED tr').length <= 1){
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: "É necessário incluir pelo menos uma parcela para continuar."
+      })
+      $('#collapseCriarAlterarParcelaED').collapse("show");
+      $( "#txtDescricaoParcelaED" ).focus();
+      return;
+    }
+    AlterarDespesa()
+  }
+})//Evento Click btnSalvarDespesaED
+
+//Salvar nova despesa (Validado)
+/*
+* Para salvar uma nova despesa irei utilizar 2 arrays, o primeiro irá armazenar os dados da despesa como nome, vencimento, etc.. 
+* O segundo array irá armazenar os dados das parcelas, que serão geradas dinamicamente na tabela 'tabelaParcelas'
+*/
+function AlterarDespesa(){
+  let url = $('#idURL').val();
+  let requisicao = "alterarDespesa";
+  let userID = $('#userID').val(); // ID do usuário logado
+
+  let idDespesa = $("#txtDespesaID").val();
+  let descricao = $("#txtDescricaoED").val();
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+        url : url,
+        type : 'post',
+        data : {
+          requisicao : requisicao,
+          userID : userID,
+          idDespesa : idDespesa,
+          descricao : descricao,      
+        },
+        dataType: 'json',
+        beforeSend : function(){
+          //alert(requisicao+" \n "+ url );
+        }
+  })
+  .done(function(msg){
+      //alert(msg.mensagem);
+      if (msg.success == true){
+        //Exibe mensagem
+        Toast.fire({
+          icon: 'success',
+          title: msg.mensagem
+        })
+      }else{
+        Toast.fire({
+          icon: 'error',
+          title: msg.mensagem
+        })
+        console.log(msg.mensagem);
+      }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+      alert("Erro ao alterar despesa: "+"\n"+jqXHR.responseText);
+      console.log("Erro ao alterar despesa: "+"\n"+jqXHR);
+      //console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//AlterarDespesa
+
+//Alterar Despesa Fixa
+/*
+* Despesas fixas não geram parcelas no momento da criação, as parcelas são criadas no momento em que o usuário abre a lista de despesas
+* e o sistema identifica que existem despesas fixas não informadas na tabela de despesas.
+*/
+function AlterarDespesaFixa(){
+  let url = $('#idURL').val();
+  let requisicao = "alterarDespesaFixa";
+  let userID = $('#userID').val(); // ID do usuário logado
+
+  let idDespesa = $("#txtDespesaID").val();
+  let descricao = $("#txtDescricaoED").val();
+  let vencimento = $('#txtVencimentoED').val();
+  let valor = $('#txtValorED').val();
+  let categoria = $("#selCategoriaED").val();
+
+  //vencimento = FormataDataPadraoAmericano(vencimento);
+  valor = ConverterRealParaFloat(valor);
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+        url : url,
+        type : 'post',
+        data : {
+          requisicao : requisicao,
+          idDespesa : idDespesa,
+          userID : userID,
+          descricao : descricao,
+          vencimento : vencimento,
+          valor : valor,
+          categoria : categoria,      
+        },
+        dataType: 'json',
+        beforeSend : function(){
+          //alert(vencimento);
+        }
+  })
+  .done(function(msg){
+      //alert(msg.mensagem);
+      if (msg.success == true){
+        Toast.fire({
+          icon: 'success',
+          title: msg.mensagem
+        })
+      }else{
+        Toast.fire({
+          icon: 'error',
+          title: msg.mensagem
+        })
+        console.log(msg.mensagem)
+      }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+      alert("Erro ao editar despesa: "+"\n"+jqXHR.responseText);
+      console.log("Erro ao editar despesa: "+"\n"+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//AlterarDespesaFixa
 
 //#endregion
