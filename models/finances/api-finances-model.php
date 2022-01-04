@@ -84,6 +84,9 @@
                 case "atualizarDataReferencia":
                     $this->AtualizarDataReferencia();
                     break;
+                case "buscarDataReferencia":
+                    $this->BuscarDataReferencia();
+                    break;
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
@@ -606,8 +609,8 @@
                 $sql = "UPDATE fn_despesas SET
                     descricao = '{$descricao}',
                     fixo = NULL,
-                    vencimento = NULL,
-                    valor = NULL
+                    vencimento_despesa_fixa = NULL,
+                    valor_despesa_fixa = NULL
                 WHERE id = {$idDespesa}
                     AND usuarios_id = {$userID}";
 
@@ -628,7 +631,7 @@
             }
         }//AlterarDespesa
 
-         /**
+        /**
          * Alterar Despesa FIxa
          * Altera apenas o cabeçalho da despesa
          * Esse método recebe via POST os parâmetros userID, idDespesa, descricão
@@ -928,10 +931,20 @@
             $dataReferencia = $_POST['dataReferencia'];
 
             try{
-                $sql = "REPLACE INTO configuracoes
-                ( usuario_id, data_referencia )
-                VALUES
-                ( {$userID} , '{$dataReferencia}' )";
+                //Verifico se já existe um registro de configuração para o usuário
+                $sql = "SELECT COUNT(*) FROM configuracoes WHERE usuarios_id = {$userID}";
+                $consulta =  $db_con->query($sql);
+                $count = $consulta->fetchColumn();
+
+                if($count == 0){
+                    $sql = "INSERT INTO configuracoes (data_referencia, usuarios_id)
+                    VALUES ('{$dataReferencia}', {$userID} )";
+                }else{
+                    $sql = "UPDATE configuracoes SET
+                    data_referencia = '{$dataReferencia}'
+                    WHERE
+                    usuarios_id = {$userID}";
+                }
 
                 $consulta =  $db_con->query($sql);
 
@@ -949,6 +962,42 @@
                 exit;
             }
         }//AtualizarDataReferencia
+
+        /**
+         * Lista todas as despesas por mês 
+         * Esse método recebe via POST os parâmetros mes, ano e userID
+         */
+        public function BuscarDataReferencia(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "SELECT data_referencia
+                FROM configuracoes
+                WHERE usuarios_id = {$userID}";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //O método fetchAll transforma o resultado da consulta em um array
+                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
+                $result = $consulta->fetchAll(PDO::FETCH_ASSOC);
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Data de referência listada com sucesso!",$result);
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//BuscarDataReferencia
 
         public function tempo_corrido($time) {
 

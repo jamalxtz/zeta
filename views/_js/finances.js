@@ -24,8 +24,8 @@ window.onload = function() {
   //Verifica qual página está sendo carregada (existe um input em cada página com o nome dela no value)
   if ( $('#pagina').val() == "despesas"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
-    $('#txtDataReferenciaDP').val("2021-12");
-    ListarDespesasMensal();
+    PreencherDataReferencia();
+    
   }
   else if ( $('#pagina').val() == "editarDespesa"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
@@ -1028,7 +1028,7 @@ $("#txtDataReferenciaDP").blur(function(){
   let requisicao = 'atualizarDataReferencia';
   let dataReferencia = $('#txtDataReferenciaDP').val();//yyyy-MM
 
-  dataReferencia = dataReferencia+'01';//yyyy-MM-DD
+  dataReferencia = dataReferencia+'-01';//yyyy-MM-DD
 
   //Requisição Ajax para enviar os dados para o banco de dados
   $.ajax({
@@ -1048,12 +1048,7 @@ $("#txtDataReferenciaDP").blur(function(){
   .done(function(msg){
     //alert(msg.mensagem);
     if (msg.success == true){
-      PreencherCamposEditarDespesa();
       //Exibe mensagem
-      Toast.fire({
-        icon: 'success',
-        title: msg.mensagem
-      })
     }else{
       //Exibe mensagem
       Toast.fire({
@@ -1068,6 +1063,44 @@ $("#txtDataReferenciaDP").blur(function(){
     console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
 });//FIM Salva a data de referência quando alterada
+
+function PreencherDataReferencia(){
+
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = 'buscarDataReferencia';
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+    requisicao : requisicao,
+    userID : userID,
+  },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao + url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    console.log(msg);
+    if (msg.success == true){
+      let dataFormatada;
+      dataFormatada = msg[0][0].data_referencia.substring(0,7);//Formato a data de YYYY-mm-dd para YYYY-mm
+      $('#txtDataReferenciaDP').val(dataFormatada);
+      ListarDespesasMensal();
+    }else{
+      $('#txtDataReferenciaDP').val(DataAtual());
+    }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
+    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}
 
 //#endregion
 

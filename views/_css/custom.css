@@ -131,3 +131,14 @@ border: 1px dashed red !important;
 .texto-riscado{
     text-decoration: line-through;
 }
+
+/*Remove o ícone do input data de referencia*/
+.unstyled {
+    margin: 0;
+    padding-right: 0;
+}
+.unstyled::-webkit-inner-spin-button,
+.unstyled::-webkit-calendar-picker-indicator {
+    margin: 0;
+    padding-right: 0;
+}
