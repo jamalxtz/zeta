@@ -132,7 +132,7 @@ border: 1px dashed red !important;
     text-decoration: line-through;
 }
 
-/*Remove o ícone do input data de referencia*/
+/*Remove as margens do  o ícone do input data de referencia*/
 .unstyled {
     margin: 0;
     padding-right: 0;

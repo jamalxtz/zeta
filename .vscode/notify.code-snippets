@@ -69,5 +69,22 @@
 			"});//Fim da requisição Ajax para enviar os dados para o banco de dados",
 		],
 		"description": "Requisição AJAX completa"
-		}
+		},
+		"Comparar Datas": {
+			"scope": "javascript,typescript",
+			"prefix": "datediff",
+			"body": [
+				"let dataVencimento = new Date(arrayDados[vencimento]);",
+				"let dataAtual = new Date(DataAtual());",
+				"//Para comparar datas iguais tem que acrescentar o + na frente das variaveis",
+				"if(+dataVencimento === +dataAtual){",
+				"  novaCelula.className = 'text-warning';",
+				"}else if(dataVencimento < dataAtual){",
+				"  novaCelula.className = 'text-danger';",
+				"}",
+			],
+			"description": "Faz a comparação entre duas datas"
+			}
 }
+
+		

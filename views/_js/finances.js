@@ -24,6 +24,9 @@ window.onload = function() {
   //Verifica qual página está sendo carregada (existe um input em cada página com o nome dela no value)
   if ( $('#pagina').val() == "despesas"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
+    /*Aparentemente os métodos não são carregados corretamente quando estão em sequencia nessa função
+    *Pensei em criar um método de rotina que engloba todos os outros, acredito que isso facilitaria até mesmo para colocar um loader
+    */
     PreencherDataReferencia();
     
   }
@@ -800,8 +803,15 @@ function InserirLinhaTabelaDespesas(arrayDados){
   novaCelula = novaLinha.insertCell(2);//Coluna Vencimento
   novaCelula.innerHTML = vencimento;
   novaCelula.className = "text-muted";
-  //Bruno usar um date diff aqui para pintar de vermelho as parcelas atrasadas if(DataAtual())
-  //novaCelula.className = "text-danger";
+  if(quitado != 'SIM'){
+    let dataVencimento = new Date(arrayDados["vencimento"]);
+    let dataAtual = new Date(DataAtual());
+    if(+dataVencimento === +dataAtual){
+      novaCelula.className = "text-warning";
+    }else if(dataVencimento < dataAtual){
+      novaCelula.className = "text-danger";
+    }
+  } 
   
   novaCelula = novaLinha.insertCell(3);//Coluna Valor
   if(quitado == 'SIM'){
@@ -1370,7 +1380,7 @@ function IncluirParcelaED(){
   let idDespesa = $("#txtDespesaID").val();
   let descricao = document.getElementById("txtDescricaoParcelaED").value;
   let vencimento = $("#txtVencimentoParcelaED").val();
-  let valor = ConverterRealParaFloat($("#txtValorParcelaED"));
+  let valor = ConverterRealParaFloat($("#txtValorParcelaED").val());
   let codigoCategoria = parseInt($("#selCategoriaParcelaED").val());
   let codigoDeBarras = document.getElementById("txtCodigoDeBarrasParcelaED").value;
   let observacoes = document.getElementById("txtObservacoesParcelaED").value;
