@@ -132,13 +132,27 @@ border: 1px dashed red !important;
     text-decoration: line-through;
 }
 
-/*Remove as margens do  o ícone do input data de referencia*/
-.unstyled {
-    margin: 0;
-    padding-right: 0;
-}
-.unstyled::-webkit-inner-spin-button,
-.unstyled::-webkit-calendar-picker-indicator {
-    margin: 0;
-    padding-right: 0;
+/*Remove as margens do  o ícone de calendário dos inputs de data
+*Para dispositivos móveis
+*/
+@media screen and (max-width: 600px) {
+    input[type="month"]{
+        margin: 0;
+        padding-right: 0;
+    }
+    input[type="month"]::-webkit-inner-spin-button,
+    input[type="month"]::-webkit-calendar-picker-indicator {
+        margin: 0;
+        padding-right: 1;
+    }
+
+    input[type="date"]{
+        margin: 0;
+        padding-right: 0;
+    }
+    input[type="date"]::-webkit-inner-spin-button,
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        margin: 0;
+        padding-right: 1;
+    }
 }
