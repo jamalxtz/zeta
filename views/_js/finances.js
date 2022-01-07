@@ -1150,6 +1150,129 @@ function GraficoDespesaMensal(arrayGraficoDespesas){
 
 //#endregion
 
+//Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
+function ListarDespesasFixasSemParcela(){
+  //Pega os dados dos campos
+  let url = $('#idURL').val();
+  let requisicao = "listarDespesasFixasSemParcela";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let dataReferencia = $('#txtDataReferenciaDP').val(); // 2121-02
+
+
+  //Valida os dados
+  if(dataReferencia == null || dataReferencia == ""){
+    Toast.fire({
+      icon: 'error',
+      title: "A data de referência não pode ser vazia!"
+    })
+    $('#txtDataReferenciaDP').focus();
+    return;
+  }
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+      url : url,
+      type : 'post',
+      data : {
+      requisicao : requisicao,
+      userID : userID,
+      dataReferencia : dataReferencia,      
+    },
+      dataType: 'json',
+      beforeSend : function(){
+        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+      }
+  })
+  .done(function(msg){
+    if(msg.success == true){
+      let modalDespesasFixas = $("#modal-despesas-fixas");
+      //Limpa a tabela de Despesas
+      $("#tabelaDespesasFixasBodyDP tr").remove();
+      //Fecha tooltipe descritivo
+      $('.tooltip').remove();
+
+      if(msg[0].length == 0){
+        let message = "Nenhuma despesa fixa para ser incluída no mês atual."
+        $('#alertModalDespesasFixasDP').append('<div id="alertdiv" class="alert alert-info"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+        modalDespesasFixas.find('#txtValorQuitadoModalQuitarDespesaDP').val(valorPendente).attr('readonly', true);
+        modalDespesasFixas.modal('toggle');
+        return;
+      }
+    bruon alterar o .lenght para saber se o elemento existe
+
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas Fixas
+      for(var k in msg[0]) {
+        //console.log(k, msg[0][k]["descricao"]);
+        //return;
+        //Chama a a função que irá inserir as linhas de despesa na tabela, uma a uma
+        InserirLinhaTabelaDespesasFixas(msg[0][k]);
+      }
+      modalDespesasFixas.modal('toggle');
+
+    }else{
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Despesas: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//ListarDespesasFixasSemParcela
+
+//Inclui uma linha na tabela de Despesas com os dados recebidos por parâmetro
+function InserirLinhaTabelaDespesasFixas(arrayDados){
+  let tabelaDeDespesas = document.getElementById("tabelaDespesasFixasBodyDP");
+  let novaLinha = tabelaDeDespesas.insertRow(-1);
+  let novaCelula;
+  //Captura os valores do array
+  let id = arrayDados["id"];
+  let descricao = arrayDados["descricao"];
+  let vencimento = arrayDados["vencimento_despesa_fixa"];
+  let valor = arrayDados["valor_despesa_fixa"];
+
+  let acoes;
+
+  //Formata as datas e valores para o padrão brasileiro
+  valor = parseFloat(valor);
+  valor = ConverterValorParaRealBrasileiro(valor,true);
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
+  
+  //Insere os valores na tabela
+  novaCelula = novaLinha.insertCell(0); //Coluna ID
+  novaCelula.innerHTML = id;
+  novaCelula.className = "hidden";
+
+  novaCelula = novaLinha.insertCell(1);//Coluna Descrição
+  novaCelula.innerHTML = '<nobr>'+descricao+'</nobr>';
+
+  novaCelula = novaLinha.insertCell(2);//Coluna Valor
+  novaCelula.innerHTML = valor;
+
+  novaCelula = novaLinha.insertCell(3);//Coluna Vencimento
+  novaCelula.innerHTML = vencimento;
+  novaCelula.className = "hidden";
+  
+  novaCelula = novaLinha.insertCell(4);//Coluna Ações
+  acoes = '<div class="form-check">';
+  acoes += '<input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>';
+  acoes += '<label class="form-check-label" for="flexCheckChecked">';
+  acoes += '';
+  acoes += '</label>';
+  acoes += '</div>';
+  novaCelula.innerHTML = acoes;
+  novaCelula.className = "text-center";
+
+  //Exibe mensagem
+  // Toast.fire({
+  //   icon: 'info',
+  //   title: "Tabela de despesas atualizada."
+  // })
+}//InserirLinhaTabelaDespesa
+
 //*********************************************************************************************************************
 //*******************************************   EDITAR DESPESAS   *****************************************************                  
 //*********************************************************************************************************************

@@ -36,7 +36,7 @@
             <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
           </div>
-          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasMensal()"><i class="fas fa-sync-alt mr-1"></i></button>
+          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasFixasSemParcela()"><i class="fas fa-sync-alt mr-1"></i></button>
           <!-- <a type="button" href="<?php echo HOME_URI ?>finances" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Voltar"><i class="fas fa-reply mr-1"></i></a> -->
         </div>
         <p class="form_success"></p>
@@ -203,6 +203,58 @@
   </div>
 </div>
 <!--FIM do modal Estornar-->
+
+<!--Modal Despesas Fixas-->
+<div class="modal fade" id='modal-despesas-fixas' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-md" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <p class="modal-title" id="myModalLabel"><strong>Importar Despesas Fixas?</strong></p>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <!--Corpo do modal-->
+      <form id="formModalDespesasFixasDP">
+
+        <!-- Inputs Ocultos -->
+        <input class="hidden" type="text" id="txtIdModalDespesasFixasDP" name="txtIdModalDespesasFixasDP" value="">
+        <input class="hidden" type="text" id="txtQtdeParcelasModalDespesasFixasDP" name="txtQtdeParcelasModalDespesasFixasDP" value="">
+        <input class="hidden" type="text" id="txtVencimentoModalDespesasFixasDP" name="txtVencimentoModalDespesasFixasDP" value="">
+
+        <div id="alertModalDespesasFixasDP"></div>
+
+        <div class="table-responsive">
+          <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasFixasDP" width="100%" cellspacing="0">
+            <thead class="thead-dark">
+              <tr>
+                <th class="hidden">ID</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th class="hidden">Vencimento</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaDespesasFixasBodyDP">
+            </tbody>
+          </table>
+        </div>
+
+      <!--FIM Corpo do modal-->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success" id="btnImportarModalDespesasFixasDP">Importar</button>
+      </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+<!--FIM do modal Despesas Fixas-->
 
 
 

@@ -34,8 +34,8 @@
         //Pega a data atual
         //public $dataAtual = date('Y/m/d H:i:s');
         
-        /**
-         * Recebe a requisição via post e chama o método reponsável por tratar aquela determinada requisição.
+        /* Recebe a requisição via post e chama o método reponsável por tratar aquela determinada requisição.
+         *
          */
         public function DistribuirRequisicao($requisicao){
             switch ($requisicao) {
@@ -87,17 +87,18 @@
                 case "buscarDataReferencia":
                     $this->BuscarDataReferencia();
                     break;
+                case "listarDespesasFixasSemParcela":
+                    $this->ListarDespesasFixasSemParcela();
+                    break;
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
         }//DistribuirRequisicao
 
-        /**
-         * Recebe por padrão os parâmetros 'success' que indica se a operação deu certo ou não.
+        /* Recebe por padrão os parâmetros 'success' que indica se a operação deu certo ou não.
          * 'mensagem' retorna um informativo ao usuário, referente a requisição.
          * 'dados' quando a requisição tiver algum dado para ser retornado deverá ser incluído nesse parâmetro,
-         * mantendo sempre a mesma estrutura.
-         */
+         * mantendo sempre a mesma estrutura. */
         public function RetornoPadrao($success, $mensagem, $dados = null){
             // Array de retorno
             $retorno = array('success' => $success,
@@ -130,8 +131,8 @@
             }
         }//ConsultaSimples
 
-        /**
-         * Roda o script de exportaçaõ do MySQL e cria a estrutura do banco de daos
+        /* Roda o script de exportaçaõ do MySQL e cria a estrutura do banco de daos
+         *
          */
         public function CriarBancoDeDados(){
             // Conexão com o banco de dados
@@ -345,13 +346,11 @@
             }
         }//CriarBancoDeDados
 
-        /**
-         * Faz a inclusão de novas despesas no banco de dados
+        /* Faz a inclusão de novas despesas no banco de dados
          * Esse método recebe via POST um array multidimensional, dentro do array principal tem o userID - que é o código do usuario logado
          * E também a descrição da despesa, dentro desse array principal, tem um array com a lista das despesas. 
          * Primeiramente é feito uma consulta na tabela fn_despesas para pegar o código da última despesa cadastrada
-         * Em seguida executo um loop para inserir as parcelas do array de parcelas no banco de dados.
-         */
+         * Em seguida executo um loop para inserir as parcelas do array de parcelas no banco de dados. */
         public function IncluirDespesa(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -431,13 +430,11 @@
             
         }//IncluirDespesa
 
-        /**
-         * Faz a inclusão das parcelas de despesa no banco de dados
+        /* Faz a inclusão das parcelas de despesa no banco de dados
          * Esse método recebe via parâmetro ou via POST um array contendo os dados das parcelas a serem cadastradas
          * E também a o ID da despesa que já deverá ter sido previamente cadastrada
          * Antes todo o processo era feito de forma unica no método 'IncluirDespesa', porém surgiu a necessidade de incrementar parcelas em despesas
-         * Esse método retorna boleano, indicando se a operação de cadastro foi realizada com sucesso ou não
-         */
+         * Esse método retorna boleano, indicando se a operação de cadastro foi realizada com sucesso ou não. */
         public function IncluirParcelaDespesa($arrayDadosParcela = [], $IDfndespesas){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -564,8 +561,8 @@
             exit;
         }//ExcluirParcelaDespesa
 
-        /**
-         * Faz a inclusão de despesas fixas
+        /* Faz a inclusão de despesas fixas 
+         *
          */
         public function IncluirDespesaFixa(){
             // Conexão com o banco de dados
@@ -591,11 +588,9 @@
 
         }//IncluirDespesaFixa
 
-        /**
-         * Alterar Despesa
+        /* Alterar Despesa
          * Altera apenas o cabeçalho da despesa
-         * Esse método recebe via POST os parâmetros userID, idDespesa, descricão
-         */
+         * Esse método recebe via POST os parâmetros userID, idDespesa, descricão */
         public function AlterarDespesa(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -631,11 +626,9 @@
             }
         }//AlterarDespesa
 
-        /**
-         * Alterar Despesa FIxa
+        /* Alterar Despesa FIxa
          * Altera apenas o cabeçalho da despesa
-         * Esse método recebe via POST os parâmetros userID, idDespesa, descricão
-         */
+         * Esse método recebe via POST os parâmetros userID, idDespesa, descricão */
         public function AlterarDespesaFixa(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -675,10 +668,8 @@
             }
         }//AlterarDespesaFixa
 
-        /**
-         * Faz a inclusão de novas categorias
-         * Esse método recebe via POST os parâmetros para o cadastro e retorna o id da categoria cadastrada.
-         */
+        /* Faz a inclusão de novas categorias
+         * Esse método recebe via POST os parâmetros para o cadastro e retorna o id da categoria cadastrada. */
         public function IncluirCategoria(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -724,10 +715,8 @@
 
         }//IncluirCategoria
 
-        /**
-         * Lista todas as despesas por mês 
-         * Esse método recebe via POST os parâmetros mes, ano e userID
-         */
+        /* Lista todas as despesas por mês 
+         * Esse método recebe via POST os parâmetros mes, ano e userID */
         public function ListarDespesasMensal(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -750,7 +739,7 @@
                     INNER JOIN fn_despesas ON fn_despesas_parcelas.fn_despesas_id = fn_despesas.id
                 WHERE usuarios_id = {$userID}
                     AND DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
-                GROUP BY fn_despesas.id, fn_despesas.descricao, Fn_despesas_parcelas.quitado, fn_despesas_parcelas.vencimento, fn_despesas_parcelas.quitacao
+                GROUP BY fn_despesas.id, fn_despesas.descricao, fn_despesas_parcelas.quitado, fn_despesas_parcelas.vencimento, fn_despesas_parcelas.quitacao
                 ORDER BY fn_despesas.descricao ASC";
 
                 $consulta =  $db_con->query($sql);
@@ -773,10 +762,8 @@
             }
         }//ListarDespesasMensal
 
-        /**
-         * Quita Despesa
-         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento, quitacao, valorQuitado
-         */
+        /* Quita Despesa
+         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento, quitacao, valorQuitado */
         public function QuitarDespesa(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -823,10 +810,8 @@
             }
         }//QuitarDespesa
 
-        /**
-         * Estorna Despesa
-         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento
-         */
+        /* Estorna Despesa
+         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento */
         public function EstornarDespesa(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -862,10 +847,9 @@
             }
         }//EstornarDespesa
 
-        /**
-         * Retorna os dados de uma despesa específica por código (Informações do cabeçalho da despesa e as parcelas que esão pendentes)
-         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento
-         */
+        /* Retorna os dados de uma despesa específica por código
+         * (Informações do cabeçalho da despesa e as parcelas que estão pendentes)
+         * Esse método recebe via POST os parâmetros userID, idDespesa, qtdeParcelas, vencimento */
         public function ListarDadosDespesaPendentePorCodigo(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -918,11 +902,9 @@
             }
         }//ListarDadosDespesaPendentePorCodigo
 
-        /**
-         * Atualizar Data de Referência
+        /* Atualizar Data de Referência
          * Atualiza a data do mes que é utilizada como referencia para consultar as receitas e despesas
-         * Esse método recebe via POST os parâmetros userID, dataReferencia
-         */
+         * Esse método recebe via POST os parâmetros userID, dataReferencia*/
         public function AtualizarDataReferencia(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -963,10 +945,8 @@
             }
         }//AtualizarDataReferencia
 
-        /**
-         * Lista todas as despesas por mês 
-         * Esse método recebe via POST os parâmetros mes, ano e userID
-         */
+        /* Retorna a Data de referência salva no banco de dados 
+         * Esse método recebe via POST os parâmetros userID */
         public function BuscarDataReferencia(){
             // Conexão com o banco de dados
             require '../conexao.php';
@@ -998,6 +978,64 @@
                 exit;
             }
         }//BuscarDataReferencia
+
+        /* Lista todas as despesas por mês 
+         * Esse método recebe via POST os parâmetros mes, ano e userID*/
+        public function ListarDespesasFixasSemParcela(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $dataReferencia = $_POST['dataReferencia'];
+
+            try{
+                //Consulta todas as despesa fixas
+                $sql = "SELECT id, 
+                    descricao,
+                    valor_despesa_fixa,
+                    vencimento_despesa_fixa 
+                FROM fn_despesas 
+                WHERE fixo = 'SIM' AND usuarios_id = {$userID}";
+                $consulta =  $db_con->query($sql);
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar lista de Depesas Fixas - ".$e->getMessage(), "\n");
+                    exit;
+                }
+                /*O método fetchAll transforma o resultado da consulta em um array
+                 *O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número*/
+                $arrDespesasFixas = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+                //Consulta todas as parcelas do mês de referência
+                $sql = "SELECT DISTINCT(fn_despesas_id) AS codDespesaDaParcela
+                FROM fn_despesas_parcelas 
+                    INNER JOIN fn_despesas ON fn_despesas.id  = fn_despesas_parcelas.id
+                WHERE vencimento = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
+                    AND usuarios_id = {$userID}";
+                $consultaParcelasAtivasNesseMes =  $db_con->query($sql);
+                if(!$consultaParcelasAtivasNesseMes){
+                    $this->RetornoPadrao(false,"Erro ao consultar lista de Depesas Fixas - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz a iteração no array para verificar se já existe parcela com o código da despesa fixa no mês de referência
+                foreach ($consultaParcelasAtivasNesseMes as $rowParcelasAtivasNesseMes) {
+                    //Verifica se o id das parcelas do mês de referencia já existe no array de despesa fixa
+                    //Remove a despesa fixa do array que já tem parcela
+                    $key = array_search($rowParcelasAtivasNesseMes['codDespesaDaParcela'], $arrDespesasFixas['id']);
+                    if($key!==false){
+                        unset($arrDespesasFixas[$key]);
+                    }
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Despesas Fixas listadas com sucesso!",$arrDespesasFixas);
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao consultar lista de Depesas Fixas - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//ListarDespesasFixasSemParcela
 
         public function tempo_corrido($time) {
 
