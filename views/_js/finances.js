@@ -62,6 +62,17 @@ function FormataDataBancoDeDadosParaInput(data) {
   // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
 }//FormataDataBancoDeDadosParaInput
 
+//Recebe a data no formato YYYY-MM-DD e retorna no padrão YYYY-MM aceita pelos inputs do tipo Month (data de referência)
+function FormataDataParaInputMonth(data) {
+  data = data.substring(0, 10);
+  var ano  = data.split("-")[0];
+  var mes  = data.split("-")[1];
+  var dia  = data.split("-")[2];
+
+  return ano + '-' + ("0"+mes).slice(-2)
+  // Utilizo o .slice(-2) para garantir o formato com 2 digitos.
+}//FormataDataParaInputMonth
+
 //Recebe a data no formato YYYY-MM-DD e retorna no padrão DD/MM/AAAA 
 function FormatarDataPadraoBrasileiro(data){
   //Troca os traços por vírgulas
@@ -1103,7 +1114,7 @@ function PreencherDataReferencia(){
       $('#txtDataReferenciaDP').val(dataFormatada);
       ListarDespesasMensal();
     }else{
-      $('#txtDataReferenciaDP').val(DataAtual());
+      $('#txtDataReferenciaDP').val(FormataDataParaInputMonth(DataAtual()));
     }
   })
   .fail(function(jqXHR, textStatus, msg){
@@ -1150,6 +1161,8 @@ function GraficoDespesaMensal(arrayGraficoDespesas){
 
 //#endregion
 
+//#region LISTAR DESPESAS FIXAS----------------------------------------------------------------------------------------
+
 //Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
 function ListarDespesasFixasSemParcela(){
   //Pega os dados dos campos
@@ -1185,20 +1198,26 @@ function ListarDespesasFixasSemParcela(){
   })
   .done(function(msg){
     if(msg.success == true){
+      console.log(msg);
+
       let modalDespesasFixas = $("#modal-despesas-fixas");
       //Limpa a tabela de Despesas
       $("#tabelaDespesasFixasBodyDP tr").remove();
       //Fecha tooltipe descritivo
       $('.tooltip').remove();
 
-      if(msg[0].length == 0){
+      if(typeof msg[0] == 'undefined'){
+        ListarDespesasMensal()
         let message = "Nenhuma despesa fixa para ser incluída no mês atual."
-        $('#alertModalDespesasFixasDP').append('<div id="alertdiv" class="alert alert-info"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
-        modalDespesasFixas.find('#txtValorQuitadoModalQuitarDespesaDP').val(valorPendente).attr('readonly', true);
-        modalDespesasFixas.modal('toggle');
+        console.log(message);
+        Toast.fire({
+          icon: 'success',
+          title: "Lista de Despesas atualizada com sucesso!"
+        })
+        //$('#alertModalDespesasFixasDP').append('<div id="alertdiv" class="alert alert-info"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+        //modalDespesasFixas.modal('toggle');
         return;
       }
-    bruon alterar o .lenght para saber se o elemento existe
 
       //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas Fixas
       for(var k in msg[0]) {
@@ -1272,6 +1291,10 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   //   title: "Tabela de despesas atualizada."
   // })
 }//InserirLinhaTabelaDespesa
+
+bruno continuar daqui, inserir função para inserir os valores da tabela de despesas fixas no banco de dados
+
+//#endregion
 
 //*********************************************************************************************************************
 //*******************************************   EDITAR DESPESAS   *****************************************************                  

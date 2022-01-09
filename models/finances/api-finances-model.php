@@ -970,8 +970,13 @@
                 //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
                 $result = $consulta->fetchAll(PDO::FETCH_ASSOC);
                 //Faz o retorno dos dados
-                $this->RetornoPadrao(true,"Data de referência listada com sucesso!",$result);
+                if(sizeof($result) == 0){
+                    $this->RetornoPadrao(false,"Nenhuma data de referência encontrada");
+                }else{
+                    $this->RetornoPadrao(true,"Data de referência listada com sucesso!",$result);
                 exit;
+                }
+                
             }
             catch (Exception $e){
                 $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
