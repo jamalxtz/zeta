@@ -1290,11 +1290,104 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   //   icon: 'info',
   //   title: "Tabela de despesas atualizada."
   // })
-}//InserirLinhaTabelaDespesa
-
-bruno continuar daqui, inserir função para inserir os valores da tabela de despesas fixas no banco de dados
+}//InserirLinhaTabelaDespesasFixas
 
 //#endregion
+
+$("#formModalDespesasFixasDP").on("submit", function (event) { 
+  event.preventDefault();
+
+  IncluirParcelasDespesasFixas();
+  //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
+  return false;
+}); //FIM da função utilizada para incluir parcelas de despesas fixas
+
+
+function IncluirParcelasDespesasFixas(){
+  let url = $('#idURL').val();
+  let requisicao = "incluirParcelasDespesasFixas";
+  let userID = $('#userID').val(); // ID do usuário logado
+
+  //Cria o Array de parcelas, obtido através da tabela 'tabelaParcelas' que é montada dinâmicamente ao clicar no botão 'Gerar Parcelas'
+  var indices = [];
+  //Pega os indices da tabela
+  $('#tabelaDespesasFixasDP thead tr th').each(function() {
+    indices.push($(this).text());
+  });
+  //console.log("Cabeçalho parcelas");
+  //console.log(indices);
+
+  var arrayParcelas = [];
+  //Pecorre todas as parcelas e armazena no array
+  $('#tabelaDespesasFixasDP tbody tr').each(function( index ) {
+    var obj = {};
+    let valorFormatado;
+    
+    //Verifico se o checkbox está marcado, se estiver incluo a despesa no array de despesas
+    if($(this).find('input').prop("checked") == true){
+      //Controle o objeto
+      $(this).find('td').each(function( index ) {
+        //Alerta de gambiarra: Tive que utilizar o replace, pois quando estava pegando o valor das parcelas, não estava conseguindo remover o espaço
+        //do valor formatado, então eu faço uma verificação para identificar se é uma parcela, se for, eu já faço a formatação antes de enviar para o PHP
+        if($(this).text().substring(0, 2) == "R$"){
+          valorFormatado = $(this).text().replace(/[^0-9,]*/g, '').replace(',', '.');
+        }else{
+          valorFormatado = $(this).text(); 
+        }
+        obj[indices[index]] = valorFormatado;
+        //alert(valorFormatado);
+      });
+    
+      //Adiciona no arrray de objetos
+      arrayParcelas.push(obj);
+    }
+  });
+  //Mostra dados pegos no console
+  //console.log("Listagem das parcelas");
+  //console.log(arrayParcelas);
+  
+  //Cria o array final que será um array multidimensional, ele irá conter o array com os dados principais da despesa e tambem o array com as parcelas
+  var arrayDespesa = [];
+  arrayDespesa.push(arrayParcelas);
+  //console.log("Array final");
+  console.log(arrayDespesa);
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+        url : url,
+        type : 'post',
+        data : {
+          requisicao : requisicao,
+          userID : userID,
+          arrayDespesa,      
+        },
+        dataType: 'json',
+        beforeSend : function(){
+          //alert(requisicao+" \n "+ url );
+        }
+  })
+  .done(function(msg){
+      //alert(msg.mensagem);
+      if (msg.success == true){
+        //Exibe mensagem
+        Toast.fire({
+          icon: 'success',
+          title: msg.mensagem
+        })
+        ListarDespesasMensal()
+      }else{
+        Toast.fire({
+          icon: 'error',
+          title: msg.mensagem
+        })
+      }
+  })
+  .fail(function(jqXHR, textStatus, msg){
+      alert("Erro ao incluir despesas fixas: "+"\n"+jqXHR.responseText);
+      console.log("Erro ao incluir despesas fixas: "+"\n"+jqXHR);
+      //console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}//IncluirParcelasDespesasFixas
 
 //*********************************************************************************************************************
 //*******************************************   EDITAR DESPESAS   *****************************************************                  

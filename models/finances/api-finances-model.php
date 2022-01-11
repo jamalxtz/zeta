@@ -90,6 +90,10 @@
                 case "listarDespesasFixasSemParcela":
                     $this->ListarDespesasFixasSemParcela();
                     break;
+                case "incluirParcelasDespesasFixas":
+                    $this->IncluirParcelasDespesasFixas();
+                    break;
+                    
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
@@ -496,6 +500,68 @@
             }
             
         }//IncluirParcelaDespesa
+
+        /* Faz a inclusão das parcelas das despesas fixas no banco de dados
+         * Esse método recebe via parâmetro ou via POST um array contendo os dados das parcelas a serem cadastradas
+         * E também a o ID da despesa que já deverá ter sido previamente cadastrada */
+        public function IncluirParcelasDespesasFixas(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+
+            $modoDeInclusao =  "ViaParametro";
+
+            /*Verifica se os dados da despesa foram recebidos via parâmetro (função utilizada ao cadastrar uma nova despesa)
+             *senão ele verifica se existe algo no POST, utilizado na tela de editar despesa quando o usuário inclui uma nova despesa
+             */
+            $arrayDadosParcela = [];
+            $arrayDadosParcela = $_POST['arrayParcelaDespesa'];
+
+            $parcela = "";
+            $vencimento = "";
+            $valor = "";
+            $qteParcelas = sizeof($arrayDadosParcela);
+            $categoriaParcela = 0;
+
+
+
+            bruno primeiro de tudo eu tenho que fazer um consulta na tabela de Despesas, em seguida, é só chamar a função de incluir IncluirParcelasDespesasFixas
+            dá pra usar ela tranquilo;
+ 
+            foreach ($arrayDadosParcela as $value) {
+                $parcela = $value['Parcela'];//Número da parcela informado na descrição da parcela
+                $vencimento = $value['Vencimento'];
+                $vencimento = implode("-",array_reverse(explode("/",$vencimento)));//Entender e documentar essa função aqui
+                $valor = strval($value['Valor']);
+                $descricaoParcela = $parcela;
+                $categoriaParcela = $value['Categoria'];
+                $codigoDeBarras = $value['CodigoDeBarras'];
+                $observacoes = $value['Observacoes'];
+                
+                try{
+                    $sql =  $db_con->query("INSERT INTO `fn_despesas_parcelas`
+                    (`descricao`,`valorpendente`,`vencimento`,`quitado`,`codigo_de_barras`,`observacoes`,`fn_categorias_id`,`fn_despesas_id`) 
+                    VALUES 
+                    ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO','{$codigoDeBarras}','{$observacoes}','{$categoriaParcela}','{$IDfndespesas}')");           
+                }
+                catch (Exception $e){
+                    if($modoDeInclusao ==  "ViaPOST"){
+                        $this->RetornoPadrao(false,"Erro ao cadastrar parcela! - ".$e->getMessage(), "\n");
+                        exit;
+                    }else{//ViaParametro
+                        return false;
+                        exit;
+                    }
+                }
+            }
+            if($modoDeInclusao ==  "ViaPOST"){
+                $this->RetornoPadrao(true,"Parcela cadastrada com sucesso!");
+                exit;
+            }else{//ViaParametro
+                return true;
+                exit;
+            }
+            
+        }//IncluirParcelasDespesasFixas
 
         public function AlterarParcelaDespesa(){
             // Conexão com o banco de dados
