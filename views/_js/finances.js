@@ -83,11 +83,17 @@ function FormatarDataPadraoBrasileiro(data){
   return dataFormatada;
 }//FormatarDataPadraoBrasileiro
 
-//Retorna a data atual no padrão Americao YYYY-MM-DD (aceito pelos inputs tipo date)
-function DataAtual(){
+/*Retorna a data atual no padrão Americao YYYY-MM-DD (aceito pelos inputs tipo date)
+ *O padrão de retorno sem formatação não inclui o zero na frente do mês retornando valores como 2022-1-25
+ *Foi necessário acrescentar esse padrão pois ao comparar datas esse detalhe faz diferença. */
+function DataAtual(semFormatacao = false){
   var today = new Date();
   var dy = today.getDate();
-  var mt = today.getMonth()+1;
+  if(semFormatacao == true){
+    var mt = today.getMonth()+1;
+  }else{
+    var mt = ("0" + today.getMonth()+1).slice(-2);
+  }
   var yr = today.getFullYear();
   return yr+"-"+mt+"-"+dy;
 }//DataAtual
@@ -816,7 +822,7 @@ function InserirLinhaTabelaDespesas(arrayDados){
   novaCelula.className = "text-muted";
   if(quitado != 'SIM'){
     let dataVencimento = new Date(arrayDados["vencimento"]);
-    let dataAtual = new Date(DataAtual());
+    let dataAtual = new Date(DataAtual(true));
     if(+dataVencimento === +dataAtual){
       novaCelula.className = "text-warning";
     }else if(dataVencimento < dataAtual){
@@ -874,6 +880,7 @@ $('#modal-quitar-despesa').on('show.bs.modal', function (event) {
   modal.find('#txtIdModalQuitarDespesaDP').val(id) // Passa o id salvo no botão para o campo id do modal
   modal.find('#txtQtdeParcelasModalQuitarDespesaDP').val(qtdeParcelas)
   modal.find('#txtVencimentoModalQuitarDespesaDP').val(vencimento)
+  modal.find('#txtDataQuitacaoModalQuitarDespesaDP').val(DataAtual())
   //Quando houver mais de 1 parcela na mesma despesa, informo ao usuário que não será possível editar o valor de quitação, pois todas as parcelas serão quitadas
   if(qtdeParcelas > 1){
     let message = "<strong>Atenção</strong>, a despesa selecionada possui <strong>"+qtdeParcelas+"</strong> parcelas com o vencimento na mesma data, portanto elas foram agrupadas e o valor de quitação não pode ser alterado. Caso seja necessário alterar o valor de quitação, clique em editar despesa e altere o valor conforme desejar."
@@ -1070,6 +1077,7 @@ $("#txtDataReferenciaDP").blur(function(){
     //alert(msg.mensagem);
     if (msg.success == true){
       //Exibe mensagem
+      ListarDespesasMensal();
     }else{
       //Exibe mensagem
       Toast.fire({
@@ -1237,8 +1245,8 @@ function ListarDespesasFixasSemParcela(){
     console.log(msg);
   })
   .fail(function(jqXHR, textStatus, msg){
-    alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
-    console.log("Erro ao listar Despesas: "+"\n"+jqXHR);
+    alert("Erro ao listar Despesas Fixas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Despesas  Fixas: "+"\n"+jqXHR.responseText);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
 }//ListarDespesasFixasSemParcela
 
@@ -1252,6 +1260,8 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   let descricao = arrayDados["descricao"];
   let vencimento = arrayDados["vencimento_despesa_fixa"];
   let valor = arrayDados["valor_despesa_fixa"];
+  let categoria = arrayDados["categorias_id"];
+  let dataReferencia = $("#txtDataReferenciaDP").val() // yyyy-mm
 
   let acoes;
 
@@ -1259,7 +1269,13 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   valor = parseFloat(valor);
   valor = ConverterValorParaRealBrasileiro(valor,true);
   vencimento = FormatarDataPadraoBrasileiro(vencimento);
-  
+
+  let diaVencimento;
+  diaVencimento = vencimento.substring(0, 2);
+
+  vencimento = dataReferencia + "-" + diaVencimento
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
+
   //Insere os valores na tabela
   novaCelula = novaLinha.insertCell(0); //Coluna ID
   novaCelula.innerHTML = id;
@@ -1274,8 +1290,12 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   novaCelula = novaLinha.insertCell(3);//Coluna Vencimento
   novaCelula.innerHTML = vencimento;
   novaCelula.className = "hidden";
+
+  novaCelula = novaLinha.insertCell(4);//Coluna Categoria
+  novaCelula.innerHTML = categoria;
+  novaCelula.className = "hidden";
   
-  novaCelula = novaLinha.insertCell(4);//Coluna Ações
+  novaCelula = novaLinha.insertCell(5);//Coluna Ações
   acoes = '<div class="form-check">';
   acoes += '<input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>';
   acoes += '<label class="form-check-label" for="flexCheckChecked">';
@@ -1285,14 +1305,11 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   novaCelula.innerHTML = acoes;
   novaCelula.className = "text-center";
 
-  //Exibe mensagem
-  // Toast.fire({
-  //   icon: 'info',
-  //   title: "Tabela de despesas atualizada."
-  // })
 }//InserirLinhaTabelaDespesasFixas
 
 //#endregion
+
+//#region INCLUIR PARCELAS DESPESAS FIXAS------------------------------------------------------------------------------
 
 $("#formModalDespesasFixasDP").on("submit", function (event) { 
   event.preventDefault();
@@ -1301,7 +1318,6 @@ $("#formModalDespesasFixasDP").on("submit", function (event) {
   //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
   return false;
 }); //FIM da função utilizada para incluir parcelas de despesas fixas
-
 
 function IncluirParcelasDespesasFixas(){
   let url = $('#idURL').val();
@@ -1375,6 +1391,7 @@ function IncluirParcelasDespesasFixas(){
           title: msg.mensagem
         })
         ListarDespesasMensal()
+        $('#modal-despesas-fixas').modal('hide');
       }else{
         Toast.fire({
           icon: 'error',
@@ -1388,6 +1405,8 @@ function IncluirParcelasDespesasFixas(){
       //console.log("Erro no retorno de dados: "+textStatus+"\n"+msg+"\n"+jqXHR);
   });//Fim da requisição Ajax para enviar os dados para o banco de dados
 }//IncluirParcelasDespesasFixas
+
+//#endregion
 
 //*********************************************************************************************************************
 //*******************************************   EDITAR DESPESAS   *****************************************************                  
@@ -1485,7 +1504,9 @@ function PreencherCamposEditarDespesa(){
       $("#selCategoriaED").val(msg[0][0][0]["categorias_id"]);
       if(despesaFixa == true){
         $("#txtVencimentoED").val(msg[0][0][0]["vencimento_despesa_fixa"].substring(0,10));
-        $("#txtValorED").val(msg[0][0][0]["valor_despesa_fixa"]);
+        let valorFormatado;
+        valorFormatado = ConverterValorParaRealBrasileiro(parseFloat(msg[0][0][0]["valor_despesa_fixa"]), false);
+        $("#txtValorED").val(valorFormatado);
       }else{
         $("#agrupamentoCampoCategoriaED").addClass("hidden");
         $("#agrupamentoCamposVencimentoValorED").addClass("hidden");
@@ -2050,7 +2071,7 @@ function AlterarDespesaFixa(){
         },
         dataType: 'json',
         beforeSend : function(){
-          //alert(vencimento);
+          alert(valor);
         }
   })
   .done(function(msg){

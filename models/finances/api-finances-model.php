@@ -11,9 +11,8 @@
 
 //******************* DECLARAÇÃO DE VARIÁVEIS *************************************************************************
     /*Recebe a requisição via POST e redireciona para o método responsável por tratar essa requisição
-    *Para testar basta procar o _POST por _GET e utilizar o seguinte padrão de URL:
-    *http://localhost:8090/zeta/zeta/models/finances/api-finances-model.php?requisicao=consultaSimples&outroParametro=22
-    */
+     *Para testar basta procar o _POST por _GET e utilizar o seguinte padrão de URL:
+     *http://localhost:8090/zeta/zeta/models/finances/api-finances-model.php?requisicao=consultaSimples&outroParametro=22 */
     if (isset($_POST['requisicao'])){
         $requisicao = $_POST['requisicao'];
     }elseif (isset($_GET['requisicao'])){
@@ -33,7 +32,10 @@
     class FinancesAPI {
         //Pega a data atual
         //public $dataAtual = date('Y/m/d H:i:s');
-        
+
+        //*********************************************************************************************************************
+        //*************************************************   GLOBAIS   *******************************************************                  
+        //*********************************************************************************************************************
         /* Recebe a requisição via post e chama o método reponsável por tratar aquela determinada requisição.
          *
          */
@@ -350,6 +352,128 @@
             }
         }//CriarBancoDeDados
 
+        /* Verifica se um valor já está presente no array
+         * $value - Valor a ser pesquisado no array Ex: "maçã"
+         * $key - Chave do array onde o valor será procurado Ex: "id"
+         * $array - Array que será percorrido pela função Ex: $arrayFrutas*/
+        public function SearchArray($value, $key, $array) {
+            foreach ($array as $k => $val) {
+                if ($val[$key] == $value) {
+                    return $k;
+                }
+            }
+            return null;
+        }//SearchArray
+
+        public function TempoCorrido($time) {
+
+            $now = strtotime(date('m/d/Y H:i:s'));
+            $time = strtotime($time);
+            $diff = $now - $time;
+    
+            $seconds = $diff;
+            $minutes = round($diff / 60);
+            $hours = round($diff / 3600);
+            $days = round($diff / 86400);
+            $weeks = round($diff / 604800);
+            $months = round($diff / 2419200);
+            $years = round($diff / 29030400);
+    
+            if ($seconds <= 60) return $seconds==1 ?'1 seg atrás':$seconds.' seg atrás';
+            //if ($seconds <= 60) return"30 seg atrás";
+            else if ($minutes <= 60) return $minutes==1 ?'1 min atrás':$minutes.' min atrás';
+            else if ($hours <= 24) return $hours==1 ?'1 hr atrás':$hours.' hrs atrás';
+            else if ($days <= 7) return $days==1 ?'1 dia atrás':$days.' dias atrás';
+            else if ($weeks <= 4) return $weeks==1 ?'1 semana atrás':$weeks.' semanas atrás';
+            else if ($months <= 12) return $months == 1 ?'1 mês atrás':$months.' meses atrás';
+            else return $years == 1 ? 'um ano atrás':$years.' anos atrás';
+        }//tempo_corrido
+
+        /* Atualizar Data de Referência
+         * Atualiza a data do mes que é utilizada como referencia para consultar as receitas e despesas
+         * Esse método recebe via POST os parâmetros userID, dataReferencia*/
+        public function AtualizarDataReferencia(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $dataReferencia = $_POST['dataReferencia'];
+
+            try{
+                //Verifico se já existe um registro de configuração para o usuário
+                $sql = "SELECT COUNT(*) FROM configuracoes WHERE usuarios_id = {$userID}";
+                $consulta =  $db_con->query($sql);
+                $count = $consulta->fetchColumn();
+
+                if($count == 0){
+                    $sql = "INSERT INTO configuracoes (data_referencia, usuarios_id)
+                    VALUES ('{$dataReferencia}', {$userID} )";
+                }else{
+                    $sql = "UPDATE configuracoes SET
+                    data_referencia = '{$dataReferencia}'
+                    WHERE
+                    usuarios_id = {$userID}";
+                }
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao atualizar data de referência - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Data de referência atualizada com sucesso!");
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao atualizar data de referência - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//AtualizarDataReferencia
+
+        /* Retorna a Data de referência salva no banco de dados 
+         * Esse método recebe via POST os parâmetros userID */
+        public function BuscarDataReferencia(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+
+            //Faz uma consulta para retornar um array com todas as despesas listadas
+            try{
+                $sql = "SELECT data_referencia
+                FROM configuracoes
+                WHERE usuarios_id = {$userID}";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //O método fetchAll transforma o resultado da consulta em um array
+                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
+                $result = $consulta->fetchAll(PDO::FETCH_ASSOC);
+                //Faz o retorno dos dados
+                if(sizeof($result) == 0){
+                    $this->RetornoPadrao(false,"Nenhuma data de referência encontrada");
+                }else{
+                    $this->RetornoPadrao(true,"Data de referência listada com sucesso!",$result);
+                exit;
+                }
+                
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//BuscarDataReferencia
+
+        //*********************************************************************************************************************
+        //************************************************   DESPESAS   *******************************************************                  
+        //*********************************************************************************************************************
         /* Faz a inclusão de novas despesas no banco de dados
          * Esse método recebe via POST um array multidimensional, dentro do array principal tem o userID - que é o código do usuario logado
          * E também a descrição da despesa, dentro desse array principal, tem um array com a lista das despesas. 
@@ -514,7 +638,7 @@
              *senão ele verifica se existe algo no POST, utilizado na tela de editar despesa quando o usuário inclui uma nova despesa
              */
             $arrayDadosParcela = [];
-            $arrayDadosParcela = $_POST['arrayParcelaDespesa'];
+            $arrayDadosParcela = $_POST['arrayDespesa'][0];
 
             $parcela = "";
             $vencimento = "";
@@ -522,44 +646,28 @@
             $qteParcelas = sizeof($arrayDadosParcela);
             $categoriaParcela = 0;
 
-
-
-            bruno primeiro de tudo eu tenho que fazer um consulta na tabela de Despesas, em seguida, é só chamar a função de incluir IncluirParcelasDespesasFixas
-            dá pra usar ela tranquilo;
  
             foreach ($arrayDadosParcela as $value) {
-                $parcela = $value['Parcela'];//Número da parcela informado na descrição da parcela
+                $IDfndespesas = $value['ID']; //Código da despesa
+                $descricaoParcela = "1";//Número da parcela informado na descrição da parcela
                 $vencimento = $value['Vencimento'];
                 $vencimento = implode("-",array_reverse(explode("/",$vencimento)));//Entender e documentar essa função aqui
                 $valor = strval($value['Valor']);
-                $descricaoParcela = $parcela;
                 $categoriaParcela = $value['Categoria'];
-                $codigoDeBarras = $value['CodigoDeBarras'];
-                $observacoes = $value['Observacoes'];
                 
                 try{
                     $sql =  $db_con->query("INSERT INTO `fn_despesas_parcelas`
-                    (`descricao`,`valorpendente`,`vencimento`,`quitado`,`codigo_de_barras`,`observacoes`,`fn_categorias_id`,`fn_despesas_id`) 
+                    (`descricao`,`valorpendente`,`vencimento`,`quitado`,`fn_categorias_id`,`fn_despesas_id`) 
                     VALUES 
-                    ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO','{$codigoDeBarras}','{$observacoes}','{$categoriaParcela}','{$IDfndespesas}')");           
+                    ('{$descricaoParcela}','{$valor}','{$vencimento}','NÃO','{$categoriaParcela}','{$IDfndespesas}')");           
                 }
                 catch (Exception $e){
-                    if($modoDeInclusao ==  "ViaPOST"){
-                        $this->RetornoPadrao(false,"Erro ao cadastrar parcela! - ".$e->getMessage(), "\n");
-                        exit;
-                    }else{//ViaParametro
-                        return false;
-                        exit;
-                    }
+                    $this->RetornoPadrao(false,"Erro ao cadastrar parcelas! - ".$e->getMessage(), "\n");
+                    exit;
                 }
             }
-            if($modoDeInclusao ==  "ViaPOST"){
-                $this->RetornoPadrao(true,"Parcela cadastrada com sucesso!");
-                exit;
-            }else{//ViaParametro
-                return true;
-                exit;
-            }
+            $this->RetornoPadrao(true,"Parcelas cadastradas com sucesso!");
+            exit;
             
         }//IncluirParcelasDespesasFixas
 
@@ -968,88 +1076,6 @@
             }
         }//ListarDadosDespesaPendentePorCodigo
 
-        /* Atualizar Data de Referência
-         * Atualiza a data do mes que é utilizada como referencia para consultar as receitas e despesas
-         * Esse método recebe via POST os parâmetros userID, dataReferencia*/
-        public function AtualizarDataReferencia(){
-            // Conexão com o banco de dados
-            require '../conexao.php';
-            //Recebe os dados via POST
-            $userID = $_POST['userID'];
-            $dataReferencia = $_POST['dataReferencia'];
-
-            try{
-                //Verifico se já existe um registro de configuração para o usuário
-                $sql = "SELECT COUNT(*) FROM configuracoes WHERE usuarios_id = {$userID}";
-                $consulta =  $db_con->query($sql);
-                $count = $consulta->fetchColumn();
-
-                if($count == 0){
-                    $sql = "INSERT INTO configuracoes (data_referencia, usuarios_id)
-                    VALUES ('{$dataReferencia}', {$userID} )";
-                }else{
-                    $sql = "UPDATE configuracoes SET
-                    data_referencia = '{$dataReferencia}'
-                    WHERE
-                    usuarios_id = {$userID}";
-                }
-
-                $consulta =  $db_con->query($sql);
-
-                if(!$consulta){
-                    $this->RetornoPadrao(false,"Erro ao atualizar data de referência - ".$e->getMessage(), "\n");
-                    exit;
-                }
-
-                //Faz o retorno dos dados
-                $this->RetornoPadrao(true,"Data de referência atualizada com sucesso!");
-                exit;
-            }
-            catch (Exception $e){
-                $this->RetornoPadrao(false,"Erro ao atualizar data de referência - ".$e->getMessage(), "\n");
-                exit;
-            }
-        }//AtualizarDataReferencia
-
-        /* Retorna a Data de referência salva no banco de dados 
-         * Esse método recebe via POST os parâmetros userID */
-        public function BuscarDataReferencia(){
-            // Conexão com o banco de dados
-            require '../conexao.php';
-            //Recebe os dados via POST
-            $userID = $_POST['userID'];
-
-            //Faz uma consulta para retornar um array com todas as despesas listadas
-            try{
-                $sql = "SELECT data_referencia
-                FROM configuracoes
-                WHERE usuarios_id = {$userID}";
-
-                $consulta =  $db_con->query($sql);
-
-                if(!$consulta){
-                    $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
-                    exit;
-                }
-
-                //O método fetchAll transforma o resultado da consulta em um array
-                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
-                $result = $consulta->fetchAll(PDO::FETCH_ASSOC);
-                //Faz o retorno dos dados
-                if(sizeof($result) == 0){
-                    $this->RetornoPadrao(false,"Nenhuma data de referência encontrada");
-                }else{
-                    $this->RetornoPadrao(true,"Data de referência listada com sucesso!",$result);
-                exit;
-                }
-                
-            }
-            catch (Exception $e){
-                $this->RetornoPadrao(false,"Erro ao consultar data de referência - ".$e->getMessage(), "\n");
-                exit;
-            }
-        }//BuscarDataReferencia
-
         /* Lista todas as despesas por mês 
          * Esse método recebe via POST os parâmetros mes, ano e userID*/
         public function ListarDespesasFixasSemParcela(){
@@ -1057,14 +1083,15 @@
             require '../conexao.php';
             //Recebe os dados via POST
             $userID = $_POST['userID'];
-            $dataReferencia = $_POST['dataReferencia'];
+            $dataReferencia = $_POST['dataReferencia'] . "-01";
 
             try{
                 //Consulta todas as despesa fixas
                 $sql = "SELECT id, 
                     descricao,
                     valor_despesa_fixa,
-                    vencimento_despesa_fixa 
+                    vencimento_despesa_fixa,
+                    categorias_id 
                 FROM fn_despesas 
                 WHERE fixo = 'SIM' AND usuarios_id = {$userID}";
                 $consulta =  $db_con->query($sql);
@@ -1079,24 +1106,32 @@
                 //Consulta todas as parcelas do mês de referência
                 $sql = "SELECT DISTINCT(fn_despesas_id) AS codDespesaDaParcela
                 FROM fn_despesas_parcelas 
-                    INNER JOIN fn_despesas ON fn_despesas.id  = fn_despesas_parcelas.id
-                WHERE vencimento = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
+                    INNER JOIN fn_despesas ON fn_despesas.id  = fn_despesas_parcelas.fn_despesas_id
+                WHERE DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
                     AND usuarios_id = {$userID}";
                 $consultaParcelasAtivasNesseMes =  $db_con->query($sql);
                 if(!$consultaParcelasAtivasNesseMes){
                     $this->RetornoPadrao(false,"Erro ao consultar lista de Depesas Fixas - ".$e->getMessage(), "\n");
                     exit;
                 }
-
+                $listaKeys = "";
                 //Faz a iteração no array para verificar se já existe parcela com o código da despesa fixa no mês de referência
                 foreach ($consultaParcelasAtivasNesseMes as $rowParcelasAtivasNesseMes) {
                     //Verifica se o id das parcelas do mês de referencia já existe no array de despesa fixa
                     //Remove a despesa fixa do array que já tem parcela
-                    $key = array_search($rowParcelasAtivasNesseMes['codDespesaDaParcela'], $arrDespesasFixas['id']);
-                    if($key!==false){
-                        unset($arrDespesasFixas[$key]);
+                    // $key = array_search($rowParcelasAtivasNesseMes['codDespesaDaParcela'], array_column($arrDespesasFixas, 'id'));
+                    // if($key!==false){
+                    //     unset($arrDespesasFixas[$key]);
+                    // }
+
+                    $results = $this->searcharray($rowParcelasAtivasNesseMes['codDespesaDaParcela'], 'id', $arrDespesasFixas);
+
+                    if ($results !== null){
+                        unset($arrDespesasFixas[$results]);
+                        $listaKeys = $listaKeys."-".$results;
                     }
                 }
+
 
                 //Faz o retorno dos dados
                 $this->RetornoPadrao(true,"Despesas Fixas listadas com sucesso!",$arrDespesasFixas);
@@ -1108,32 +1143,7 @@
             }
         }//ListarDespesasFixasSemParcela
 
-        public function tempo_corrido($time) {
-
-            $now = strtotime(date('m/d/Y H:i:s'));
-            $time = strtotime($time);
-            $diff = $now - $time;
-    
-            $seconds = $diff;
-            $minutes = round($diff / 60);
-            $hours = round($diff / 3600);
-            $days = round($diff / 86400);
-            $weeks = round($diff / 604800);
-            $months = round($diff / 2419200);
-            $years = round($diff / 29030400);
-    
-            if ($seconds <= 60) return $seconds==1 ?'1 seg atrás':$seconds.' seg atrás';
-            //if ($seconds <= 60) return"30 seg atrás";
-            else if ($minutes <= 60) return $minutes==1 ?'1 min atrás':$minutes.' min atrás';
-            else if ($hours <= 24) return $hours==1 ?'1 hr atrás':$hours.' hrs atrás';
-            else if ($days <= 7) return $days==1 ?'1 dia atrás':$days.' dias atrás';
-            else if ($weeks <= 4) return $weeks==1 ?'1 semana atrás':$weeks.' semanas atrás';
-            else if ($months <= 12) return $months == 1 ?'1 mês atrás':$months.' meses atrás';
-            else return $years == 1 ? 'um ano atrás':$years.' anos atrás';
-        }//tempo_corrido
     }//Class FinancesAPI
-    
-//echo"chegou ao final sem erros";
 
 //*********************************************************************************************************************
 

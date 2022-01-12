@@ -234,6 +234,7 @@
                 <th>Descrição</th>
                 <th>Valor</th>
                 <th class="hidden">Vencimento</th>
+                <th class="hidden">Categoria</th>
                 <th>Ação</th>
               </tr>
             </thead>
