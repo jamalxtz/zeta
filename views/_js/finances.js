@@ -27,14 +27,14 @@ window.onload = function() {
     /*Aparentemente os métodos não são carregados corretamente quando estão em sequencia nessa função
     *Pensei em criar um método de rotina que engloba todos os outros, acredito que isso facilitaria até mesmo para colocar um loader
     */
-    PreencherDataReferencia();
+    CarregarFuncoesPaginaDespesas();
   }
   else if ( $('#pagina').val() == "editarDespesa"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
     PreencherCamposEditarDespesa();
   }
   else if ( $('#pagina').val() == "receitas"){
-    PreencherDataReferenciaRC();
+    CarregarFuncoesPaginaReceitas()
   }
   else if ( $('#pagina').val() == "editarReceita"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
@@ -42,7 +42,7 @@ window.onload = function() {
   }
   else if ( $('#pagina').val() == "dashboard"){
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
-    PreencherDataReferenciaDS();
+    CarregarFuncoesPaginaDashboard()
   }
 };//FIM window.onload
 
@@ -194,6 +194,109 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
   //Utilizo esse return false, porque evita do formulário ser submetido, dessa forma a página não é carregada
   return false;
 }); //FIM da função cadastrar uma nova categoria
+
+//#endregion
+
+//#region ATUALIZAÇÃO DATA REFERENCIA----------------------------------------------------------------------------------------
+
+//Salva a data de referência quando alterada
+$("#txtDataReferencia").blur(function(){
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = 'atualizarDataReferencia';
+  let dataReferencia = $('#txtDataReferencia').val();//yyyy-MM
+
+  dataReferencia = dataReferencia+'-01';//yyyy-MM-DD
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+    requisicao : requisicao,
+    userID : userID,
+    dataReferencia : dataReferencia,
+  },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao + url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    //alert(msg.mensagem);
+    if (msg.success == true){
+      //Verifica em qual página teve esse chamado e então executa a função
+      switch($('#pagina').val()) {
+        case "despesas":
+          ListarDespesasMensal();
+          break;
+        case "receitas":
+          ListarReceitasMensal();
+          break;
+        case "dashboard":
+          ListarReceitasMensal();
+          ListarDespesasMensal();
+          break;
+        default:
+          // code block
+      }
+    }else{
+      //Exibe mensagem
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
+    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+});//FIM Salva a data de referência quando alterada
+
+/* Preencher Data de Referência
+ * Essa função utiliza o conceito de callback, ou seja, chama a função passada no callback quando a PreencherDataReferencia for chamada
+ */
+function PreencherDataReferencia(callback){
+
+  //Captura os valores dos campos
+  let url = $('#idURL').val();
+  let userID = $('#userID').val(); // ID do usuário logado
+  let requisicao = 'buscarDataReferencia';
+
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+    requisicao : requisicao,
+    userID : userID,
+  },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(requisicao + url );
+      //console.log(data);
+    }
+  })
+  .done(function(msg){
+    console.log(msg);
+    if (msg.success == true){
+      let dataFormatada;
+      dataFormatada = msg[0][0].data_referencia.substring(0,7);//Formato a data de YYYY-mm-dd para YYYY-mm
+      $('#txtDataReferencia').val(dataFormatada);
+    }else{
+      $('#txtDataReferencia').val(FormataDataParaInputMonth(DataAtual()));
+    }
+    callback();
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
+    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+}
 
 //#endregion
 
@@ -705,13 +808,17 @@ function LimparCamposIncluirDespesa(limparSomenteCamposIncluirParcelas = false){
 //*********************************************************************************************************************
 //#region LISTAR DESPESAS E FUNÇÕES EXECUTADAS NA TELA DE DESPESAS-----------------------------------------------------
 
+function CarregarFuncoesPaginaDespesas(){
+  PreencherDataReferencia(ListarDespesasMensal)
+}//CarregarFuncoesPaginaDespesas
+
 //Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
 function ListarDespesasMensal(){
   //Pega os dados dos campos
   let url = $('#idURL').val();
   let requisicao = "listarDespesasMensal";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataReferencia = $('#txtDataReferenciaDP').val(); // 2121-02
+  let dataReferencia = $('#txtDataReferencia').val(); // 2121-02
   let totalDespesasPendentes = 0;
   let totalDespesasQuitadas = 0;
 
@@ -721,7 +828,7 @@ function ListarDespesasMensal(){
       icon: 'error',
       title: "A data de referência não pode ser vazia!"
     })
-    $('#txtDataReferenciaDP').focus();
+    $('#txtDataReferencia').focus();
     return;
   }
 
@@ -1060,89 +1167,6 @@ $("#formModalEstornarDespesaDP").on("submit", function (event) {
   return false;
 }); //FIM da função Estornar Despesa
 
-//Salva a data de referência quando alterada
-$("#txtDataReferenciaDP").blur(function(){
-  //Captura os valores dos campos
-  let url = $('#idURL').val();
-  let userID = $('#userID').val(); // ID do usuário logado
-  let requisicao = 'atualizarDataReferencia';
-  let dataReferencia = $('#txtDataReferenciaDP').val();//yyyy-MM
-
-  dataReferencia = dataReferencia+'-01';//yyyy-MM-DD
-
-  //Requisição Ajax para enviar os dados para o banco de dados
-  $.ajax({
-    url : url,
-    type : 'post',
-    data : {
-    requisicao : requisicao,
-    userID : userID,
-    dataReferencia : dataReferencia,
-  },
-    dataType: 'json',
-    beforeSend : function(){
-      //alert(requisicao + url );
-      //console.log(data);
-    }
-  })
-  .done(function(msg){
-    //alert(msg.mensagem);
-    if (msg.success == true){
-      //Exibe mensagem
-      ListarDespesasMensal();
-    }else{
-      //Exibe mensagem
-      Toast.fire({
-        icon: 'error',
-        title: msg.mensagem
-      })
-    }
-    console.log(msg);
-  })
-  .fail(function(jqXHR, textStatus, msg){
-    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
-    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-});//FIM Salva a data de referência quando alterada
-
-function PreencherDataReferencia(){
-
-  //Captura os valores dos campos
-  let url = $('#idURL').val();
-  let userID = $('#userID').val(); // ID do usuário logado
-  let requisicao = 'buscarDataReferencia';
-
-  //Requisição Ajax para enviar os dados para o banco de dados
-  $.ajax({
-    url : url,
-    type : 'post',
-    data : {
-    requisicao : requisicao,
-    userID : userID,
-  },
-    dataType: 'json',
-    beforeSend : function(){
-      //alert(requisicao + url );
-      //console.log(data);
-    }
-  })
-  .done(function(msg){
-    console.log(msg);
-    if (msg.success == true){
-      let dataFormatada;
-      dataFormatada = msg[0][0].data_referencia.substring(0,7);//Formato a data de YYYY-mm-dd para YYYY-mm
-      $('#txtDataReferenciaDP').val(dataFormatada);
-      ListarDespesasMensal();
-    }else{
-      $('#txtDataReferenciaDP').val(FormataDataParaInputMonth(DataAtual()));
-    }
-  })
-  .fail(function(jqXHR, textStatus, msg){
-    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
-    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-}
-
 //#endregion
 
 //#region GRÁFICOS DE DESPESA------------------------------------------------------------------------------------------
@@ -1166,6 +1190,7 @@ function GraficoDespesaMensal(arrayGraficoDespesas){
             legend: { position: 'bottom', alignment: 'midlle' },
             is3D:true,
             height:400,
+            colors: ['#e0440e','#E56B6F','#355070','#e6693e','#B56576','#ec8f6e','#f3b49f','#f6c7b6',"#6D597A","#EAAC8B","#A8201A", "#DE6449" ],
             vAxis: {format:'$###,###,###.00'}, // Money format
           };
 
@@ -1189,7 +1214,7 @@ function ListarDespesasFixasSemParcela(){
   let url = $('#idURL').val();
   let requisicao = "listarDespesasFixasSemParcela";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataReferencia = $('#txtDataReferenciaDP').val(); // 2121-02
+  let dataReferencia = $('#txtDataReferencia').val(); // 2121-02
 
 
   //Valida os dados
@@ -1198,7 +1223,7 @@ function ListarDespesasFixasSemParcela(){
       icon: 'error',
       title: "A data de referência não pode ser vazia!"
     })
-    $('#txtDataReferenciaDP').focus();
+    $('#txtDataReferencia').focus();
     return;
   }
 
@@ -1273,7 +1298,7 @@ function InserirLinhaTabelaDespesasFixas(arrayDados){
   let vencimento = arrayDados["vencimento_despesa_fixa"];
   let valor = arrayDados["valor_despesa_fixa"];
   let categoria = arrayDados["categorias_id"];
-  let dataReferencia = $("#txtDataReferenciaDP").val() // yyyy-mm
+  let dataReferencia = $("#txtDataReferencia").val() // yyyy-mm
   let acoes;
 
   //Formata as datas e valores para o padrão brasileiro
@@ -2616,13 +2641,17 @@ function LimparCamposIncluirReceita(limparSomenteCamposIncluirParcelas = false){
 //*********************************************************************************************************************
 //#region LISTAR RECEITAS E FUNÇÕES EXECUTADAS NA TELA DE RECEITAS-----------------------------------------------------
 
+function CarregarFuncoesPaginaReceitas(){
+  PreencherDataReferencia(ListarReceitasMensal);
+}//CarregarFuncoesPaginaReceitas
+
 //Faz uma consulta no banco de dados e retorna todas as receitas que possuem parcelas na dta selecionada
 function ListarReceitasMensal(){
   //Pega os dados dos campos
   let url = $('#idURL').val();
   let requisicao = "listarReceitasMensal";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataReferencia = $('#txtDataReferenciaRC').val(); // 2121-02
+  let dataReferencia = $('#txtDataReferencia').val(); // 2121-02
   let totalReceitasPendentes = 0;
   let totalReceitasQuitadas = 0;
 
@@ -2632,7 +2661,7 @@ function ListarReceitasMensal(){
       icon: 'error',
       title: "A data de referência não pode ser vazia!"
     })
-    $('#txtDataReferenciaRC').focus();
+    $('#txtDataReferencia').focus();
     return;
   }
 
@@ -2971,88 +3000,6 @@ $("#formModalEstornarReceitaRC").on("submit", function (event) {
   return false;
 }); //FIM da função Estornar Receita
 
-//Salva a data de referência quando alterada
-$("#txtDataReferenciaRC").blur(function(){
-  //Captura os valores dos campos
-  let url = $('#idURL').val();
-  let userID = $('#userID').val(); // ID do usuário logado
-  let requisicao = 'atualizarDataReferencia';
-  let dataReferencia = $('#txtDataReferenciaRC').val();//yyyy-MM
-
-  dataReferencia = dataReferencia+'-01';//yyyy-MM-DD
-
-  //Requisição Ajax para enviar os dados para o banco de dados
-  $.ajax({
-    url : url,
-    type : 'post',
-    data : {
-    requisicao : requisicao,
-    userID : userID,
-    dataReferencia : dataReferencia,
-  },
-    dataType: 'json',
-    beforeSend : function(){
-      //alert(requisicao + url );
-      //console.log(data);
-    }
-  })
-  .done(function(msg){
-    //alert(msg.mensagem);
-    if (msg.success == true){
-      //Exibe mensagem
-      ListarReceitasMensal();
-    }else{
-      //Exibe mensagem
-      Toast.fire({
-        icon: 'error',
-        title: msg.mensagem
-      })
-    }
-    console.log(msg);
-  })
-  .fail(function(jqXHR, textStatus, msg){
-    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
-    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-});//FIM Salva a data de referência quando alterada
-
-function PreencherDataReferenciaRC(){
-  //Captura os valores dos campos
-  let url = $('#idURL').val();
-  let userID = $('#userID').val(); // ID do usuário logado
-  let requisicao = 'buscarDataReferencia';
-
-  //Requisição Ajax para enviar os dados para o banco de dados
-  $.ajax({
-    url : url,
-    type : 'post',
-    data : {
-    requisicao : requisicao,
-    userID : userID,
-  },
-    dataType: 'json',
-    beforeSend : function(){
-      //alert(requisicao + url );
-      //console.log(data);
-    }
-  })
-  .done(function(msg){
-    console.log(msg);
-    if (msg.success == true){
-      let dataFormatada;
-      dataFormatada = msg[0][0].data_referencia.substring(0,7);//Formato a data de YYYY-mm-dd para YYYY-mm
-      $('#txtDataReferenciaRC').val(dataFormatada);
-      ListarReceitasMensal();
-    }else{
-      $('#txtDataReferenciaRC').val(FormataDataParaInputMonth(DataAtual()));
-    }
-  })
-  .fail(function(jqXHR, textStatus, msg){
-    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
-    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-}
-
 //#endregion
 
 //#region GRÁFICOS DE RECEITA------------------------------------------------------------------------------------------
@@ -3099,7 +3046,7 @@ function ListarReceitasFixasSemParcela(){
   let url = $('#idURL').val();
   let requisicao = "listarReceitasFixasSemParcela";
   let userID = $('#userID').val(); // ID do usuário logado
-  let dataReferencia = $('#txtDataReferenciaRC').val(); // 2121-02
+  let dataReferencia = $('#txtDataReferencia').val(); // 2121-02
 
 
   //Valida os dados
@@ -3108,7 +3055,7 @@ function ListarReceitasFixasSemParcela(){
       icon: 'error',
       title: "A data de referência não pode ser vazia!"
     })
-    $('#txtDataReferenciaRC').focus();
+    $('#txtDataReferencia').focus();
     return;
   }
 
@@ -3183,7 +3130,7 @@ function InserirLinhaTabelaReceitasFixas(arrayDados){
   let vencimento = arrayDados["vencimento_receita_fixa"];
   let valor = arrayDados["valor_receita_fixa"];
   let categoria = arrayDados["categorias_id"];
-  let dataReferencia = $("#txtDataReferenciaRC").val() // yyyy-mm
+  let dataReferencia = $("#txtDataReferencia").val() // yyyy-mm
   let acoes;
 
   //Formata as datas e valores para o padrão brasileiro
@@ -4022,40 +3969,72 @@ function AlterarReceitaFixa(){
 //*********************************************************************************************************************
 
 //#region LISTAR INFORMAÇÕES NO DASHBOARD------------------------------------------------------------------------------
-
-//Salva a data de referência quando alterada
-$("#txtDataReferenciaDS").blur(function(){
-  //Captura os valores dos campos
+function ListarDadosDashboardMensal(){
+  //Pega os dados dos campos
   let url = $('#idURL').val();
   let userID = $('#userID').val(); // ID do usuário logado
-  let requisicao = 'atualizarDataReferencia';
-  let dataReferencia = $('#txtDataReferenciaDS').val();//yyyy-MM
+  let dataReferencia = $('#txtDataReferencia').val(); // 2121-02
+  let totalReceitas = 0;
+  let totalReceitasPendentes = 0;
+  let totalReceitasQuitadas = 0;
+  let totalDespesas = 0;
+  let totalDespesasPendentes = 0;
+  let totalDespesasQuitadas = 0;
 
-  dataReferencia = dataReferencia+'-01';//yyyy-MM-DD
+  //Valida os dados
+  if(dataReferencia == null || dataReferencia == ""){
+    Toast.fire({
+      icon: 'error',
+      title: "A data de referência não pode ser vazia!"
+    })
+    $('#txtDataReferencia').focus();
+    return;
+  }
 
-  //Requisição Ajax para enviar os dados para o banco de dados
+  //LISTAR DADOS DAS DESPESAS
+  let requisicao = "listarDespesasMensal";
   $.ajax({
-    url : url,
-    type : 'post',
-    data : {
-    requisicao : requisicao,
-    userID : userID,
-    dataReferencia : dataReferencia,
-  },
-    dataType: 'json',
-    beforeSend : function(){
-      //alert(requisicao + url );
-      //console.log(data);
-    }
+      url : url,
+      type : 'post',
+      data : {
+      requisicao : requisicao,
+      userID : userID,
+      dataReferencia : dataReferencia,      
+    },
+      dataType: 'json',
+      beforeSend : function(){
+        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+      }
   })
   .done(function(msg){
-    //alert(msg.mensagem);
-    if (msg.success == true){
-      //Exibe mensagem
-      ListarReceitasMensal();
-      ListarDespesasMensal();
+    if(msg.success == true){
+      //Limpa a tabela de Despesas
+
+      let arrayGraficoDespesas = [['Despesa', 'Valor']];
+      let valorDespesa;
+      let contador;
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
+      for(var k in msg[0]) {
+        //console.log(k, msg[0][k]["descricao"]);
+
+        //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de receitas
+        if(msg[0][k]["quitado"] == "SIM"){
+          totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+          valorDespesa = parseFloat(msg[0][k]["valorquitado"]);
+        }else{
+          totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+          valorDespesa = parseFloat(msg[0][k]["valorpendente"]);
+        }
+        //Cria um array com os dados da parcela para montar o gráfico de receitas
+        arrayGraficoDespesas[parseFloat(k) + 1] = [msg[0][k]["descricao"], valorDespesa]; 
+      }
+      GraficoDespesaMensal(arrayGraficoDespesas);
+      //Exibe os totais no rodapé da tabela de receitas
+      $("#totalPendenteDespesasDS").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
+      $("#totalQuitadoDespesasDS").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
+      totalDespesas = totalDespesasPendentes + totalDespesasQuitadas;
+      $("#totalDespesasDS").text(ConverterValorParaRealBrasileiro(totalDespesas,true));
     }else{
-      //Exibe mensagem
       Toast.fire({
         icon: 'error',
         title: msg.mensagem
@@ -4064,47 +4043,79 @@ $("#txtDataReferenciaDS").blur(function(){
     console.log(msg);
   })
   .fail(function(jqXHR, textStatus, msg){
-    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
-    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-});//FIM Salva a data de referência quando alterada
+    alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Despesas: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax LISTAR DADOS DAS DESPESAS
 
-function PreencherDataReferenciaDS(){
-  //Captura os valores dos campos
-  let url = $('#idURL').val();
-  let userID = $('#userID').val(); // ID do usuário logado
-  let requisicao = 'buscarDataReferencia';
 
-  //Requisição Ajax para enviar os dados para o banco de dados
+
+  //LISTAR DADOS DAS RECEITAS
+  requisicao = "listarReceitasMensal";
   $.ajax({
     url : url,
     type : 'post',
     data : {
     requisicao : requisicao,
     userID : userID,
+    dataReferencia : dataReferencia,      
   },
     dataType: 'json',
     beforeSend : function(){
-      //alert(requisicao + url );
-      //console.log(data);
+      //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
     }
   })
   .done(function(msg){
-    console.log(msg);
-    if (msg.success == true){
-      let dataFormatada;
-      dataFormatada = msg[0][0].data_referencia.substring(0,7);//Formato a data de YYYY-mm-dd para YYYY-mm
-      $('#txtDataReferenciaDS').val(dataFormatada);
-      ListarReceitasMensal();
-      ListarDespesasMensal();
+    if(msg.success == true){
+      //Limpa a tabela de Receitas
+
+      let arrayGraficoReceitas = [['Receita', 'Valor']];
+      let valorReceita;
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Receitas
+      for(var k in msg[0]) {
+        //console.log(k, msg[0][k]["descricao"]);
+
+        //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de receitas
+        if(msg[0][k]["quitado"] == "SIM"){
+          totalReceitasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+          valorReceita = parseFloat(msg[0][k]["valorquitado"]);
+        }else{
+          totalReceitasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+          valorReceita = parseFloat(msg[0][k]["valorpendente"]);
+        }
+        //Cria um array com os dados da parcela para montar o gráfico de receitas
+        arrayGraficoReceitas[parseFloat(k) + 1] = [msg[0][k]["descricao"], valorReceita]; 
+      }
+      GraficoReceitaMensal(arrayGraficoReceitas);
+      //Exibe os totais no rodapé da tabela de receitas
+      $("#totalPendenteReceitasDS").text(ConverterValorParaRealBrasileiro(totalReceitasPendentes,true));
+      $("#totalQuitadoReceitasDS").text(ConverterValorParaRealBrasileiro(totalReceitasQuitadas,true));
+      totalDespesas = totalReceitasPendentes + totalReceitasQuitadas;
+      $("#totalReceitasDS").text(ConverterValorParaRealBrasileiro(totalDespesas,true));
     }else{
-      $('#txtDataReferenciaDS').val(FormataDataParaInputMonth(DataAtual()));
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
     }
+    console.log(msg);
   })
   .fail(function(jqXHR, textStatus, msg){
-    alert('Erro ao atualizar data de referência: '+jqXHR.responseText);
-    console.log('Erro ao atualizar data de referência: '+jqXHR.responseText);
-  });//Fim da requisição Ajax para enviar os dados para o banco de dados
-}
+    alert("Erro ao listar Receitas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Receitas: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax LISTAR DADOS DAS RECEITAS
+
+  return;
+  //RESULTADO
+  totalReceitas = ConverterRealParaFloat($("#totalReceitasDS"))
+  
+  totalDespesas = ConverterRealParaFloat($("#totalDespesasDS"))
+  totalResultadoDS = totalReceitas - totalDespesas;
+  $("#totalResultadoDS").text(ConverterValorParaRealBrasileiro(totalResultadoDS,true));
+
+}//ListarDadosDashboardMensal
+
+function CarregarFuncoesPaginaDashboard(){
+  PreencherDataReferencia(ListarDadosDashboardMensal)
+}//CarregarFuncoesPaginaDashboard
 
 //#endregion

@@ -19,90 +19,75 @@
 
     <!-- Painel do Dashboard-->
     <div class="card shadow mb-4">
-
-      <?php 
-        // Lista os dados
-        $lista_total_receitas = $modelo->listar_total_receitas( $parametros );
-        $lista_total_despesas = $modelo->listar_total_despesas( $parametros );
-        $lista_total_resultado = $modelo->listar_total_resultado( $parametros );
-        // Função que Seleciona o mês que irá exibir os dados
-        // Primeiro verifica o mês anterior, se não houver nenhuma conta a pagar ou a receber pendente então exibe o mês atual
-        $link_mes_atual = $modelo->selecionar_mes() ;
-      ?>
-      
+      <div class="card-header d-flex justify-content-between">
+        <div><i class="fas fa-chart-area mr-1"></i>Análise Mensal</div>
+        <div class="col-lg-3 col-md-4 col-6">
+          <!--form-control-->
+          <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferencia" name="txtDataReferencia" value="">
+        </div>
+      </div>
       <div class="card-body">
       <!-- Corpo do painel -->
-        <div class="text-right">
-        <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferenciaDS" name="txtDataReferenciaDS" value="">
-        </div>
-        <p class="form_success"></p>
-        <br>
 
           <!--Atalhos -->
           <div class="row">
 
-            <div class="col-xl-3 col-md-6">
+            <!-- Receitas -->
+            <div class="col-xl-4 col-md-6">
               <div class="card bg-success text-white mb-4">
                 <div class="card-body" style="transform: rotate(0);">
                   <div class="row">
                     <div class="col-6">Receitas</div>
-                    <div class="col-6 fz-30 text-white text-right"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="col-6 fz-30 text-white text-right"><i class="icone-dashboard fas fa-hand-holding-usd"></i></div>
+                  </div>
+                  <div class="row">
+                    <h2 id="totalReceitasDS">rs</h2>
                   </div>
                   <!--stretched-link funciona apenas no body do painel por causa do style transform-->
-                  <a class="small text-white stretched-link" href="<?php echo HOME_URI?>receitas/<?php echo $link_mes_atual?>"></a>
+                  <a class="small text-white stretched-link" href="<?php echo HOME_URI?>receitas/"></a>
                 </div>
 
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                  <?php foreach ($lista_total_receitas as $fetch_userdata): ?>
-                    <small class="small text-white" data-toggle="tooltip" data-placement="top" title="Total Pendente">R$ 
-                      <?php
-                        echo $modelo->formatar_valor($fetch_userdata['TotalPendente']);
-                      ?>
-                    </small>
-                    <small>
-                      <strong data-toggle="tooltip" data-placement="top" title="Total Quitado">R$ 
-                        <?php 
-                          echo $modelo->formatar_valor($fetch_userdata['TotalQuitado']);
-                        ?>
-                      </strong>
-                    </small>
-                  <?php endforeach;?>
+                  <small class="small text-white" data-toggle="tooltip" data-placement="top" title="Total Pendente"> 
+                    <span id="totalPendenteReceitasDS"></span>
+                  </small>
+                  <small>
+                    <strong data-toggle="tooltip" data-placement="top" title="Total Quitado"> 
+                      <span id="totalQuitadoReceitasDS"></span>
+                    </strong>
+                  </small>
                 </div>
-
               </div>
             </div>
 
-            <div class="col-xl-3 col-md-6">
+            <!-- Despesas -->
+            <div class="col-xl-4 col-md-6">
               <div class="card bg-danger text-white mb-4">
                 <div class="card-body"  style="transform: rotate(0);">
                   <div class="row">
                     <div class="col-6">Despesas</div>
-                    <div class="col-6 fz-30 text-white text-right"><i class="fas fa-credit-card"></i></div>
+                    <div class="col-6 fz-30 text-white text-right"><i class="icone-dashboard fas fa-credit-card"></i></div>
+                  </div>
+                  <div class="row">
+                    <h2 id="totalDespesasDS"></h2>
                   </div>
                   <!--stretched-link funciona apenas no body do painel por causa do style transform-->
                   <a class="small text-white stretched-link" href="<?php echo HOME_URI?>despesas/"></a>
                 </div>
-                
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                  <?php foreach ($lista_total_despesas as $fetch_userdata): ?>
-                    <small class="small text-white" data-toggle="tooltip" data-placement="top" title="Total Pendente">R$ 
-                      <?php
-                        echo $modelo->formatar_valor($fetch_userdata['TotalPendente']);
-                      ?>
-                    </small>
-                    <small>
-                      <strong data-toggle="tooltip" data-placement="top" title="Total Quitado">R$ 
-                        <?php 
-                          echo $modelo->formatar_valor($fetch_userdata['TotalQuitado']);
-                        ?>
-                      </strong>
-                    </small>
-                  <?php endforeach;?>
+                  <small class="small text-white" data-toggle="tooltip" data-placement="top" title="Total Pendente">
+                    <span id="totalPendenteDespesasDS"></span>
+                  </small>
+                  <small>
+                    <strong data-toggle="tooltip" data-placement="top" title="Total Quitado">
+                      <span id="totalQuitadoDespesasDS"></span>
+                    </strong>
+                  </small>
                 </div>
-
               </div>
             </div>
 
+            <!-- Investimentos 
             <div class="col-xl-3 col-md-6">
               <div class="card bg-info text-white mb-4">
                 <div class="card-body">
@@ -116,34 +101,30 @@
                   <a class="small text-white stretched-link" href="<?php echo HOME_URI?>finances/investimentos"><strong>R$ 0,00</strong></a>
                 </div>
               </div>
-            </div>
+            </div>-->
 
-            <div class="col-xl-3 col-md-6">
+            <!-- Resultado -->
+            <div class="col-xl-4 col-md-6">
               <div class="card bg-dark mb-4">
                 <div class="card-body text-white">
                   <div class="row">
-                    <div class="col-6">Resultado</div>
-                    <div class="col-6 fz-30 text-right"><i class="fas fa-wallet"></i></div>
+                    <div class="col-6">Lucro/Prejuízo</div>
+                    <div class="col-6 fz-30 text-right"><i class="icone-dashboard fas fa-wallet"></i></div>
+                  </div>
+                  <div class="row">
+                    <h2 id="totalResultadoDS"></h2>
                   </div>
                 </div>
-    
-                <div class="card-footer d-flex align-items-center justify-content-between text-white">
-                  <?php foreach ($lista_total_resultado as $fetch_userdata): ?>
-                    <small class="small" data-toggle="tooltip" data-placement="top" title="Resultado Pendente">R$ 
-                      <?php
-                        echo $modelo->formatar_valor($fetch_userdata['ResultadoPendente']);
-                      ?>
-                    </small>
-                    <small>
-                      <strong data-toggle="tooltip" data-placement="top" title="Resultado Quitado">R$ 
-                        <?php 
-                          echo $modelo->formatar_valor($fetch_userdata['ResultadoQuitado']);
-                        ?>
-                      </strong>
-                    </small>
-                  <?php endforeach;?>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                  <small class="small text-white" data-toggle="tooltip" data-placement="top" title="Total Pendente">
+                    <span id="totalPendenteResultadoDS"></span>
+                  </small>
+                  <small>
+                    <strong data-toggle="tooltip" data-placement="top" title="Total Quitado">
+                      <span id="totalQuitadoResultadoDS"></span>
+                    </strong>
+                  </small>
                 </div>
-
               </div>
             </div>
 

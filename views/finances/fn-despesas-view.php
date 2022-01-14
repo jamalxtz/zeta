@@ -19,13 +19,13 @@
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
     <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="despesas">
 
-    <!-- Painel do Painel Principal -->
+    <!-- Painel Principal -->
     <div class="card shadow mb-4">
       <div class="card-header d-flex justify-content-between">
         <div><i class="fas fa-chart-area mr-1"></i>Análise Mensal</div>
         <div class="col-lg-3 col-md-4 col-6">
           <!--form-control-->
-          <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferenciaDP" name="txtDataReferenciaDP" value="">
+          <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferencia" name="txtDataReferencia" value="">
         </div>
       </div>
       <div class="card-body">

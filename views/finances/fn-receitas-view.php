@@ -25,7 +25,7 @@
         <div><i class="fas fa-chart-area mr-1"></i>Análise Mensal</div>
         <div class="col-lg-3 col-md-4 col-6">
           <!--form-control-->
-          <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferenciaRC" name="txtDataReferenciaRC" value="">
+          <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferencia" name="txtDataReferencia" value="">
         </div>
       </div>
       <div class="card-body">
