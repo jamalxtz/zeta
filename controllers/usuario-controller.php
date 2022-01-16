@@ -38,6 +38,28 @@ class usuarioController extends MainController{
 			return;
 		}
 
+		//Verifica as permissões quando o usuário não for o usuário Master
+		if($_SESSION["userdata"]["id"] <> 62){
+			$this->permission_required = 'AcessarCadastroUsuarios';
+
+			if (!$this->check_permissions($this->permission_required, $this->userdata['user_permissions'])) {
+				$this->logged_in = false;
+				$this->login_error = 'Você não tem permissão para acessar essa página!';
+
+				/** Carrega os arquivos do view **/
+				// Header
+				require ABSPATH . '/views/_includes/header.php';
+				// Menu
+				require ABSPATH . '/views/_includes/menu.php';
+
+				echo '<h3 class="p-5">Você não tem permissão para acessar essa página!</h3>';
+				// Rodapé
+				require ABSPATH . '/views/_includes/footer.php';
+				
+				return;
+			}
+		}
+
 		/** Carrega os arquivos do view **/
 		// Header
 		require ABSPATH . '/views/_includes/header.php';

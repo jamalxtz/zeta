@@ -147,6 +147,12 @@
                         <label class="custom-control-label" for="customCheck2">Acessar Site Admin</label>
                       </div>
                     </div>
+                    <div class="form-group col-lg-06">
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="customCheck2" name="pAcessarCadastroUsuarios" value="AcessarCadastroUsuarios" <?php if(strpos($fetch_userdata['user_permissions'], 'AcessarCadastroUsuarios') !== false){ echo "checked";}?>>
+                        <label class="custom-control-label" for="customCheck2">Acessar Cadastro Usuários</label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </fieldset>

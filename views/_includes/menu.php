@@ -47,11 +47,17 @@
           	</div>
             Dashboard
           </a>
-          <a class="nav-link" href="<?php echo HOME_URI;?>contato/links">
+          <a class="nav-link" href="<?php echo HOME_URI;?>receitas/">
           	<div class="sb-nav-link-icon">
-          		<i class="fas fa-link"></i>
+          		<i class="fas fa-hand-holding-usd"></i>
           	</div>
-            Links
+            Receitas
+          </a>
+          <a class="nav-link" href="<?php echo HOME_URI;?>despesas/">
+          	<div class="sb-nav-link-icon">
+          		<i class="fas fa-credit-card"></i>
+          	</div>
+            Depesas
           </a>
           <!--<a class="nav-link" href="<?php echo HOME_URI;?>monitor">
           	<div class="sb-nav-link-icon">
@@ -80,12 +86,12 @@
             </nav>
           </div> -->
 
-          <a class="nav-link" href="<?php echo HOME_URI;?>produto">
+          <!-- <a class="nav-link" href="<?php echo HOME_URI;?>produto">
             <div class="sb-nav-link-icon">
               <i class="fas fa-box"></i>
             </div>
             Produtos
-          </a>
+          </a> -->
           <a class="nav-link" href="<?php echo HOME_URI;?>usuario">
             <div class="sb-nav-link-icon">
               <span class="icon-user mr-1" aria-hidden="true"></span>

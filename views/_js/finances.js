@@ -236,8 +236,7 @@ $("#txtDataReferencia").blur(function(){
           ListarReceitasMensal();
           break;
         case "dashboard":
-          ListarReceitasMensal();
-          ListarDespesasMensal();
+          CarregarFuncoesPaginaDashboard();
           break;
         default:
           // code block
@@ -2807,7 +2806,7 @@ function InserirLinhaTabelaReceitas(arrayDados){
   }else{
     acoes = '<nobr>';
     acoes += '<a href="" class="btn btn-info btn-sm"  role="button" data-toggle="modal" data-target="#modal-editar-receita" data-id="'+id+'" data-vencimento="'+vencimento+'"><i class="fas fa-pen"></i></a>';
-    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-receita" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-vencimento="'+vencimento+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
+    acoes += '<a href="" class="btn btn-success btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-receita" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-vencimento="'+vencimento+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
     acoes += '</nobr>';
   }
   novaCelula.innerHTML = acoes;
@@ -4104,18 +4103,65 @@ function ListarDadosDashboardMensal(){
     console.log("Erro ao listar Receitas: "+"\n"+jqXHR);
   });//Fim da requisição Ajax LISTAR DADOS DAS RECEITAS
 
-  return;
-  //RESULTADO
-  totalReceitas = ConverterRealParaFloat($("#totalReceitasDS"))
-  
-  totalDespesas = ConverterRealParaFloat($("#totalDespesasDS"))
-  totalResultadoDS = totalReceitas - totalDespesas;
-  $("#totalResultadoDS").text(ConverterValorParaRealBrasileiro(totalResultadoDS,true));
+
+  //LISTAR DADOS lUCRO/PREJUÍZO
+  requisicao = "listarLucroPrejuizoMensal";
+  $.ajax({
+    url : url,
+    type : 'post',
+    data : {
+    requisicao : requisicao,
+    userID : userID,
+    dataReferencia : dataReferencia,      
+  },
+    dataType: 'json',
+    beforeSend : function(){
+      //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+    }
+  })
+  .done(function(msg){
+    if(msg.success == true){
+      //Exibe os totais no rodapé da tabela de receitas
+      totalReceitas = parseFloat(msg[0][0]["receita"])
+      totalDespesas = parseFloat(msg[0][0]["despesa"])
+      totalResultadoDS = totalReceitas - totalDespesas;
+      $("#totalResultadoDS").text(ConverterValorParaRealBrasileiro(totalResultadoDS,true));
+      if(totalReceitas == totalDespesas){
+        $("#totalResultadoDS").addClass("text-warning");
+      }
+      else if(totalReceitas > totalDespesas){
+        $("#totalResultadoDS").addClass("text-success");
+      }
+      else if(totalReceitas < totalDespesas){
+        $("#totalResultadoDS").addClass("text-danger");
+      }
+    }else{
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao listar Receitas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Receitas: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax LISTAR DADOS lUCRO/PREJUÍZO
 
 }//ListarDadosDashboardMensal
 
 function CarregarFuncoesPaginaDashboard(){
   PreencherDataReferencia(ListarDadosDashboardMensal)
 }//CarregarFuncoesPaginaDashboard
+
+function PreencherResultado(){
+
+  
+  totalReceitas = ConverterRealParaFloat($("#totalReceitasDS"))
+  
+  totalDespesas = ConverterRealParaFloat($("#totalDespesasDS"))
+  totalResultadoDS = totalReceitas - totalDespesas;
+  $("#totalResultadoDS").text(ConverterValorParaRealBrasileiro(totalResultadoDS,true));
+}
 
 //#endregion

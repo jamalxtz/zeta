@@ -271,7 +271,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <p class="modal-title" id="myModalLabel"><strong>Quitar Receita?</strong></p>
+        <p class="modal-title" id="myModalLabel"><strong>Aguarde</strong></p>
         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -287,31 +287,21 @@
 
         <div id="alert_placeholder"></div>
 
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <small class="mt-4"><strong>Data de Quitação:</strong></small>
-            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarReceitaRC" name="txtDataQuitacaoModalQuitarReceitaRC" value="" required>
-          </div>
-          <div class="form-group col-md-6">
-            <small class="mt-4"><strong>Valor Quitado:</strong></small>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">R$</div>
-              </div>
-              <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarReceitaRC" name="txtValorQuitadoModalQuitarReceitaRC" value="" required>
-            </div>
+        <div class="d-flex justify-content-center">
+          <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
           </div>
         </div>
       <!--FIM Corpo do modal-->
       </div>
 
-      <div class="modal-footer">
+      <!-- <div class="modal-footer">
         <button type="button" class="btn btn-dark" data-dismiss="modal">Cancelar</button>
         <button type="submit" class="btn btn-success" id="btnQuitarModalQuitarReceitaRC">Quitar</button>
-      </div>
+      </div> -->
       </form>
 
     </div>
   </div>
 </div>
-<!--FIM do modal Quitar-->
+<!--FIM do modal Editar Receitas-->

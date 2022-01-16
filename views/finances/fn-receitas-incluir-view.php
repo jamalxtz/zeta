@@ -11,7 +11,7 @@
     <h1 class="mt-4">Incluir Receita</h1>
     <ol class="breadcrumb mb-4">
       <li class="breadcrumb-item"><a href="<?php echo HOME_URI ?>">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="<?php echo HOME_URI ?>Receitas">Receitas</a></li>
+      <li class="breadcrumb-item"><a href="<?php echo HOME_URI ?>receitas">Receitas</a></li>
       <li class="breadcrumb-item active">Incluir</li>
     </ol>
 

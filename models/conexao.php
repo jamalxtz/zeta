@@ -1,5 +1,5 @@
 <?php 
-  $online = "localhost";
+  $online = "site";
 
   if($online == "localhost"){
     // Conexão com o banco de dados online(servidor)
@@ -11,10 +11,10 @@
   else{
 
     // Conexão com o banco de dados online(servidor)
-    $db_host = "162.241.2.89";
-    $db_name = "ntolog02_zeta";
-    $db_user = "ntolog02_nto";
-    $db_pass = "3Akx97e0Fm";
+    $db_host = "192.185.176.177";
+    $db_name = "alemte27_zeta_finances";
+    $db_user = "alemte27_alem";
+    $db_pass = "a8LB9u17dg";
 
   }
   try{

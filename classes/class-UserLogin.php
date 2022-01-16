@@ -166,7 +166,7 @@ class UserLogin
 			return;
 		}
 
-		$this->permission_required = 'AcessarSiteAdmin';
+		//$this->permission_required = 'AcessarSiteAdmin';
 		
 
 		/*// Verifica se o usuário tem a permissão para acessar essa página
@@ -226,17 +226,17 @@ class UserLogin
 
 
 			// Verifica se o usuário tem a permissão para acessar essa página
-			$this->permission_required = 'AcessarSiteAdmin';
+			//$this->permission_required = 'AcessarSiteAdmin';
 
-			if (!$this->check_permissions($this->permission_required, $this->userdata['user_permissions'])) {
-				$this->logged_in = false;
-				$this->login_error = 'Você não tem permissão para acessar essa página!';
+			// if (!$this->check_permissions($this->permission_required, $this->userdata['user_permissions'])) {
+			// 	$this->logged_in = false;
+			// 	$this->login_error = 'Você não tem permissão para acessar essa página!';
 				
-				// Desconfigura qualquer sessão que possa existir sobre o usuário
-				//$this->logout();
+			// 	// Desconfigura qualquer sessão que possa existir sobre o usuário
+			// 	//$this->logout();
 				
-				return;
-			}
+			// 	return;
+			// }
 			
 			// Verifica se existe uma URL para redirecionar o usuário
 			if ( isset( $_SESSION['goto_url'] ) ) {

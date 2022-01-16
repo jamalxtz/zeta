@@ -41,7 +41,7 @@
                     <div class="col-6 fz-30 text-white text-right"><i class="icone-dashboard fas fa-hand-holding-usd"></i></div>
                   </div>
                   <div class="row">
-                    <h2 id="totalReceitasDS">rs</h2>
+                    <h2 id="totalReceitasDS"></h2>
                   </div>
                   <!--stretched-link funciona apenas no body do painel por causa do style transform-->
                   <a class="small text-white stretched-link" href="<?php echo HOME_URI?>receitas/"></a>
@@ -105,8 +105,8 @@
 
             <!-- Resultado -->
             <div class="col-xl-4 col-md-6">
-              <div class="card bg-dark mb-4">
-                <div class="card-body text-white">
+              <div class="card bg-light mb-4">
+                <div class="card-body">
                   <div class="row">
                     <div class="col-6">Lucro/Prejuízo</div>
                     <div class="col-6 fz-30 text-right"><i class="icone-dashboard fas fa-wallet"></i></div>
@@ -116,12 +116,12 @@
                   </div>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                  <small class="small text-white" data-toggle="tooltip" data-placement="top" title="Total Pendente">
-                    <span id="totalPendenteResultadoDS"></span>
+                  <small class="small">
+                    <span id="totalPendenteResultadoDS">.</span>
                   </small>
                   <small>
-                    <strong data-toggle="tooltip" data-placement="top" title="Total Quitado">
-                      <span id="totalQuitadoResultadoDS"></span>
+                    <strong>
+                      <span id="totalQuitadoResultadoDS">.</span>
                     </strong>
                   </small>
                 </div>
@@ -144,11 +144,11 @@
                   
       <!-- FIM Corpo do painel -->
       </div>
-      <div class="card-footer">
+      <!-- <div class="card-footer">
         <div class="text-right ">
           <button type="submit" class="btn btn-dark shadow">Fechar o Mês</button>
         </div>
-      </div>
+      </div> -->
               
     </div>
     <!-- Fim do Painel do Dashboard-->

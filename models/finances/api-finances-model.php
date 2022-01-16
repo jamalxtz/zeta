@@ -137,6 +137,10 @@
                 case "incluirParcelasReceitasFixas":
                     $this->IncluirParcelasReceitasFixas();
                     break;
+                //Dashboard
+                case "listarLucroPrejuizoMensal":
+                    $this->ListarLucroPrejuizoMensal();
+                    break;
                 default:
                     $this->RetornoPadrao(false,"Nenhuma requisição foi enviada.");
             }
@@ -1840,6 +1844,69 @@
                 exit;
             }
         }//ListarReceitasFixasSemParcela
+
+        //*********************************************************************************************************************
+        //************************************************   DASHBOARD   ******************************************************                  
+        //*********************************************************************************************************************
+
+        /* Lista o balanço Lucro/Prejuízo  por mês 
+         * Esse método recebe via POST os parâmetros mes, ano e userID */
+        public function ListarLucroPrejuizoMensal(){
+            // Conexão com o banco de dados
+            require '../conexao.php';
+            //Recebe os dados via POST
+            $userID = $_POST['userID'];
+            $dataReferencia = $_POST['dataReferencia'];
+            $dataReferencia = $dataReferencia.'-01';
+
+            //Faz uma consulta para retornar um array com todas as receitas listadas
+            try{
+                $sql = "SELECT COALESCE(receitas.valoreceita,0) as receita,
+                COALESCE(despesas.valordespesa,0) as despesa
+                FROM
+                    (SELECT 
+                        CASE WHEN quitado = 'NÃO' THEN
+                        SUM(COALESCE(fn_receitas_parcelas.valorpendente,0))
+                        ELSE
+                            SUM(COALESCE(fn_receitas_parcelas.valorquitado,0))
+                        END AS valoreceita
+                    FROM fn_receitas_parcelas
+                        INNER JOIN fn_receitas ON fn_receitas_parcelas.fn_receitas_id = fn_receitas.id
+                    WHERE usuarios_id = {$userID}
+                        AND DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
+                    ORDER BY fn_receitas.descricao ASC) as receitas,
+                                
+                    (SELECT 
+                        CASE WHEN quitado = 'NÃO' THEN
+                            SUM(COALESCE(fn_despesas_parcelas.valorpendente,0))
+                        ELSE
+                            SUM(COALESCE(fn_despesas_parcelas.valorquitado,0))
+                        END AS valordespesa
+                    FROM fn_despesas_parcelas
+                        INNER JOIN fn_despesas ON fn_despesas_parcelas.fn_despesas_id = fn_despesas.id
+                    WHERE usuarios_id = {$userID}
+                        AND DATE_FORMAT(vencimento, '%Y-%m') = DATE_FORMAT('{$dataReferencia}', '%Y-%m')
+                    ORDER BY fn_despesas.descricao ASC) as despesas";
+
+                $consulta =  $db_con->query($sql);
+
+                if(!$consulta){
+                    $this->RetornoPadrao(false,"Erro ao consultar Lucro/Prejuízo - ".$e->getMessage(), "\n");
+                    exit;
+                }
+
+                //O método fetchAll transforma o resultado da consulta em um array
+                //O parâmetro PDO::FETCH_ASSOC inclui os indices(nomes das colunas) no array em vez do número
+                $result = $consulta->fetchAll(PDO::FETCH_ASSOC);
+                //Faz o retorno dos dados
+                $this->RetornoPadrao(true,"Lucro/Prejuízo listadas com sucesso!",$result);
+                exit;
+            }
+            catch (Exception $e){
+                $this->RetornoPadrao(false,"Erro ao consultar Lucro/Prejuízo - ".$e->getMessage(), "\n");
+                exit;
+            }
+        }//ListarLucroPrejuizoMensal
 
     }//Class FinancesAPI
 

@@ -83,6 +83,8 @@ class usuarioModel extends MainModel{
 
 			$pAcessarAreaRestrita = filter_input(INPUT_POST, 'pAcessarAreaRestrita');
 			$pAcessarSiteAdmin = filter_input(INPUT_POST, 'pAcessarSiteAdmin');
+			$pAcessarCadastroUsuarios = filter_input(INPUT_POST, 'pAcessarCadastroUsuarios');
+
 
 			date_default_timezone_set('America/Sao_Paulo');
 			$cadastro = date('Y/m/d');
@@ -131,7 +133,7 @@ class usuarioModel extends MainModel{
 			}
 
 			// Verifica as permissoes
-			$permissions = $pAcessarAreaRestrita . "," . $pAcessarSiteAdmin;
+			$permissions = $pAcessarAreaRestrita . "," . $pAcessarSiteAdmin. "," . $pAcessarCadastroUsuarios;
 			// Faz um trim nas permissões
 			$permissions = array_map('trim', explode(',', $permissions));
 			// Remove permissões duplicadas
