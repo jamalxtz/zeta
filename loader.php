@@ -3,6 +3,7 @@
 if ( ! defined('ABSPATH')) exit;
  
 // Inicia a sessão
+session_set_cookie_params(2419200,"/"); // Essa configuração mantem o cookie salvo no navegador por um mês, sem precisar ter que ficar fazendo login o tempo todo
 session_start();
 
 // Verifica o modo para debugar

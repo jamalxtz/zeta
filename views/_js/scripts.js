@@ -144,7 +144,9 @@ if(document.getElementById('pagina')){
 }
 
 if(pagina =='login'){
-  alterarWallpaper();
+  //alterarWallpaper();
+  var element = document.getElementsByTagName("body")[0];
+  element.classList.add("bg-imagem");
 }
 //alterar plano de fundo da tela de login
 function alterarWallpaper(){

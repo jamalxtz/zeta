@@ -238,7 +238,7 @@ class usuarioModel extends MainModel{
 				'dica' => $dica,
 				'cadastro' => $cadastro,
 				'user'   => $email,
-				'situacao'   => $situacao,
+				'situacao'   => "Ativo",
 				'user_permissions' => 'AcessarAreaRestrita',
 				'imagem' => $imagem
 			));

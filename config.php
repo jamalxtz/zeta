@@ -2,8 +2,8 @@
 /**
  * Configuração geral
  */
-$tipo_conexao = $_SERVER['HTTP_HOST'];
-//$tipo_conexao = "localhost";
+//$tipo_conexao = $_SERVER['HTTP_HOST'];
+$tipo_conexao = "localhost";
 define( 'TIPO_CONEXAO', $_SERVER['HTTP_HOST'] );
 
 
@@ -16,13 +16,12 @@ define( 'UP_ABSPATH', ABSPATH . '/views/_images' );
 define( 'UP_DOWNLOAD_ABSPATH', ABSPATH . '/views/_downloads' );
 
 
-
 if($tipo_conexao == "localhost"){
 	// URL da home
-	define( 'HOME_URI', 'http://localhost/zeta/zeta/' );
+	define( 'HOME_URI', 'http://localhost:8090/zeta/zeta/' );
 
 	// URL do site
-	define( 'SITE_URI', "http://localhost/zeta/zeta/" );
+	define( 'SITE_URI', "http://localhost:8090/zeta/zeta/" );
 
 	// Nome do host da base de dados
   define( 'HOSTNAME', 'localhost' );

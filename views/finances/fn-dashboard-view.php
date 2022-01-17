@@ -11,7 +11,7 @@
     <ol class="breadcrumb mb-4">
       <li class="breadcrumb-item active">Dashboard</li>
     </ol>
-    
+
     <!-- Hidden Inputs -->
     <input class="hidden" type="text" id="idURL" value="<?php echo HOME_URI ?>models/finances/api-finances-model.php">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">

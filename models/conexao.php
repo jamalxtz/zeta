@@ -1,5 +1,5 @@
 <?php 
-  $online = "site";
+  $online = "localhost";
 
   if($online == "localhost"){
     // Conexão com o banco de dados online(servidor)

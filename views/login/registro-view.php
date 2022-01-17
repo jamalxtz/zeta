@@ -40,7 +40,7 @@
             <!--Painel de Registro-->
             <div class="card shadow-lg border-0 rounded-lg mt-5">
               <div class="card-header">
-                <h3 class="text-center font-weight-light my-4"> <span class="fz-30 icon-diamond texto-azul" aria-hidden="true"></span>  Registro SiteAdmin</h3>
+                <h3 class="text-center font-weight-light my-4"> <span class="fz-30 icon-diamond texto-azul" aria-hidden="true"></span>  Zeta Finances</h3>
               </div>
               <div class="card-body">
               <!--Inicio do corpo do painel-->
@@ -51,9 +51,8 @@
                   <div class="col-10">
                     <?php
                       // Carrega todos os métodos do modelo
-                      $modelo->validate_register_form();
+                      $modelo->cadastrar_usuario();
                       $lista = $modelo->editar_usuario( $parametros );
-                      $listaDepartamentos = $modelo->pegar_lista_departamentos();
                       // Mensagem de feedback para o usuário
                       echo $modelo->form_msg;
                     ?>
@@ -110,16 +109,7 @@
                       <small><strong>Telefone:</strong></small>
                       <input class="form-control form-control-sm" name="telefone" type="text" placeholder="(62) 0000-0000" data-mask="(00) 0000-0000" data-mask-selectonfocus="true" value="<?php print_r($_SESSION['CUtelefone']);?>">
                     </div>
-                  
-                    <div class="form-group col-6">
-                    <small class="col-form-label col-form-label-sm" for=""><strong>Departamento:</strong></small>
-                    <select id="select-servicos" name="departamento" class="form-control form-control-sm" required>
-                      <option selected></option>
-                            <?php foreach ($listaDepartamentos as $fetch_userdata): ?>
-                              <option value="<?php echo $fetch_userdata['id'] ?>"><?php echo $fetch_userdata['descricao'] ?></option>
-                            <?php endforeach;?>
-                    </select>
-                  </div>
+                
                 </div>
                 </fieldset>
 
