@@ -1,6 +1,6 @@
 <?php if ( ! defined('ABSPATH')) exit; ?>
 
-      <footer class="py-4 bg-dark mt-auto">
+      <footer class="py-4 bg-light mt-auto">
         <div class="container-fluid">
           <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">Copyright &copy; Bruno MSS 2020</div>
