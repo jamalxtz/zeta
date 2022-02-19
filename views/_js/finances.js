@@ -172,6 +172,9 @@ $("#formCadastrarCategoriaNC").on("submit", function (event) {
         value: msg[0].id,
         text: descricao
       }));
+
+      $('select').val(msg[0].id);
+
       //Exibe mensagem
       Toast.fire({
         icon: 'success',
