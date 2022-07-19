@@ -143,7 +143,12 @@
     <!-- <script src="<?php echo HOME_URI;?>views/_js/atendimentos.js"></script> -->
     <!-- <script src="<?php echo HOME_URI;?>views/_js/inicio/menu.js"></script> -->
     <!-- <script src="<?php echo HOME_URI;?>views/_js/inicio/apresentacao.js"></script> -->
-    <?php echo $this->elementosFooter[0] ?>
+    <!--Scripts incluidos no controller da página-->
+    <?php 
+    foreach ($this->elementosFooter as $script) {
+        echo $script . "\n";
+    }
+    ?>
     
   </body>
 </html>

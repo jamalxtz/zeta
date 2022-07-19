@@ -101,7 +101,7 @@ function DataAtual(semFormatacao = false){
   if(semFormatacao == true){
     var mt = today.getMonth()+1;
   }else{
-    var mt = ("0" + today.getMonth()+1).slice(-2);
+    var mt = ("0" + (today.getMonth()+1)).slice(-2);
   }
   var yr = today.getFullYear();
   return yr+"-"+mt+"-"+dy;
@@ -1011,7 +1011,6 @@ $('#modal-quitar-despesa').on('show.bs.modal', function (event) {
     modal.find('#txtValorQuitadoModalQuitarDespesaDP').val(valorPendente).attr('readonly', false);
     $('#alert_placeholder').remove();
   }
-  modal.find('#txtDataQuitacaoModalQuitarDespesaDP').val(DataAtual());
 })//Carrega o Modal Quitar Despesa
 
 //Quitar Despesa
