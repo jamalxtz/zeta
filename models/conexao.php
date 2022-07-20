@@ -1,6 +1,6 @@
 <?php 
-  //$online = "localhost";
-  $online = $_SERVER['HTTP_HOST'];
+  $online = "localhost";
+  //$online = $_SERVER['HTTP_HOST'];
   if($online == "localhost"){
     // Conexão com o banco de dados online(servidor)
     $db_host = "localhost";

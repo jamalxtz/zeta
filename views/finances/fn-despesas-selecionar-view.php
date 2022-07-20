@@ -6,10 +6,11 @@
 <main class='bg-color'>
   <div class="container-fluid">
 
-    <h1 class="mt-4">Despesas</h1>
+    <h1 class="mt-4">Selecionar Despesas</h1>
     <ol class="breadcrumb mb-4">
       <li class="breadcrumb-item"><a href="<?php echo HOME_URI ?>">Dashboard</a></li>
-      <li class="breadcrumb-item active">Despesas</li>
+      <li class="breadcrumb-item "><a href="<?php echo HOME_URI ?>despesas">Despesas</a></li>
+      <li class="breadcrumb-item active">Selecionar</li>
     </ol>
 
     <!-- Hidden Inputs -->
@@ -17,23 +18,19 @@
     <input class="hidden" type="text" id="urlEditarDespesa" value="<?php echo HOME_URI ?>despesas/editar">
     <input class="hidden" type="text" id="userID" value="<?php print_r($_SESSION["userdata"]["id"]); ?>">
     <input class="hidden" type="text" id="dataParametro" value="<?php print_r($parametros[0] . $parametros[1]) ?>">
-    <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="despesas">
+    <input class="form-control py-4 hidden" name="pagina" id="pagina" type="text" value="selecionarDespesas">
 
     <!-- Painel Principal -->
     <div class="card shadow mb-4">
       <div class="card-header d-flex justify-content-between">
-        <div><i class="fas fa-chart-area mr-1"></i>Análise Mensal</div>
-        <div class="col-lg-3 col-md-4 col-6">
-          <!--form-control-->
-          <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataReferencia" name="txtDataReferencia" value="">
-        </div>
+        <div><i class="fas fa-chart-area mr-1"></i>Despesas</div>
       </div>
       <div class="card-body">
         <!-- Corpo do Painel Principal -->
         <div class="d-flex align-items-center justify-content-between">
           <div>
             <a type="button" href="<?php echo HOME_URI ?>despesas/incluir" class="btn btn-danger btn" role="button" data-toggle="tooltip" data-placement="top" title="Incluir Despesa">+<i class="fas fa-credit-card mr-1"></i></a>
-            <a type="button" href="<?php echo HOME_URI ?>despesas/selecionar" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Selecionar todas as despesas"><i class="fas fa-list-ul mr-1"></i></a>
+            <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
             <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
           </div>
           <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasFixasSemParcela()"><i class="fas fa-sync-alt mr-1"></i></button>
@@ -44,11 +41,11 @@
 
         <div class="row">
 
-          <div class="col-xl-6">
+          <div class="col-xl-12">
             <!--Painel de Despesas-->
             <div class="table-responsive">
 
-              <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasDP" width="100%" cellspacing="0">
+              <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasSD" width="100%" cellspacing="0">
                 <caption>
                   <div class="d-flex align-items-center justify-content-between">
                     <small class="small text-muted" data-toggle="tooltip" data-placement="top" title="Total Pendente" id="idTotalPendente"></small>
@@ -68,7 +65,7 @@
                     <th>Ação</th>
                   </tr>
                 </thead>
-                <tbody id="tabelaDespesasBodyDP">
+                <tbody id="tabelaDespesasBodySD">
                 </tbody>
               </table>
             </div>
@@ -76,17 +73,11 @@
           </div>
           <!--FIM Painel de Despesas-->
 
-          <div class="col-xl-6">
-            <!--Painel de Gráficos-->
-            <div class="charts" id="grafico-despesas"></div>
-            <!--FIM Painel de Gráficos-->
-          </div>
-
         </div>
       <!-- FIM Corpo do Painel Principal -->
       </div>
       <div class="card-footer bg-dark text-white text-center">
-        <h3>Total: <strong id="totalDespesasMensalDP"></strong></h3>
+        <h3>Total: <strong id="totalDespesasMensalSD"></strong></h3>
       </div>
 
     </div>

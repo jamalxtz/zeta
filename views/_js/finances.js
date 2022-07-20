@@ -33,6 +33,10 @@ window.onload = function() {
     //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
     PreencherCamposEditarDespesa();
   }
+  else if ( $('#pagina').val() == "selecionarDespesas"){
+    //Criar função aqui para pegar a data de referencia, fazer uma consulta na tabela de configurações e então verificar a ultima data de referencia
+    CarregarFuncoesPaginaSelecionarDespesas();
+  }
   else if ( $('#pagina').val() == "receitas"){
     CarregarFuncoesPaginaReceitas()
   }
@@ -2129,12 +2133,190 @@ function AlterarDespesaFixa(){
 
 //#endregion
 
+//*********************************************************************************************************************
+//*****************************************   SELECIONAR DESPESAS   ***************************************************                  
+//*********************************************************************************************************************
+//#region CARREGA OS DADOS DA DESPESA----------------------------------------------------------------------------------
 
+function CarregarFuncoesPaginaSelecionarDespesas(){
+  ListarTodasAsDespesas();
+}//CarregarFuncoesPaginaSelecionarDespesas
 
+//Faz uma consulta no banco de dados e retorna todas as despesas que possuem parcelas na dta selecionada
+function ListarTodasAsDespesas(){
+  //Pega os dados dos campos
+  let url = $('#idURL').val();
+  let requisicao = "listarDespesasMensal";
+  let userID = $('#userID').val(); // ID do usuário logado
+  let dataReferencia = '2022-01'; // 2121-02
+  let totalDespesasPendentes = 0;
+  let totalDespesasQuitadas = 0;
 
+  //Valida os dados
+  if(dataReferencia == null || dataReferencia == ""){
+    Toast.fire({
+      icon: 'error',
+      title: "A data de referência não pode ser vazia!"
+    })
+    $('#txtDataReferencia').focus();
+    return;
+  }
 
+  //Requisição Ajax para enviar os dados para o banco de dados
+  $.ajax({
+      url : url,
+      type : 'post',
+      data : {
+      requisicao : requisicao,
+      userID : userID,
+      dataReferencia : dataReferencia,      
+    },
+      dataType: 'json',
+      beforeSend : function(){
+        //alert(varFuncao+" \n "+ url+" \n "+ elemento +" \n "+ status );
+      }
+  })
+  .done(function(msg){
+    if(msg.success == true){
+      //Limpa a tabela de Despesas
+      $("#tabelaDespesasBodySD tr").remove();
 
+      let arrayGraficoDespesas = [['Despesa', 'Valor']];
+      let valorDespesa;
+      let contador;
+      //Faz a iteração no array de retorno para inserir linha a linha na tabela de Despesas
+      for(var k in msg[0]) {
+        //console.log(k, msg[0][k]["descricao"]);
 
+        //Chama a a função que irá inserir as linhas de despesa na tabela, uma a uma
+        InserirLinhaTabelaSelecionarDespesas(msg[0][k]);
+        //Somo os valores pendentes e os valores quitados recebidos na consulta para mostrar no rodapé da tabela de despesas
+        if(msg[0][k]["quitado"] == "SIM"){
+          totalDespesasQuitadas += parseFloat(msg[0][k]["valorquitado"]);
+          valorDespesa = parseFloat(msg[0][k]["valorquitado"]);
+        }else{
+          totalDespesasPendentes += parseFloat(msg[0][k]["valorpendente"]);
+          valorDespesa = parseFloat(msg[0][k]["valorpendente"]);
+        }
+        //Cria um array com os dados da parcela para montar o gráfico de despesas
+        arrayGraficoDespesas[parseFloat(k) + 1] = [msg[0][k]["descricao"], valorDespesa]; 
+      }
+      //Exibe os totais no rodapé da tabela de despesas
+      $("#idTotalPendente").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes,true));
+      $("#idTotalQuitado").text(ConverterValorParaRealBrasileiro(totalDespesasQuitadas,true));
+      $("#totalDespesasMensalDP").text(ConverterValorParaRealBrasileiro(totalDespesasPendentes + totalDespesasQuitadas,true));
+    }else{
+      Toast.fire({
+        icon: 'error',
+        title: msg.mensagem
+      })
+    }
+    console.log(msg);
+  })
+  .fail(function(jqXHR, textStatus, msg){
+    alert("Erro ao listar Despesas: "+"\n"+jqXHR.responseText);
+    console.log("Erro ao listar Despesas: "+"\n"+jqXHR);
+  });//Fim da requisição Ajax para enviar os dados para o banco de dados
+  
+}//ListarTodasAsDespesas
+
+//Inclui uma linha na tabela de Despesas com os dados recebidos por parâmetro
+function InserirLinhaTabelaSelecionarDespesas(arrayDados){
+  let tabelaDeDespesas = document.getElementById("tabelaDespesasBodySD");
+  let novaLinha = tabelaDeDespesas.insertRow(-1);
+  let novaCelula;
+  //Captura os valores do array
+  let id = arrayDados["id"];
+  let descricao = arrayDados["descricao"];
+  let vencimento = arrayDados["vencimento"];
+  let valorPendente = arrayDados["valorpendente"];
+  let valorQuitado = arrayDados["valorquitado"];
+  let quitado = arrayDados["quitado"];
+  let quitacao = arrayDados["quitacao"];
+  let quantidaDeParcelas = arrayDados["quantidadeparcelas"];
+  let valor;
+  let acoes;
+
+  //Formata as datas e valores para o padrão brasileiro
+  valorPendente = parseFloat(valorPendente);
+  valorQuitado = parseFloat(valorQuitado);
+  vencimento = FormatarDataPadraoBrasileiro(vencimento);
+
+  if(quitado == 'SIM'){
+    valor = valorQuitado;
+  }else{
+    valor = valorPendente;
+  }
+
+  valor = ConverterValorParaRealBrasileiro(valor,true);
+
+  //Insere os valores na tabela
+  novaCelula = novaLinha.insertCell(0); //Coluna ID
+  novaCelula.innerHTML = id;
+  novaCelula.className = "hidden";
+
+  novaCelula = novaLinha.insertCell(1);//Coluna Descrição
+  if(quantidaDeParcelas > 1){
+    novaCelula.innerHTML = '<nobr>'+descricao+'<small class="text-muted"> ('+quantidaDeParcelas+'X)</small></nobr>';
+  }else{
+    novaCelula.innerHTML = '<nobr>'+descricao+'</nobr>';
+  }
+  if(quitado == 'SIM'){
+    novaCelula.className = "texto-riscado";
+  }
+
+  novaCelula = novaLinha.insertCell(2);//Coluna Vencimento
+  novaCelula.innerHTML = vencimento;
+  novaCelula.className = "text-muted";
+  if(quitado != 'SIM'){
+    let dataVencimento = new Date(arrayDados["vencimento"]);
+    let dataAtual = new Date(DataAtual(true));
+    if(+dataVencimento === +dataAtual){
+      novaCelula.className = "text-warning";
+    }else if(dataVencimento < dataAtual){
+      novaCelula.className = "text-danger";
+    }
+  } 
+  
+  novaCelula = novaLinha.insertCell(3);//Coluna Valor
+  if(quitado == 'SIM'){
+    novaCelula.innerHTML = '<strong>'+valor+'</strong>';
+  }else{
+    novaCelula.innerHTML = valor;
+    novaCelula.className = "text-muted";
+  }
+  
+  novaCelula = novaLinha.insertCell(4);//Coluna Quitado
+  novaCelula.innerHTML = quitado;
+  novaCelula.className = "hidden";
+
+  novaCelula = novaLinha.insertCell(5);//Coluna Quantidade Parcelas
+  novaCelula.innerHTML = quantidaDeParcelas;
+  novaCelula.className = "hidden";
+  
+  novaCelula = novaLinha.insertCell(6);//Coluna Ações
+  if(quitado == 'SIM'){
+    acoes = '<nobr>';
+    acoes += '<button class="btn btn-info btn-sm" disabled><i class="fas fa-pen"></i></button>';
+    acoes += '<a href="" class="btn btn-secondary btn-sm" role="button" data-toggle="modal" data-target="#modal-estornar-despesa" data-id="'+id+'" data-descricao="'+descricao+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-valorquitado="'+valorQuitado+'" data-vencimento="'+vencimento+'" data-quitacao="'+quitacao+'"><strong class="ml-1 mr-1">E</strong></a>';
+    acoes += '</nobr>';
+  }else{
+    acoes = '<nobr>';
+    acoes += '<a href="" class="btn btn-info btn-sm"  role="button" data-toggle="modal" data-target="#modal-editar-despesa" data-id="'+id+'" data-vencimento="'+vencimento+'"><i class="fas fa-pen"></i></a>';
+    acoes += '<a href="" class="btn btn-danger btn-sm" role="button" data-toggle="modal" data-target="#modal-quitar-despesa" data-id="'+id+'" data-qtdeparcelas="'+quantidaDeParcelas+'" data-valorpendente="'+valorPendente+'" data-vencimento="'+vencimento+'"><i class="fas fa-dollar-sign ml-1 mr-1"></i></a>';
+    acoes += '</nobr>';
+  }
+  novaCelula.innerHTML = acoes;
+  novaCelula.className = "text-center";
+
+  //Exibe mensagem
+  // Toast.fire({
+  //   icon: 'info',
+  //   title: "Tabela de despesas atualizada."
+  // })
+}//InserirLinhaTabelaSelecionarDespesas
+
+//#endregion
 
 
 
