@@ -38,8 +38,7 @@ class HomeController extends MainController{
 		);
 		// Elementos do footer especificos para essa página
 		$this->elementosFooter = array(
-			"<script src='" . HOME_URI . "views/_js/finances.js'></script>",
-			"<script src='" . HOME_URI . "views/_js/chart/graficos-finances.js'></script>"
+			"<script src='" . HOME_URI . "views/_js/finances.js'></script>"
 		);
 
 		/** Carrega os arquivos do view **/

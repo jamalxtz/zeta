@@ -143,13 +143,31 @@ if(document.getElementById('pagina')){
   pagina = document.getElementById('pagina').value;
 }
 
+const WallpaperRandomico = async () => {
+  const res = await fetch(
+    "https://api.pexels.com/v1/curated",
+  {
+    headers: {
+      Authorization: '563492ad6f91700001000001ca4393a683e6484b9c664039790ef878',
+    },
+  }
+);
+  const responseJson = await res.json();
+  // return responseJson.photos;
+  var urlImagem =  ( responseJson.photos[0].src.landscape);
+  //Define o papel de parede
+  document.body.style.backgroundImage = "url("+urlImagem+")";
+  var element = document.getElementsByTagName("body")[0];
+  element.classList.add("bg-imagem");
+};
+
 if(pagina =='login'){
-  alterarWallpaper();
-  // var element = document.getElementsByTagName("body")[0];
-  // element.classList.add("bg-imagem");
+  //WallpaperPorTurno();
+  WallpaperRandomico();
 }
+
 //alterar plano de fundo da tela de login
-function alterarWallpaper(){
+function WallpaperPorTurno(){
   // Obtém a data/hora atual
   var data = new Date();
   let url = document.getElementById('url').value;
@@ -191,6 +209,7 @@ function alterarWallpaper(){
     var element = document.getElementsByTagName("body")[0];
     element.classList.add("bg-imagem");
   }
-
 };
+
+
 

@@ -2,8 +2,8 @@
 /**
  * Configuração geral
  */
-//$tipo_conexao = $_SERVER['HTTP_HOST'];
-$tipo_conexao = "site";
+//$tipo_conexao = localhost;
+$tipo_conexao = $_SERVER['HTTP_HOST'];
 define( 'TIPO_CONEXAO', $_SERVER['HTTP_HOST'] );
 
 

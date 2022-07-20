@@ -145,9 +145,11 @@
     <!-- <script src="<?php echo HOME_URI;?>views/_js/inicio/apresentacao.js"></script> -->
     <!--Scripts incluidos no controller da página-->
     <?php 
-    foreach ($this->elementosFooter as $script) {
-        echo $script . "\n";
-    }
+      if(isset($this->elementosFooter)){
+        foreach ($this->elementosFooter as $script) {
+          echo $script . "\n";
+        }
+      }
     ?>
     
   </body>
