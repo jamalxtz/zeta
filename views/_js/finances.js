@@ -111,6 +111,22 @@ function DataAtual(semFormatacao = false){
   return yr+"-"+mt+"-"+dy;
 }//DataAtual
 
+/*Retorna o primeiro dia do ano no padrão Americao YYYY-MM-DD (aceito pelos inputs tipo date)
+ *O padrão de retorno sem formatação não inclui o zero na frente do mês retornando valores como 2022-1-25
+ *Foi necessário acrescentar esse padrão pois ao comparar datas esse detalhe faz diferença. */
+ function PrimeiroDiaDoAno(semFormatacao = false){
+  var today = new Date();
+  var dy = '01';
+  if(semFormatacao == true){
+    var mt = '1';
+  }else{
+    var mt = '01';
+  }
+  var yr = today.getFullYear();
+  return yr+"-"+mt+"-"+dy;
+}//PrimeiroDiaDoAno
+
+
 //Recebe o valor no formato 1.222.222,56 e retorna no padrão 1222222.56
 function ConverterRealParaFloat(valor){
   if(valor === ""){
@@ -2136,9 +2152,11 @@ function AlterarDespesaFixa(){
 //*********************************************************************************************************************
 //*****************************************   SELECIONAR DESPESAS   ***************************************************                  
 //*********************************************************************************************************************
-//#region CARREGA OS DADOS DA DESPESA----------------------------------------------------------------------------------
+//#region CARREGA OS DADOS DA TELA SELECIONAR DESPESAS------------------------------------------------------------------
 
 function CarregarFuncoesPaginaSelecionarDespesas(){
+  $('#txtDataFinalSD').val(FormataDataParaInputMonth(DataAtual()));
+  $('#txtDataInicialSD').val(FormataDataParaInputMonth(PrimeiroDiaDoAno()));
   ListarTodasAsDespesas();
 }//CarregarFuncoesPaginaSelecionarDespesas
 

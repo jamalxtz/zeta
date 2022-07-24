@@ -1,7 +1,7 @@
 <?php if (!defined('ABSPATH')) exit;
-  date_default_timezone_set('America/Sao_Paulo');
-  $data = date('Y/m/d');
-  $hora = date('h:i a');
+date_default_timezone_set('America/Sao_Paulo');
+$data = date('Y/m/d');
+$hora = date('h:i a');
 ?>
 <main class='bg-color'>
   <div class="container-fluid">
@@ -27,17 +27,48 @@
       </div>
       <div class="card-body">
         <!-- Corpo do Painel Principal -->
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <a type="button" href="<?php echo HOME_URI ?>despesas/incluir" class="btn btn-danger btn" role="button" data-toggle="tooltip" data-placement="top" title="Incluir Despesa">+<i class="fas fa-credit-card mr-1"></i></a>
-            <a type="button" href="<?php echo HOME_URI ?>categorias" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Categorias"><i class="fas fa-list-ul mr-1"></i></a>
-            <a type="button" href="<?php echo HOME_URI ?>relatorios/despesas" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Relatórios"><i class="fas fa-chart-line mr-1"></i></a>
+        <form id="formFiltroSelecionarDespesas">
+          <!-- ------------------------------------------------------------------------------------------------------------------- -->
+          <div class="form-row">
+            <div class="form-group col-6 col-md-3">
+              <small class="mt-2"><strong>Data Inicial:</strong></small>
+              <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataInicialSD" name="txtDataInicialSD" value="">
+            </div>
+            <div class="form-group col-6 col-md-3">
+              <small class="mt-2"><strong>Data Final:</strong></small>
+              <input type="month" class="form-control form-control-sm inputDataReferencia" id="txtDataFinalSD" name="txtDataFinalSD" value="">
+            </div>
           </div>
-          <button type="button" href="" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Atualizar" onclick="ListarDespesasFixasSemParcela()"><i class="fas fa-sync-alt mr-1"></i></button>
-          <!-- <a type="button" href="<?php echo HOME_URI ?>finances" class="btn btn-dark btn" role="button" data-toggle="tooltip" data-placement="top" title="Voltar"><i class="fas fa-reply mr-1"></i></a> -->
-        </div>
-        <p class="form_success"></p>
-        <br>
+
+          <div class="form-row">
+            <div class="form-group col-md-8">
+              <small class="mt-2"><strong>Descrição:</strong></small>
+              <input type="text" class="form-control form-control-sm" id="txtDescricaoSD" name="txtDescricaoSD" required>
+            </div>
+            <div class="form-group col-md-4">
+              <small class="mt-4"><strong>Categoria:</strong></small>
+              <div class="input-group input-group-sm">
+                <select class="form-control form-control-sm" id="selCategoriaSD" name="selCategoriaSD" required>
+                  <option selected></option>
+                  <?php foreach ($listar_categorias as $fetch_userdata) : ?>
+                    <option value="<?php echo $fetch_userdata['id'] ?>">
+                      <?php echo $fetch_userdata['descricao'] ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12 text-right">
+              <small class="mt-4"><strong></strong></small>
+              <button type="submit" class="btn btn-info" id="btnGerarParcelasSD"><i class="fas fa-search mr-1"></i> Buscar</button>
+            </div>
+          </div>
+        </form>
+        <hr> <!-- ------------------------------------------------------------------------------------------------------------ -->
+
 
         <div class="row">
 
@@ -74,7 +105,7 @@
           <!--FIM Painel de Despesas-->
 
         </div>
-      <!-- FIM Corpo do Painel Principal -->
+        <!-- FIM Corpo do Painel Principal -->
       </div>
       <div class="card-footer bg-dark text-white text-center">
         <h3>Total: <strong id="totalDespesasMensalSD"></strong></h3>
@@ -98,32 +129,32 @@
         </button>
       </div>
       <div class="modal-body modalDeleteAlinhar">
-      <!--Corpo do modal-->
-      <form id="formModalQuitarDespesaDP">
+        <!--Corpo do modal-->
+        <form id="formModalQuitarDespesaDP">
 
-        <!-- Inputs Ocultos -->
-        <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
-        <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
-        <input class="hidden" type="text" id="txtVencimentoModalQuitarDespesaDP" name="txtVencimentoQuitarDespesaDP" value="">
+          <!-- Inputs Ocultos -->
+          <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtVencimentoModalQuitarDespesaDP" name="txtVencimentoQuitarDespesaDP" value="">
 
-        <div id="alert_placeholder"></div>
+          <div id="alert_placeholder"></div>
 
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <small class="mt-4"><strong>Data de Quitação:</strong></small>
-            <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
-          </div>
-          <div class="form-group col-md-6">
-            <small class="mt-4"><strong>Valor Quitado:</strong></small>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">R$</div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <small class="mt-4"><strong>Data de Quitação:</strong></small>
+              <input type="date" class="form-control" id="txtDataQuitacaoModalQuitarDespesaDP" name="txtDataQuitacaoModalQuitarDespesaDP" value="" required>
+            </div>
+            <div class="form-group col-md-6">
+              <small class="mt-4"><strong>Valor Quitado:</strong></small>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">R$</div>
+                </div>
+                <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
               </div>
-              <input type="text" class="form-control mask-money" id="txtValorQuitadoModalQuitarDespesaDP" name="txtValorQuitadoModalQuitarDespesaDP" value="" required>
             </div>
           </div>
-        </div>
-      <!--FIM Corpo do modal-->
+          <!--FIM Corpo do modal-->
       </div>
 
       <div class="modal-footer">
@@ -207,34 +238,34 @@
         </button>
       </div>
       <div class="modal-body">
-      <!--Corpo do modal-->
-      <form id="formModalDespesasFixasDP">
+        <!--Corpo do modal-->
+        <form id="formModalDespesasFixasDP">
 
-        <!-- Inputs Ocultos -->
-        <input class="hidden" type="text" id="txtIdModalDespesasFixasDP" name="txtIdModalDespesasFixasDP" value="">
-        <input class="hidden" type="text" id="txtQtdeParcelasModalDespesasFixasDP" name="txtQtdeParcelasModalDespesasFixasDP" value="">
-        <input class="hidden" type="text" id="txtVencimentoModalDespesasFixasDP" name="txtVencimentoModalDespesasFixasDP" value="">
+          <!-- Inputs Ocultos -->
+          <input class="hidden" type="text" id="txtIdModalDespesasFixasDP" name="txtIdModalDespesasFixasDP" value="">
+          <input class="hidden" type="text" id="txtQtdeParcelasModalDespesasFixasDP" name="txtQtdeParcelasModalDespesasFixasDP" value="">
+          <input class="hidden" type="text" id="txtVencimentoModalDespesasFixasDP" name="txtVencimentoModalDespesasFixasDP" value="">
 
-        <div id="alertModalDespesasFixasDP"></div>
+          <div id="alertModalDespesasFixasDP"></div>
 
-        <div class="table-responsive">
-          <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasFixasDP" width="100%" cellspacing="0">
-            <thead class="thead-dark">
-              <tr>
-                <th class="hidden">ID</th>
-                <th>Descrição</th>
-                <th>Valor</th>
-                <th class="hidden">Vencimento</th>
-                <th class="hidden">Categoria</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaDespesasFixasBodyDP">
-            </tbody>
-          </table>
-        </div>
+          <div class="table-responsive">
+            <table class="table table-sm display compact table-hover table-bordered" id="tabelaDespesasFixasDP" width="100%" cellspacing="0">
+              <thead class="thead-dark">
+                <tr>
+                  <th class="hidden">ID</th>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th class="hidden">Vencimento</th>
+                  <th class="hidden">Categoria</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaDespesasFixasBodyDP">
+              </tbody>
+            </table>
+          </div>
 
-      <!--FIM Corpo do modal-->
+          <!--FIM Corpo do modal-->
       </div>
 
       <div class="modal-footer">
@@ -268,22 +299,22 @@
         </button>
       </div>
       <div class="modal-body modalDeleteAlinhar">
-      <!--Corpo do modal-->
-      <form id="formModalQuitarDespesaDP">
+        <!--Corpo do modal-->
+        <form id="formModalQuitarDespesaDP">
 
-        <!-- Inputs Ocultos -->
-        <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
-        <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
-        <input class="hidden" type="text" id="txtVencimentoModalQuitarDespesaDP" name="txtVencimentoQuitarDespesaDP" value="">
+          <!-- Inputs Ocultos -->
+          <input class="hidden" type="text" id="txtIdModalQuitarDespesaDP" name="txtIdModalQuitarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtQtdeParcelasModalQuitarDespesaDP" name="txtQtdeParcelasModalQuitarDespesaDP" value="">
+          <input class="hidden" type="text" id="txtVencimentoModalQuitarDespesaDP" name="txtVencimentoQuitarDespesaDP" value="">
 
-        <div id="alert_placeholder"></div>
+          <div id="alert_placeholder"></div>
 
-        <div class="d-flex justify-content-center">
-          <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-            <span class="sr-only">Loading...</span>
+          <div class="d-flex justify-content-center">
+            <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
           </div>
-        </div>
-      <!--FIM Corpo do modal-->
+          <!--FIM Corpo do modal-->
       </div>
 
       <!-- <div class="modal-footer">
