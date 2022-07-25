@@ -2,7 +2,7 @@
 /**
  * Configuração geral
  */
-//$tipo_conexao = "localhost";
+//$tipo_conexao = "site";
 $tipo_conexao = $_SERVER['HTTP_HOST'];
 define( 'TIPO_CONEXAO', $_SERVER['HTTP_HOST'] );
 
@@ -48,22 +48,22 @@ if($tipo_conexao == "localhost"){
 
 	// Nome do host da base de dados
 	//define( 'HOSTNAME', 'localhost' );
-	define( 'HOSTNAME', "192.185.176.177" );
+	define( 'HOSTNAME', "sql212.epizy.com" );
 
 	// Nome do DB
 	//define( 'DB_NAME', 'zeta' );
-	define( 'DB_NAME', "alemte27_zeta_finances" );
+	define( 'DB_NAME', "epiz_32245153_zeta" );
 
 	// Usuário do DB
 	//define( 'DB_USER', 'root' );
-	define( 'DB_USER', "alemte27_alem" );
+	define( 'DB_USER', "epiz_32245153" );
 
 	// Senha do DB
 	//define( 'DB_PASSWORD', '' );
-	define( 'DB_PASSWORD', "a8LB9u17dg" );
+	define( 'DB_PASSWORD', "1WcludFAI6" );
 
 	// Se você estiver desenvolvendo, modifique o valor para true
-	define( 'DEBUG', false );
+	define( 'DEBUG', true );
 
 }
 

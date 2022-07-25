@@ -1,6 +1,6 @@
 <?php 
-  $online = "localhost";
-  //$online = $_SERVER['HTTP_HOST'];
+  //$online = "localhost";
+  $online = $_SERVER['HTTP_HOST'];
   if($online == "localhost"){
     // Conexão com o banco de dados online(servidor)
     $db_host = "localhost";
@@ -11,10 +11,10 @@
   else{
 
     // Conexão com o banco de dados online(servidor)
-    $db_host = "192.185.176.177";
-    $db_name = "alemte27_zeta_finances";
-    $db_user = "alemte27_alem";
-    $db_pass = "a8LB9u17dg";
+    $db_host = "sql212.epizy.com";
+    $db_name = "epiz_32245153_zeta";
+    $db_user = "epiz_32245153";
+    $db_pass = "1WcludFAI6";
 
   }
   try{
